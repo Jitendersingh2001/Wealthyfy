@@ -7,15 +7,9 @@
 </head>
 
 <body>
-  <div class="background">
-    <div class="shape"></div>
-    <div class="shape"></div>
-  </div>
-
   <form id="kc-form-login" onsubmit="document.getElementById('kc-login').disabled = true; return true;"
     action="${url.loginAction}" method="post">
-
-
+    
     <h3>${msg("Login")?no_esc}</h3>
 
     <label for="username">${msg("Email")}</label>
