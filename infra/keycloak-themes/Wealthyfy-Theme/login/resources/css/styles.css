@@ -7,28 +7,7 @@
 }
 
 body {
-    background-color: #fafafa;
-}
-
-.background {
-    width: 430px;
-    height: 520px;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    left: 50%;
-    top: 50%;
-}
-
-form {
-    height: max-content;
-    width: 410px;
-    background-color: white;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    left: 50%;
-    border-radius: 6px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(117, 114, 114, 0.1);
-    padding: 50px 35px;
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
