@@ -35,7 +35,7 @@
         }
         
         // Get current theme from localStorage or default to light
-        const currentTheme = localStorage.getItem('theme') || 'light';
+        const currentTheme = localStorage.getItem('wealthyfy-theme') || 'light';
         document.documentElement.setAttribute('data-theme', currentTheme);
         
         // Update button appearance based on current theme
@@ -48,7 +48,7 @@
             
             // Update theme
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('wealthyfy-theme', newTheme);
             
             // Update button appearance
             updateThemeToggleAppearance(newTheme);

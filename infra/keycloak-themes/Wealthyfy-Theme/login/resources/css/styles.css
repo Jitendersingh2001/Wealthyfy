@@ -9,5 +9,5 @@
 body {
     background-color: var(--background);
     color: var(--foreground);
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.7s ease-out, color 0.7s ease-in;
 }
