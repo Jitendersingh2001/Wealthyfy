@@ -1,10 +1,8 @@
 <#-- login.ftl -->
-<#assign pageTitle = msg("loginPageTitle", "Sign In")>
-
 <#-- Use layout.ftl as base template -->
 <#import "layout.ftl" as layout>
 
-<@layout.main>
+<@layout.main pageTitle=msg("Login")>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">

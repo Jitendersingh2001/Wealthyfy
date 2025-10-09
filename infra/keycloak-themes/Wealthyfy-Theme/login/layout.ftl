@@ -1,5 +1,5 @@
 <#-- Layout template with macro definition -->
-<#macro main>
+<#macro main pageTitle="Default Title">
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,13 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <#-- Dynamic Page Title -->
-    <title>
-        <#if pageTitle??>
-            ${pageTitle?no_esc}
-        <#else>
-            ${msg("login")?no_esc}
-        </#if>
-    </title>
+    <title>${pageTitle?no_esc}</title>
 
     <#-- Favicon -->
     <link rel="icon" type="image/png" href="${url.resourcesPath}/images/favicon.png">
