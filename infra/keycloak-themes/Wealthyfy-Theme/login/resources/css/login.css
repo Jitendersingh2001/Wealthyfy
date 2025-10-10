@@ -1,0 +1,4 @@
+.login-container {
+    border: 2px solid var(--border) !important;
+    border-radius: 5px;
+}

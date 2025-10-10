@@ -4,3 +4,4 @@
 <#-- Theme css file-->
 <link rel="stylesheet" href="${url.resourcesPath}/css/theme.css">
 <link rel="stylesheet" href="${url.resourcesPath}/css/styles.css">
+<link rel="stylesheet" href="${url.resourcesPath}/css/login.css">
