@@ -41,6 +41,7 @@ body {
     transition: all 0.5s ease-out;
     transform-origin: center;
     transform: scale(1) translateY(0);
+    font-family: sans-serif;
 }
 
 #page-intro:hover {
@@ -83,5 +84,61 @@ body {
 
     75% {
         background-position: 15% 15%, 85% 5%, 55% 85%, 15% 95%, 5% 15%;
+    }
+}
+
+/* Quote Text Styling */
+.quote-headline {
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 0.9;
+    text-align: left;
+    margin-bottom: 2rem;
+}
+
+.quote-line {
+    display: block;
+    margin-bottom: 0.2rem;
+}
+
+.quote-supporting {
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: left;
+    color: white;
+    opacity: 0.95;
+}
+
+.brand-header h1 {
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: white;
+    opacity: 0.8;
+}
+
+/* Layout positioning adjustments */
+.branding-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 3rem 2rem !important;
+}
+
+.brand-main {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .quote-headline {
+        font-size: 3rem;
+    }
+    
+    .quote-supporting {
+        font-size: 1rem;
     }
 }

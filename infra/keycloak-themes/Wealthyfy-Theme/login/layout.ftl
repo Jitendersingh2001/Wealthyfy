@@ -19,17 +19,16 @@
             <div class="d-flex layout-main-container rounded-5">
                 <div class="col-md-5 d-flex align-items-center justify-content-center position-relative rounded-5 m-3" id="page-intro">
                     <div class="branding-background position-absolute w-100 h-100"></div>
-                    <div class="branding-content position-relative p-5" style="color: var(--foreground);">
+                    <div class="branding-content position-relative p-5" style="color: white;">
                         <div class="brand-header mb-4">
-                            <h1 class="h4 fw-light text-uppercase mb-2">Wealthyfy</h1>
-                            <hr class="border-2 w-25" style="border-color: var(--foreground) !important;">
+                            <h1 class="h6 fw-light text-uppercase mb-2">Wealthyfy</h1>
                         </div>
                         <div class="brand-main mb-4">
-                            <h2 class="display-4 fw-bold mb-3">Your Finances, Unified.</h2>
-                            <p class="lead mb-3">Wealthyfy is a smart portfolio app that brings all your investments together in one place — no matter which broker you use.</p>
-                            <p class="mb-3">It automatically syncs your stocks, mutual funds, and trades, giving you a complete picture of your wealth in real time.</p>
-                            <p class="mb-3">With powerful insights like profit & loss, sector allocation, and risk analysis, Wealthyfy helps you understand where your money is going and how to grow it faster.</p>
-                            <p class="mb-0">Think of it as your personal finance command center — simple, secure, and built for the modern investor.</p>
+                            <h2 class="display-1 fw-bold mb-4 quote-headline">
+                                <div class="quote-line">Your Finances,</div>
+                                <div class="quote-line">Unified.</div>
+                            </h2>
+                            <p class="quote-supporting mb-0">Wealthyfy is a smart portfolio app that brings all your investments together in one place — no matter which broker you use.<br><br>Get a complete picture of your wealth in real time with powerful insights and analysis.</p>
                         </div>
                     </div>
                 </div>
