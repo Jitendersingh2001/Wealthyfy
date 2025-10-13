@@ -3,7 +3,7 @@
 <#import "layout.ftl" as layout>
 
 <@layout.main pageTitle=msg("Login")>
-  <div class="d-flex justify-content-center align-items-center min-vh-100 p-3">
+  <#-- <div class="d-flex justify-content-center align-items-center min-vh-100 p-3">
     <div class="container-fluid">
       <div class="row justify-content-center">
         <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-4">
@@ -28,5 +28,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 </@layout.main>

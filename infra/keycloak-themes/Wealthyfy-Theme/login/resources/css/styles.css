@@ -30,7 +30,58 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Layout container hover effects */
 /* .layout-main-container:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     transform: translate(-50%, calc(-50% - 2px));
 } */
+
+/* Page intro base and hover styles */
+#page-intro {
+    transition: all 0.5s ease-out;
+    transform-origin: center;
+    transform: scale(1) translateY(0);
+}
+
+#page-intro:hover {
+    transform: scale(1.01) translateY(-2px);
+}
+
+/* Page Intro Gradient Background */
+.branding-background {
+    background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(15, 46, 28, 0.9) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 80% at 80% 20%, rgba(20, 83, 45, 0.95) 0%, transparent 50%),
+        radial-gradient(ellipse 100% 100% at 60% 80%, rgba(21, 128, 61, 0.8) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 10% 70%, rgba(22, 163, 74, 0.85) 0%, transparent 50%),
+        linear-gradient(135deg,
+            rgba(15, 46, 28, 0.6) 0%,
+            rgba(20, 83, 45, 0.7) 25%,
+            rgba(21, 128, 61, 0.8) 50%,
+            rgba(22, 163, 74, 0.9) 75%,
+            rgba(15, 46, 28, 0.95) 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position: 0% 0%, 100% 0%, 50% 100%, 0% 100%, 0% 0%;
+    animation: gradientFlow 8s ease-in-out infinite;
+    border-radius: inherit;
+}
+
+@keyframes gradientFlow {
+
+    0%,
+    100% {
+        background-position: 0% 0%, 100% 0%, 50% 100%, 0% 100%, 0% 0%;
+    }
+
+    25% {
+        background-position: 10% 10%, 90% 10%, 60% 90%, 10% 90%, 5% 5%;
+    }
+
+    50% {
+        background-position: 20% 5%, 80% 15%, 40% 95%, 20% 85%, 10% 10%;
+    }
+
+    75% {
+        background-position: 15% 15%, 85% 5%, 55% 85%, 15% 95%, 5% 15%;
+    }
+}
