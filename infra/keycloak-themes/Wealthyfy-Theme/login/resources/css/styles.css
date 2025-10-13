@@ -58,8 +58,8 @@ body {
     background-size: 200% 200%; /* enables smooth animation */
     background-position: 0% 50%;
     border-radius: inherit;
-    animation: gradientFlow 10s ease-in-out infinite;
-    transition: background 0.5s ease;
+    animation: gradientFlow 15s ease-in-out infinite;
+    transition: background 1s ease-in;
 }
 
 /* Keyframes for gradient motion */
