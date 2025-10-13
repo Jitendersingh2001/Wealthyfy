@@ -11,3 +11,26 @@ body {
     color: var(--foreground);
     transition: background-color 0.7s ease-out, color 0.7s ease-in;
 }
+
+
+/* Card Container Styles */
+.layout-main-container {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+    width: 98vw;
+    height: 95vh;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+/* .layout-main-container:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translate(-50%, calc(-50% - 2px));
+} */

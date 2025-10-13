@@ -15,12 +15,18 @@
     <#include "include/header.ftl">
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-    <#-- Main content area -->
-    <main class="flex-grow-1">
-        <#-- This is where page-specific content will be placed -->
-        <#nested>
-    </main>
+<body>
+    <div class="d-flex layout-main-container">
+        <div id="page-intro" class="flex-grow-1 w-50">
+            fdef
+        </div>
+        <div class="flex-grow-1 w-50">
+            <main>
+                <#-- This is where page-specific content will be placed -->
+                <#nested>
+            </main>
+        </div>
+    </div>
 
     <#include "include/footer.ftl">
 </body>
