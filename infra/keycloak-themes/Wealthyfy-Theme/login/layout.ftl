@@ -17,7 +17,7 @@
 
         <body>
             <div class="d-flex layout-main-container rounded-5">
-                <div class="col-md-5 d-flex align-items-center justify-content-center position-relative rounded-5 m-3" id="page-intro">
+                <div class="col-md-6 d-flex align-items-center justify-content-center position-relative rounded-5 m-3" id="page-intro">
                     <div class="branding-background position-absolute w-100 h-100"></div>
                     <div class="branding-content position-relative p-5" style="color: white;">
                         <div class="brand-header mb-4">
