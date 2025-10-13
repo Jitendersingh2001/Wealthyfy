@@ -50,42 +50,31 @@ body {
 
 /* Page Intro Gradient Background */
 .branding-background {
-    background:
-        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(15, 46, 28, 0.9) 0%, transparent 50%),
-        radial-gradient(ellipse 60% 80% at 80% 20%, rgba(20, 83, 45, 0.95) 0%, transparent 50%),
-        radial-gradient(ellipse 100% 100% at 60% 80%, rgba(21, 128, 61, 0.8) 0%, transparent 60%),
-        radial-gradient(ellipse 70% 50% at 10% 70%, rgba(22, 163, 74, 0.85) 0%, transparent 50%),
-        linear-gradient(135deg,
-            rgba(15, 46, 28, 0.6) 0%,
-            rgba(20, 83, 45, 0.7) 25%,
-            rgba(21, 128, 61, 0.8) 50%,
-            rgba(22, 163, 74, 0.9) 75%,
-            rgba(15, 46, 28, 0.95) 100%);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-    background-position: 0% 0%, 100% 0%, 50% 100%, 0% 100%, 0% 0%;
-    animation: gradientFlow 8s ease-in-out infinite;
+    background-image:
+        radial-gradient(circle at 97% 32%, rgba(131, 131, 131, 0.05) 0%, rgba(131, 131, 131, 0.05) 50%, rgba(20, 20, 20, 0.05) 50%, rgba(20, 20, 20, 0.05) 100%),
+        radial-gradient(circle at 61% 40%, rgba(35, 35, 35, 0.05) 0%, rgba(35, 35, 35, 0.05) 50%, rgba(239, 239, 239, 0.05) 50%, rgba(239, 239, 239, 0.05) 100%),
+        radial-gradient(circle at 47% 73%, rgba(122, 122, 122, 0.05) 0%, rgba(122, 122, 122, 0.05) 50%, rgba(5, 5, 5, 0.05) 50%, rgba(5, 5, 5, 0.05) 100%),
+        linear-gradient(90deg, rgb(0, 209, 117), rgb(5, 162, 26));
+    background-size: 200% 200%; /* enables smooth animation */
+    background-position: 0% 50%;
     border-radius: inherit;
+    animation: gradientFlow 10s ease-in-out infinite;
+    transition: background 0.5s ease;
 }
 
+/* Keyframes for gradient motion */
 @keyframes gradientFlow {
-
-    0%,
-    100% {
-        background-position: 0% 0%, 100% 0%, 50% 100%, 0% 100%, 0% 0%;
+    0% {
+        background-position: 0% 50%;
     }
-
-    25% {
-        background-position: 10% 10%, 90% 10%, 60% 90%, 10% 90%, 5% 5%;
-    }
-
     50% {
-        background-position: 20% 5%, 80% 15%, 40% 95%, 20% 85%, 10% 10%;
+        background-position: 100% 50%;
     }
-
-    75% {
-        background-position: 15% 15%, 85% 5%, 55% 85%, 15% 95%, 5% 15%;
+    100% {
+        background-position: 0% 50%;
     }
 }
+
 
 /* Quote Text Styling */
 .quote-headline {
