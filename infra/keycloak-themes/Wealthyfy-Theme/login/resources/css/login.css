@@ -1,3 +1,16 @@
-.login-container-header{
+.login-header{
     color: --var(--foreground);
+}
+
+.login-header h1{
+    font-weight: 600 !important;
+    font-size: 45px !important;
+}
+
+.login-header p {
+    font-size: 30px !important;
+}
+
+.login-form{
+    width: 80%;
 }
