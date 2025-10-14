@@ -9,7 +9,10 @@
 body {
     background-color: var(--background);
     color: var(--foreground);
+      font-family: "Titillium Web", sans-serif;
     transition: background-color 0.7s ease-out, color 0.7s ease-in;
+    font-weight: 400;
+    font-style: normal;
 }
 
 
@@ -41,7 +44,6 @@ body {
     transition: all 0.5s ease-out;
     transform-origin: center;
     transform: scale(1) translateY(0);
-    font-family: sans-serif;
 }
 
 #page-intro:hover {
@@ -54,7 +56,7 @@ body {
         radial-gradient(circle at 97% 32%, rgba(131, 131, 131, 0.05) 0%, rgba(131, 131, 131, 0.05) 50%, rgba(20, 20, 20, 0.05) 50%, rgba(20, 20, 20, 0.05) 100%),
         radial-gradient(circle at 61% 40%, rgba(35, 35, 35, 0.05) 0%, rgba(35, 35, 35, 0.05) 50%, rgba(239, 239, 239, 0.05) 50%, rgba(239, 239, 239, 0.05) 100%),
         radial-gradient(circle at 47% 73%, rgba(122, 122, 122, 0.05) 0%, rgba(122, 122, 122, 0.05) 50%, rgba(5, 5, 5, 0.05) 50%, rgba(5, 5, 5, 0.05) 100%),
-        linear-gradient(90deg, rgb(0, 209, 117), rgb(5, 162, 26));
+        linear-gradient(90deg, rgb(3, 179, 102), rgb(5, 162, 26));
     background-size: 200% 200%; /* enables smooth animation */
     background-position: 0% 50%;
     border-radius: inherit;
@@ -100,8 +102,8 @@ body {
 }
 
 .brand-header h1 {
-    font-size: 0.9rem;
-    font-weight: 300;
+    font-size: 1.2rem;
+    font-weight: 700 !important;
     letter-spacing: 0.1em;
     color: white;
     opacity: 0.8;
