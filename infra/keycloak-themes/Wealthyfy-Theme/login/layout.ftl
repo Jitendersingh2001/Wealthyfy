@@ -1,7 +1,7 @@
 <#-- Layout template with macro definition -->
     <#macro main pageTitle="Default Title">
         <!DOCTYPE html>
-        <html lang="en">
+        <html lang="en" data-theme="light">
 
         <head>
             <meta charset="UTF-8">
@@ -41,9 +41,9 @@
                 </div>
 
                 <!--Right aligned content-->
-                <div class="position-relative h-100 d-flex flex-column justify-content-center align-items-center col-12 col-md-6">
-                    <div class="right-container w-100 px-4">
-                    <main>
+                <div class="position-relative col-12 col-md-6">
+                    <div class="right-container d-flex flex-column justify-content-center align-items-center h-100 w-100">
+                    <main class = "card card-container p-4 rounded-4">
                         <#nested>
                         </main>
                     </div>
