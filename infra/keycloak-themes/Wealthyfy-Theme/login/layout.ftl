@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="flex-grow-1 col-md-6 rounded-5">
-                    <main>
+                    <main class="h-100 w-100">
                         <#-- This is where page-specific content will be placed -->
                             <#nested>
                     </main>
