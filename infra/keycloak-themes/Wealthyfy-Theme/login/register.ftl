@@ -2,13 +2,13 @@
     <#-- Use layout.ftl as base template -->
         <#import "layout.ftl" as layout>
 
-            <@layout.main pageTitle=msg( "Login")>
+            <@layout.main pageTitle=msg("Register")>
                 <div class="login-container d-flex justify-content-center align-items-center">
                     <div>
 
                         <!-- Header -->
                         <div class="login-head text-center mb-3">
-                            <h3 class="text-uppercase fw-bold">Welcome Back</h3>
+                            <h3 class="text-uppercase fw-bold">Register</h3>
                             <p class="mb-0">Please enter your email and password to access your account</p>
                         </div>
 
@@ -76,7 +76,7 @@
                                                     <#elseif p.alias=="facebook">
                                                         <i class="fab fa-facebook-f me-2 text-primary"></i>
                                             </#if>
-                                            Sign in with ${p.displayName}
+                                            Sign Up with ${p.displayName}
                                     </a>
                                 </#list>
                             </div>
@@ -86,8 +86,8 @@
                         <#if realm.registrationAllowed?? && realm.registrationAllowed>
                             <div class="text-center signup-section d-flex justify-content-center pt-3 gap-1">
                                 <p class="mb-2 text-muted">Don't have an account?</p>
-                                <a href="${url.registrationUrl}" class="text-decoration-none">
-                                    Sign up
+                                <a href="${url.loginUrl}" class="text-decoration-none">
+                                    Sign In
                                 </a>
                             </div>
                         </#if>
