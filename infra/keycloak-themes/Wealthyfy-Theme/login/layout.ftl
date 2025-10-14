@@ -16,10 +16,13 @@
         </head>
 
         <body>
-            <div class="d-flex layout-main-container rounded-5 p-3">
-                <div class="col-md-6 d-flex align-items-center justify-content-center position-relative rounded-5" id="page-intro">
+            <div class="d-flex layout-main-container">
+                <div class="w-100 d-flex position-relative" id="page-intro">
+                    <!-- Background -->
                     <div class="branding-background position-absolute w-100 h-100"></div>
-                    <div class="branding-content position-relative p-5" style="color: white;">
+
+                    <!-- Left-aligned content -->
+                    <div class="branding-content position-relative h-100 d-flex flex-column justify-content-start text-white p-5 w-100">
                         <div class="brand-header mb-4">
                             <h1 class="h6 fw-light text-uppercase mb-2">Wealthyfy</h1>
                         </div>
@@ -28,20 +31,25 @@
                                 <div class="quote-line">Your Finances,</div>
                                 <div class="quote-line">Unified.</div>
                             </h2>
-                            <p class="quote-supporting mb-0">Wealthyfy is a smart portfolio app that brings all your investments together in one place — no matter which broker you use.<br><br>Get a complete picture of your wealth in real time with powerful insights and analysis.</p>
+                            <p class="quote-supporting mb-0">
+                                Wealthyfy is a smart portfolio app that brings all your investments together in one place — no matter which broker you use.
+                                <br>
+                                <br> Get a complete picture of your wealth in real time with powerful insights and analysis.
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 rounded-5">
-                    <main class="h-100 w-100 px-5">
-                        <#-- This is where page-specific content will be placed -->
-                            <#nested>
-                    </main>
+
+                <!--Right aligned content-->
+                <div class="position-relative h-100 d-flex flex-column justify-content-center align-items-center col-12 col-md-6">
+                    <div class="right-container w-100 px-4">
+                    <main>
+                        <#nested>
+                        </main>
+                    </div>
                 </div>
             </div>
-
             <#include "include/footer.ftl">
         </body>
-
         </html>
     </#macro>
