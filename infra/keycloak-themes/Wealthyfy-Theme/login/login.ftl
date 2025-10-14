@@ -13,18 +13,25 @@
                         </div>
 
                         <!-- Form -->
-                        <form action="${url.loginAction}" method="post" class="pb-3">
+                        <form action="${url.loginAction}" method="post" class="pb-2" autocomplete="off">
 
                             <!-- Username / Email -->
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Email<span class="text-danger"> *</span> </label>
-                                <input type="text" class="form-control" id="username" name="username" autofocus value="${username?if_exists}" />
+                            <div class="form-group mb-3">
+                                <label for="username" class="form-label">Email<span class="text-danger"> *</span></label>
+                                <input type="email" class="form-control" id="username" name="username" autofocus value="${username?if_exists}" 
+                                       placeholder="Enter your email address" 
+                                       aria-describedby="username-help" 
+                                       autocomplete="new-email"
+                                    />
                             </div>
 
                             <!-- Password -->
-                            <div class="mb-3">
+                            <div class="form-group mb-3">
                                 <label for="password" class="form-label">Password <span class="text-danger"> *</span></label>
-                                <input type="password" class="form-control" id="password" name="password" />
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Enter your password" 
+                                       aria-describedby="password-help" 
+                                      />
                             </div>
 
                             <!-- Remember me and Forgot password row -->
@@ -47,10 +54,17 @@
                             </div>
 
                             <!-- Submit button -->
-                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                            <button type="submit" class="btn btn-primary w-100" 
+                                    aria-describedby="submit-help">
+                                <span class="button-text">Login</span>
+                            </button>
+                           
                         </form>
                         <!-- Identity Providers Section -->
                         <#if social.providers??>
+                         <div id="submit-help" class="text-center fw-bolder pb-2">
+                               OR
+                            </div>
                             <div class="d-flex flex-column gap-2">
                                 <#list social.providers as p>
                                     <a href="${p.loginUrl}" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center">
@@ -65,6 +79,16 @@
                                             Sign in with ${p.displayName}
                                     </a>
                                 </#list>
+                            </div>
+                        </#if>
+                        
+                        <!-- Signup option (only if registration is allowed) -->
+                        <#if realm.registrationAllowed?? && realm.registrationAllowed>
+                            <div class="text-center signup-section d-flex justify-content-center pt-3 gap-1">
+                                <p class="mb-2 text-muted">Don't have an account?</p>
+                                <a href="${url.registrationUrl}" class="text-decoration-none">
+                                    Sign up
+                                </a>
                             </div>
                         </#if>
                     </div>
