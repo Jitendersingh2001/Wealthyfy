@@ -130,7 +130,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
           {/* Left side */}
           <div className="flex items-center gap-2">
             {/* Mobile menu trigger */}
-            {isMobile && (
+            {isMobile && navigationLinks.length > 0 && (
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -176,7 +176,7 @@ export const Navbar01 = React.forwardRef<HTMLElement, Navbar01Props>(
                 <span className="hidden font-bold text-xl sm:inline-block uppercase">WealthyFy</span>
               </button>
               {/* Navigation menu */}
-              {!isMobile && (
+              {!isMobile && navigationLinks.length > 0 && (
                 <NavigationMenu className="flex">
                 <NavigationMenuList className="gap-1">
                   {navigationLinks.map((link, index) => (
