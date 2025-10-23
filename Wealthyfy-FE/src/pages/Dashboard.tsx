@@ -1,5 +1,5 @@
-function DashBoradPage() {
+function DashboradPage() {
   return <div className="relative w-full">DashBorad</div>;
 }
 
-export default DashBoradPage;
+export default DashboradPage;
