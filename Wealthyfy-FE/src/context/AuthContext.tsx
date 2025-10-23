@@ -1,5 +1,4 @@
-// auth-context.tsx
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, type ReactNode } from "react";
 import { keycloakService } from "@/services/keycloak";
 
 interface UserProfile {
@@ -22,67 +21,57 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<UserProfile | undefined>(undefined);
-  const [token, setToken] = useState<string | undefined>(undefined);
-  const [refreshToken, setRefreshToken] = useState<string | undefined>(
-    undefined
-  );
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authData, setAuthData] = useState<{
+    user?: UserProfile;
+    token?: string;
+    refreshToken?: string;
+  }>({});
+
+  const updateAuthData = (user?: UserProfile, token?: string, refreshToken?: string) => {
+    setIsAuthenticated(!!user);
+    setAuthData({ user, token, refreshToken });
+  };
 
   useEffect(() => {
     try {
       const kc = keycloakService.getKeycloakInstance();
-      if (!kc || !kc.authenticated) {
-        setIsAuthenticated(false);
-        setUser(undefined);
-        setToken(undefined);
-        setRefreshToken(undefined);
+      if (!kc?.authenticated) {
+        updateAuthData();
         return;
       }
 
-      const idToken = kc.idTokenParsed || {};
-      setIsAuthenticated(true);
-      setUser({
-        firstName: idToken.given_name,
-        lastName: idToken.family_name,
-        fullName: idToken.name,
-        email: idToken.email,
-        emailVerified: idToken.email_verified,
-      });
+      const { given_name, family_name, name, email, email_verified } = kc.idTokenParsed || {};
+      const userProfile: UserProfile = {
+        firstName: given_name,
+        lastName: family_name,
+        fullName: name,
+        email,
+        emailVerified: email_verified,
+      };
 
-      // Separate token state
-      setToken(kc.token);
-      setRefreshToken(kc.refreshToken);
+      updateAuthData(userProfile, kc.token, kc.refreshToken);
     } catch (err) {
       console.error("Keycloak initialization failed", err);
-      setIsAuthenticated(false);
-      setUser(undefined);
-      setToken(undefined);
-      setRefreshToken(undefined);
+      updateAuthData();
     }
   }, []);
 
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
+  const setTokens = (token?: string, refreshToken?: string) =>
+    setAuthData(prev => ({ ...prev, token, refreshToken }));
 
-  const setTokens = (newToken?: string, newRefreshToken?: string) => {
-    setToken(newToken);
-    setRefreshToken(newRefreshToken);
-  };
-
+  console.log("AuthContext - isAuthenticated:", isAuthenticated, "authData:", authData);
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        user,
-        token,
-        refreshToken,
+        ...authData,
         login,
         register,
-        setTokens,
+        setTokens
       }}
     >
       {children}
