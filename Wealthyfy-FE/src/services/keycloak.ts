@@ -8,6 +8,7 @@ import { config } from "@/config/config";
 
 class KeycloakService {
   private keycloak?: Keycloak;
+  private initialized = false; // track initialization
 
   public async init(options?: KeycloakInitOptions): Promise<Keycloak> {
     if (!this.keycloak) {
@@ -20,16 +21,18 @@ class KeycloakService {
       this.keycloak = new Keycloak(kcConfig);
     }
 
-    try {
-      await this.keycloak.init({
-        onLoad: "check-sso",
-        // silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-        checkLoginIframe: false,
-        pkceMethod: "S256",
-        ...options
-      });
-    } catch (error) {
-      console.error("Error initializing Keycloak", error);
+    if (!this.initialized) {
+      try {
+        await this.keycloak.init({
+          onLoad: "check-sso",
+          checkLoginIframe: false,
+          pkceMethod: "S256",
+          ...options
+        });
+        this.initialized = true; // mark as initialized
+      } catch (error) {
+        console.error("[KeycloakService] Error initializing Keycloak", error);
+      }
     }
 
     return this.keycloak;

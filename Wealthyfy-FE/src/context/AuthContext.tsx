@@ -12,23 +12,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(keycloakService.isAuthenticated());
-  const [token, setToken] = useState<string | undefined>(keycloakService.getToken());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [token, setToken] = useState<string | undefined>();
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      if (keycloakService.isAuthenticated()) {
-        try {
-          await keycloakService.init();
-          setIsAuthenticated(true);
-          setToken(keycloakService.getToken());
-        } catch (err) {
-          console.error("🔁 Token refresh failed:", err);
-        }
+    const initializeKeycloak = async () => {
+      try {
+        const kc = await keycloakService.init();
+        setIsAuthenticated(kc.authenticated);
+        setToken(kc.token);
+        console.log("Keycloak initialized", kc);
+      } catch (err) {
+        console.error("Keycloak init failed", err);
+        setIsAuthenticated(false);
+        setToken(undefined);
       }
-    }, 60000);
+    };
 
-    return () => clearInterval(interval);
+    initializeKeycloak();
   }, []);
 
   const login = () => keycloakService.login();
@@ -42,4 +43,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export default AuthContext;
-
