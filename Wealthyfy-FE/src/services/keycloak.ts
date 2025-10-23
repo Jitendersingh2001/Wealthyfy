@@ -38,6 +38,10 @@ class KeycloakService {
     return this.keycloak;
   }
 
+  public getKeycloakInstance(): Keycloak | undefined {
+    return this.keycloak;
+  }
+  
   public login(options?: KeycloakLoginOptions): Promise<void> {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
