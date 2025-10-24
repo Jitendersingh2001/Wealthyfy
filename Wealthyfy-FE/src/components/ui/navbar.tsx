@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SITE_CONFIG } from "@/constants/site";
 import { ThemeToggleBtn } from "@/components/ui/theme-toggle-btn";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 /* ----------------------------- User Menu ----------------------------- */
 interface UserMenuProps {
@@ -45,10 +46,10 @@ const UserMenu: React.FC<UserMenuProps> = React.memo(
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-            <Avatar className="cursor-pointer">
-              <AvatarImage src={userAvatar} alt={userName} />
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
+          <Avatar className="cursor-pointer">
+            <AvatarImage src={userAvatar} alt={userName} />
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          </Avatar>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56">
@@ -126,17 +127,23 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         )}
         {...props}
       >
-        <div className="flex h-15 w-full items-center justify-between gap-4 px-4 md:px-6">
+        <div className="flex h-15 w-full items-center justify-between gap-4 md:pr-5 md:pl-2">
           {/* Left: Logo + Name */}
-          <button
-            onClick={(e) => e.preventDefault()}
-            className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors"
-          >
-            <div className="text-2xl">{logo}</div>
-            <span className="hidden font-bold text-xl sm:inline-block uppercase">
-              {SITE_CONFIG.NAME}
-            </span>
-          </button>
+          {!dashboardLayout ? (
+            <div className="flex">
+              <button
+                onClick={(e) => e.preventDefault()}
+                className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors"
+              >
+                <div className="text-2xl">{logo}</div>
+                <span className="hidden font-semibold text-2xl sm:inline-block uppercase">
+                  {SITE_CONFIG.NAME}
+                </span>
+              </button>
+            </div>
+          ) : (
+            <SidebarTrigger />
+          )}
 
           {/* Right: Auth / CTA / User */}
           <div className="flex items-center gap-3">

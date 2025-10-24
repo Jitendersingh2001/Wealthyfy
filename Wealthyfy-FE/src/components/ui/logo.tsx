@@ -3,7 +3,7 @@ const Logo = (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
     <img 
       src="/favicon.png" 
       alt="WealthyFy Logo" 
-      className="h-7 w-6"
+      className="h-9 w-7"
       {...props}
     />
   );
