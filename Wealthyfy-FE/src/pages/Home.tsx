@@ -1,14 +1,26 @@
 // pages/Home.tsx
-import { Navbar01 } from "@/components/ui/shadcn-io/navbar-01";
-// import { keycloakService } from "@/services/keycloak";
+import { useEffect } from "react";
+import { Navbar } from "@/components/ui/navbar";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 
 function HomePage() {
   const auth = useAuth();
+  const { theme, setTheme } = useTheme();
+
+  // Force light theme on home page and store original theme
+  useEffect(() => {
+    // Store the current theme as the user's preference if it's not already light
+    if (theme !== "light") {
+      // Store the original theme preference in a separate key
+      localStorage.setItem("user-theme-preference", theme);
+      setTheme("light");
+    }
+  }, [theme, setTheme]);
+
   return (
     <div className="relative w-full">
-      <Navbar01
-        navigationLinks={[]}
+      <Navbar
         signInText="Log In"
         ctaText="Sign Up"
         onSignInClick={auth.login}

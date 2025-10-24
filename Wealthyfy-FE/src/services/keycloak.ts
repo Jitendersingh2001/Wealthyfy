@@ -56,6 +56,13 @@ class KeycloakService {
     return this.keycloak.register(options);
   }
 
+  public logout(options?: { redirectUri?: string }): Promise<void> {
+    if (!this.keycloak) {
+      return Promise.reject(new Error("Keycloak not initialized"));
+    }
+    return this.keycloak.logout(options);
+  }
+
   public getToken(): string | undefined {
     return this.keycloak?.token;
   }

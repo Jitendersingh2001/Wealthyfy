@@ -5,6 +5,8 @@ import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { keycloakService } from "@/services/keycloak";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { SITE_CONFIG } from "@/constants/site";
 
 const root = createRoot(document.getElementById("root")!);
 
@@ -16,7 +18,9 @@ const root = createRoot(document.getElementById("root")!);
       <StrictMode>
         <BrowserRouter>
           <AuthProvider>
-            <App />
+            <ThemeProvider defaultTheme={SITE_CONFIG.DEFAULT_THEME} storageKey={SITE_CONFIG.THEME_STORAGE_KEY}>
+              <App />
+            </ThemeProvider>
           </AuthProvider>
         </BrowserRouter>
       </StrictMode>
