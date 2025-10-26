@@ -60,12 +60,8 @@
 }
 
 .form-group.focused .form-label {
-    color: #03b366;
+    /* color: #03b366; */
     transform: translateY(-2px);
-}
-
-.form-group.filled .form-label {
-    color: #28a745;
 }
 
 /* Password toggle button */
