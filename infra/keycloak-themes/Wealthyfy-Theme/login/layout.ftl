@@ -53,3 +53,7 @@
         </body>
         </html>
     </#macro>
+<!-- Allow child templates to add their scripts -->
+    <#macro scripts>
+    <#nested>  
+</#macro>

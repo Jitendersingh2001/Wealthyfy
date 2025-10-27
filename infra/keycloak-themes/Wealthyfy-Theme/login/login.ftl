@@ -61,7 +61,7 @@
                            
                         </form>
                         <!-- Identity Providers Section -->
-                        <#if social.providers??>
+                        <#if social.providers?? && (social.providers?size > 0)>
                          <div id="submit-help" class="text-center fw-bolder pb-2">
                                OR
                             </div>
@@ -93,4 +93,9 @@
                         </#if>
                     </div>
                 </div>
+
             </@layout.main>
+
+            <@layout.scripts>
+                <script src="${url.resourcesPath}/js/login.js"></script>
+            </@layout.scripts>
