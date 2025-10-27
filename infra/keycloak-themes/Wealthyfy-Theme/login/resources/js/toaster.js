@@ -13,24 +13,15 @@ const Toaster = (() => {
             error: '#DD0303'    // red
         }[type] || '#dc3545';
 
-
-        const loaderColor = {
-            success: '#78C841', // green
-            info: '#093FB4',    // blue
-            warning: '#FEB21A', // yellow
-            error: '#DC2525'    // red
-        }[type] || '#dc3545';
-
         $.toast({
             text: message,
             position: 'bottom-right',
-            hideAfter: 4000,
-            loader: true,
+            hideAfter: 2000,
+            loader: false,
             stack: false,
             allowToastClose: false,
             showHideTransition: 'slide',
             bgColor: bgColor,
-            loaderBg: loaderColor,
         });
     }
 
