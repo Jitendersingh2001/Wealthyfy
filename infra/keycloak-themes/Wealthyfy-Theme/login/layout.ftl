@@ -74,8 +74,9 @@
             </#if>
     
                 if (window.KeycloakError && window.KeycloakError.key) {
+                console.log('Keycloak Error Detected:', window.KeycloakError);
                 const { key, type } = window.KeycloakError;
-                const message = KeycloakErrorMessages[key] || 'An unexpected error occurred. Please try again.';
+                const message = KeycloakMessages[key] || 'An unexpected error occurred. Please try again.';
                 Toaster.show(message, type || 'error');
             }
         </script>
