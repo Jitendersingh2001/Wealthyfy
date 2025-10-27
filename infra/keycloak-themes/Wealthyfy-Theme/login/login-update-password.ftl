@@ -54,4 +54,6 @@
         </div>
     </div>
 </@layout.main>
-<@layout.scripts></@layout.scripts>
+<@layout.scripts>
+ <script src="${url.resourcesPath}/js/login-update-password.js"></script>
+</@layout.scripts>
