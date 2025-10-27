@@ -4,18 +4,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form[action*="loginAction"]');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
+    const newPasswordInput = document.getElementById('password-new');
+    const confirmPasswordInput = document.getElementById('password-confirm');
     const submitButton = document.querySelector('button[type="submit"]');
     const rememberMeCheckbox = document.getElementById('rememberMe');
 
     // Add password toggle functionality
-    addPasswordToggle();
+    addPasswordToggle(passwordInput);
+    addPasswordToggle(newPasswordInput);
+    addPasswordToggle(confirmPasswordInput);
     
     // Add input animations
     addInputAnimations();
 
 
-    function addPasswordToggle() {
-        if (!passwordInput) return;
+    function addPasswordToggle(inputField) {
+        if (!inputField) return;
 
         // Create toggle button
         const toggleButton = document.createElement('button');
@@ -31,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleButton.setAttribute('aria-label', 'Toggle password visibility');
 
         // Add relative positioning to password container
-        const passwordContainer = passwordInput.parentElement;
+        const passwordContainer = inputField.parentElement;
         passwordContainer.style.position = 'relative';
 
         // Insert toggle button
@@ -40,19 +44,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Toggle functionality
         toggleButton.addEventListener('click', function() {
             const icon = document.getElementById('password-toggle-icon');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
                 icon.className = 'fas fa-eye-slash';
                 toggleButton.setAttribute('aria-label', 'Hide password');
             } else {
-                passwordInput.type = 'password';
+                inputField.type = 'password';
                 icon.className = 'fas fa-eye';
                 toggleButton.setAttribute('aria-label', 'Show password');
             }
         });
     }
 
-    function addInputAnimations() {
+    function addInputAnimations(inputField) {
         [usernameInput, passwordInput].forEach(input => {
             if (!input) return;
 

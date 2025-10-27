@@ -2,8 +2,8 @@
 <#import "layout.ftl" as layout>
 
 <@layout.main pageTitle=msg("Forget Password")>
-    <div class="login-container d-flex justify-content-center align-items-center">
-        <div class="login-box">
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="box">
 
             <!-- Header -->
             <div class="login-head text-center mb-3">

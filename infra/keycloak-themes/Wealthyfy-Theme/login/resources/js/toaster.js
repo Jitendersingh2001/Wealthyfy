@@ -16,7 +16,7 @@ const Toaster = (() => {
         $.toast({
             text: message,
             position: 'bottom-right',
-            hideAfter: 2000,
+            hideAfter: 3000,
             loader: false,
             stack: false,
             allowToastClose: false,
