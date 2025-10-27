@@ -27,4 +27,5 @@ const KeycloakMessages = Object.freeze({
     resetPasswordMessage: 'Enter your new password to complete the password reset process.',
     loginTimeout: 'Your login session has timed out. Please try again.',
     invalidPasswordMaxLengthMessage: 'Password must not exceed 10 characters.',
+    verifyEmailMessage: 'Please verify your email address to continue.',
 });

@@ -69,7 +69,7 @@
       }
       
       .modal {
-        max-width: 800px;
+        max-width: 600px;
         background: white;
         border-radius: 16px;
         padding: 40px;
