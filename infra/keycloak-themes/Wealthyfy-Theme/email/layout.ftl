@@ -69,7 +69,7 @@
       }
       
       .modal {
-        max-width: 80%;
+        max-width: 800px;
         background: white;
         border-radius: 16px;
         padding: 40px;
@@ -77,6 +77,7 @@
         position: relative;
         z-index: 1;
         margin: 0 auto;
+        width: 100%;
       }
       
       .icon-wrapper {
@@ -207,21 +208,68 @@
       }
       
       @media only screen and (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        
         .email-container {
-          padding: 40px 20px;
+          padding: 30px 15px;
           border-radius: 16px;
         }
         
+        .logo {
+          font-size: 22px;
+          margin-bottom: 30px;
+        }
+        
         .modal {
-          padding: 30px 20px;
+          padding: 25px 15px;
+          max-width: 100%;
+        }
+        
+        .icon-circle {
+          width: 60px;
+          height: 60px;
+          margin-bottom: 10px;
+        }
+        
+        .icon-circle svg {
+          width: 30px;
+          height: 30px;
         }
         
         .modal-title {
           font-size: 20px;
+          margin-bottom: 10px;
         }
         
         .greeting-text {
+          font-size: 14px;
+          margin: 15px 0;
+        }
+        
+        .reset-button {
+          padding: 12px 24px;
           font-size: 15px;
+        }
+        
+        .button-wrapper {
+          margin: 20px 0;
+        }
+        
+        .fallback-text,
+        .expiration-text {
+          font-size: 13px;
+          margin: 15px 0;
+        }
+        
+        .reset-link {
+          font-size: 11px;
+          padding: 6px 10px;
+        }
+        
+        .footer-copyright {
+          font-size: 11px;
         }
       }
     </style>
