@@ -48,6 +48,3 @@
         </div>
     </div>
 </@layout.main>
-
-<@layout.scripts>
-</@layout.scripts>
