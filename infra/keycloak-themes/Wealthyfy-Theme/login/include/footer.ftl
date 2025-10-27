@@ -15,3 +15,6 @@
 
 <#-- Custom Toaster Script -->
 <script src="${url.resourcesPath}/js/toaster.js"></script>
+
+<#-- Keycloak error messages Script -->
+<script src="${url.resourcesPath}/js/keycloak-error-messages.js"></script>

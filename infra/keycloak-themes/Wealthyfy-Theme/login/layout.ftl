@@ -7,21 +7,22 @@
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-            <#-- Dynamic Page Title -->
-                <title>${pageTitle?no_esc}</title>
+            <!-- Dynamic Page Title -->
+            <title>${pageTitle?no_esc}</title>
 
-                <#-- Favicon -->
-                    <link rel="icon" type="image/png" href="${url.resourcesPath}/images/favicon.png">
-                    <#include "include/header.ftl">
+            <!-- Favicon -->
+            <link rel="icon" type="image/png" href="${url.resourcesPath}/images/favicon.png">
+
+            <!-- Shared header includes (CSS, meta tags, etc.) -->
+            <#include "include/header.ftl">
         </head>
 
         <body>
             <div class="d-flex layout-main-container">
+                <!-- Left branding section -->
                 <div class="w-100 d-flex position-relative" id="page-intro">
-                    <!-- Background -->
                     <div class="branding-background position-absolute w-100 h-100"></div>
 
-                    <!-- Left-aligned content -->
                     <div class="branding-content position-relative h-100 d-flex flex-column justify-content-start text-white p-5 w-100">
                         <div class="brand-header mb-4">
                             <h1 class="h6 fw-light text-uppercase mb-2">Wealthyfy</h1>
@@ -40,20 +41,46 @@
                     </div>
                 </div>
 
-                <!--Right aligned content-->
+                <!-- Right content (login/register/etc.) -->
                 <div class="position-relative col-12 col-md-6">
                     <div class="right-container d-flex flex-column justify-content-center align-items-center h-100 w-100">
-                    <main class = "card card-container p-4 rounded-4">
-                        <#nested>
+                        <main class="card card-container p-4 rounded-4">
+                            <#nested>
                         </main>
                     </div>
                 </div>
             </div>
+
+            <!-- Global footer -->
             <#include "include/footer.ftl">
         </body>
+
         </html>
     </#macro>
-<!-- Allow child templates to add their scripts -->
+
+    <!-- Shared scripts macro for all pages -->
     <#macro scripts>
-    <#nested>  
-</#macro>
+
+    <!-- keyclock error toast messages start -->
+        <script>
+            <#-- Inject global Keycloak error info (if any) -->
+            <#if message??>
+                window.KeycloakError = {
+                    type: '${message.type!""}',
+                    key: '${message.summary!""}'
+                };
+            <#else>
+                window.KeycloakError = null;
+            </#if>
+    
+                if (window.KeycloakError && window.KeycloakError.key) {
+                const { key, type } = window.KeycloakError;
+                const message = KeycloakErrorMessages[key] || 'An unexpected error occurred. Please try again.';
+                Toaster.show(message, type || 'error');
+            }
+        </script>
+        <!-- keyclock error toast messages end -->
+
+        <#-- Let child templates add their page-specific scripts -->
+            <#nested>
+    </#macro>
