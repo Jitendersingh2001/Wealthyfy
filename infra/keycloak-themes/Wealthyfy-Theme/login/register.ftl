@@ -79,7 +79,7 @@
       <!-- Sign In Option -->
       <div class="text-center signup-section d-flex justify-content-center pt-3 gap-1">
         <p class="mb-2 text-muted">Already have an account?</p>
-        <a href="${url.loginUrl}" class="text-decoration-none">Sign In</a>
+        <a href="${url.loginUrl}" class="text-decoration-none">Log In</a>
       </div>
 
     </div>
