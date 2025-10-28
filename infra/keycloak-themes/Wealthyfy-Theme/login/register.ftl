@@ -18,7 +18,7 @@
           <label for="email" class="form-label">Email<span class="text-danger"> *</span></label>
           <input type="email" class="form-control" id="email" name="email"
                  value="${email?if_exists}" placeholder="Enter your email address"
-                 autocomplete="new-email" required />
+                 autocomplete="new-email" maxlength="30" required />
         </div>
 
         <!-- First & Last Name -->
@@ -26,13 +26,13 @@
           <div class="col-md-6 mb-3">
             <label for="firstName" class="form-label">First Name<span class="text-danger"> *</span></label>
             <input type="text" class="form-control" id="firstName" name="firstName"
-                   value="${firstName?if_exists}" placeholder="Enter your first name" required />
+                   value="${firstName?if_exists}" placeholder="Enter your first name" maxlength="20" required />
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="lastName" class="form-label">Last Name<span class="text-danger"> *</span></label>
             <input type="text" class="form-control" id="lastName" name="lastName"
-                   value="${lastName?if_exists}" placeholder="Enter your last name" required />
+                   value="${lastName?if_exists}" placeholder="Enter your last name" maxlength="20" required />
           </div>
         </div>
 
@@ -40,14 +40,14 @@
         <div class="form-group mb-3">
           <label for="password" class="form-label">Password<span class="text-danger"> *</span></label>
           <input type="password" class="form-control" id="password" name="password"
-                 placeholder="Enter your password" required />
+                 placeholder="Enter your password"  maxlength="11"  required />
         </div>
 
         <!-- Confirm Password -->
         <div class="form-group mb-3">
           <label for="password-confirm" class="form-label">Confirm Password<span class="text-danger"> *</span></label>
           <input type="password" class="form-control" id="password-confirm" name="password-confirm"
-                 placeholder="Re-enter your password" required />
+                 placeholder="Re-enter your password" maxlength="11" required />
         </div>
 
         <!-- Submit Button -->

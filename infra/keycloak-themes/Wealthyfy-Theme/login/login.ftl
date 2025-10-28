@@ -21,7 +21,7 @@
                                 <input type="email" class="form-control" id="username" name="username" autofocus value="${username?if_exists}" 
                                        placeholder="Enter your email address" 
                                        aria-describedby="username-help" 
-                                       autocomplete="new-email"
+                                       autocomplete="new-email" maxlength="30"
                                     />
                             </div>
 
@@ -30,7 +30,7 @@
                                 <label for="password" class="form-label">Password <span class="text-danger"> *</span></label>
                                 <input type="password" class="form-control" id="password" name="password" 
                                        placeholder="Enter your password" 
-                                       aria-describedby="password-help" 
+                                       aria-describedby="password-help" maxlength="11"
                                       />
                             </div>
 
