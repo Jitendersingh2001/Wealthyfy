@@ -1,47 +1,61 @@
 import Keycloak, {
-    type KeycloakConfig,
-    type KeycloakInitOptions,
-    type KeycloakLoginOptions,
-    type KeycloakRegisterOptions
+  type KeycloakConfig,
+  type KeycloakInitOptions,
+  type KeycloakLoginOptions,
+  type KeycloakRegisterOptions,
 } from "keycloak-js";
 import { config } from "@/config/config";
 
 class KeycloakService {
   private keycloak?: Keycloak;
-  private initialized = false; // track initialization
+  private initialized = false;
+  private initPromise?: Promise<Keycloak>;
 
   public async init(options?: KeycloakInitOptions): Promise<Keycloak> {
-    if (!this.keycloak) {
-      const kcConfig: KeycloakConfig = {
-        url: config.keycloak.url,
-        realm: config.keycloak.realm,
-        clientId: config.keycloak.clientId
-      };
 
-      this.keycloak = new Keycloak(kcConfig);
+    if (this.initialized && this.keycloak) {
+      return this.keycloak;
     }
 
-    if (!this.initialized) {
-      try {
-        await this.keycloak.init({
-          onLoad: "check-sso",
-          checkLoginIframe: false,
-          pkceMethod: "S256",
-          ...options
-        });
-        this.initialized = true; // mark as initialized
-      } catch (error) {
+    // If initialization is already running, return that same promise
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    const kcConfig: KeycloakConfig = {
+      url: config.keycloak.url,
+      realm: config.keycloak.realm,
+      clientId: config.keycloak.clientId,
+    };
+
+    this.keycloak ??= new Keycloak(kcConfig);
+
+    this.initPromise = this.keycloak
+      .init({
+        onLoad: "check-sso",
+        checkLoginIframe: false,
+        pkceMethod: "S256",
+        ...options,
+      })
+      .then(() => {
+        this.initialized = true;
+        return this.keycloak!;
+      })
+      .catch((error) => {
         console.error("[KeycloakService] Error initializing Keycloak", error);
-      }
-    }
+        throw error;
+      })
+      .finally(() => {
+        this.initPromise = undefined; // clear after completion
+      });
 
-    return this.keycloak;
+    return this.initPromise;
   }
 
   public getKeycloakInstance(): Keycloak | undefined {
     return this.keycloak;
   }
-  
+
   public login(options?: KeycloakLoginOptions): Promise<void> {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
@@ -56,7 +70,7 @@ class KeycloakService {
     return this.keycloak.register(options);
   }
 
-  public logout(options?: { redirectUri?: string }): Promise<void> {
+  public async logout(options?: { redirectUri?: string }): Promise<void> {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
     }

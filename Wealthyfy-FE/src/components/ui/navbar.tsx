@@ -142,7 +142,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
               </button>
             </div>
           ) : (
-            <SidebarTrigger />
+            <SidebarTrigger className="cursor-pointer"/>
           )}
 
           {/* Right: Auth / CTA / User */}

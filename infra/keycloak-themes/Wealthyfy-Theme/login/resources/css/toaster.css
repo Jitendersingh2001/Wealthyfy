@@ -1,3 +1,10 @@
-.jq-icon-error{
-    background-color: red !important;
+.jq-toast-single {
+    width: 110% !important;
+}
+
+.jq-toast-single.success .jq-toast-icon {
+  font-size: 12px !important;
+}
+.jq-toast-single.error .jq-toast-icon {
+  font-size: 10px !important;
 }

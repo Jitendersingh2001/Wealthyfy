@@ -19,6 +19,7 @@ interface AuthContextType {
   user?: UserProfile;
   token?: string;
   refreshToken?: string;
+  isLoading: boolean;
   login: () => void;
   register: () => void;
   logout: () => void;
@@ -31,6 +32,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [authData, setAuthData] = useState<{
     user?: UserProfile;
     token?: string;
@@ -47,34 +49,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   useEffect(() => {
-    try {
-      const kc = keycloakService.getKeycloakInstance();
-      if (!kc?.authenticated) {
+    const initAuth = async () => {
+      try {
+        await keycloakService.init();
+        const kc = keycloakService.getKeycloakInstance();
+
+        if (!kc?.authenticated) {
+          updateAuthData();
+        } else {
+          const { given_name, family_name, name, email, email_verified } =
+            kc.idTokenParsed || {};
+          const userProfile: UserProfile = {
+            firstName: given_name,
+            lastName: family_name,
+            fullName: name,
+            email,
+            emailVerified: email_verified,
+          };
+
+          updateAuthData(userProfile, kc.token, kc.refreshToken);
+        }
+      } catch (err) {
+        console.error("❌ Failed to initialize Keycloak:", err);
         updateAuthData();
-        return;
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const { given_name, family_name, name, email, email_verified } =
-        kc.idTokenParsed || {};
-      const userProfile: UserProfile = {
-        firstName: given_name,
-        lastName: family_name,
-        fullName: name,
-        email,
-        emailVerified: email_verified,
-      };
-
-      updateAuthData(userProfile, kc.token, kc.refreshToken);
-    } catch (err) {
-      console.error("Keycloak initialization failed", err);
-      updateAuthData();
-    }
+    initAuth();
   }, []);
 
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
-  const logout = () => keycloakService.logout({ redirectUri: window.location.origin });
-
+  const logout = () =>
+    keycloakService.logout({ redirectUri: window.location.origin });
   const setTokens = (token?: string, refreshToken?: string) =>
     setAuthData((prev) => ({ ...prev, token, refreshToken }));
 
@@ -82,6 +91,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        isLoading,
         ...authData,
         login,
         register,
@@ -89,7 +99,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         setTokens,
       }}
     >
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   );
 };
