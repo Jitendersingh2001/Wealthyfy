@@ -6,6 +6,11 @@ const Toaster = (() => {
      * @param {string} type - success, info, warning, error
      */
     function show(message, type = 'error') {
+        // Don't show info or warning toasts
+        if (type === 'info' || type === 'warning') {
+            return;
+        }
+
         const bgColor = {
             success: '#399918', // green
             info: '#093FB4',    // blue

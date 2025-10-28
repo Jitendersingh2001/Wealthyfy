@@ -36,7 +36,7 @@
                 <input type="hidden" name="resend" value="true"/>
 
                 <!-- Resend Button -->
-                <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                <button type="submit" id="resend-btn" class="btn btn-primary btn-lg w-100 mb-3">
                     <span class="button-text fw-semibold">Resend Verification Email</span>
                 </button>
 
@@ -48,3 +48,6 @@
         </div>
     </div>
 </@layout.main>
+<@layout.scripts>
+    <script src="${url.resourcesPath}/js/verify-email.js"></script>
+</@layout.scripts>

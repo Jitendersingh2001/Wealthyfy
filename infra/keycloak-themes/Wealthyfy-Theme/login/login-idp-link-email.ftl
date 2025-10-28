@@ -29,8 +29,6 @@
 
             <!-- Actions -->
             <form action="${url.loginAction}" method="post" class="pb-2" autocomplete="off">
-                <input type="hidden" name="submitAction" value="linkAccount" />
-                
                 <!-- Continue After Verification -->
                 <div class="text-center mb-3">
                     <p class="text-muted mb-0">
@@ -42,10 +40,13 @@
                     </p>
                 </div>
                 <!-- Resend Button -->
-                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                 <button type="submit" id="resend-btn" name="submitAction" value="linkAccount" class="btn btn-primary btn-lg w-100 mb-3">
                     <span class="button-text fw-semibold">Resend Verification Email</span>
                 </button>
             </form>
         </div>
     </div>
 </@layout.main>
+<@layout.scripts>
+    <script src="${url.resourcesPath}/js/idp-link-email.js"></script>
+</@layout.scripts>
