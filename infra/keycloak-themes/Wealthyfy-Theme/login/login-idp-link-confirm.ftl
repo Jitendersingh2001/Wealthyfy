@@ -22,7 +22,7 @@
             </div>
 
             <form action="${url.loginAction}" method="post" class="pb-2" autocomplete="off">
-                
+                <input type="hidden" name="submitAction" value="linkAccount" />
                 <button type="submit" name="submit" value="true" class="btn btn-primary btn-lg w-100 mb-3">
                     <span class="button-text fw-semibold">Link To Existing Account</span>
                 </button>
