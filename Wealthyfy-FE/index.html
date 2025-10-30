@@ -11,10 +11,21 @@
     rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wealthyfy</title>
+
+  <!-- ✅ Theme detection must run BEFORE your React bundle -->
+  <script>
+    (function () {
+      const theme = localStorage.getItem("wealthyfy-ui-theme") || "system";
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const effectiveTheme = theme === "system" ? (prefersDark ? "dark" : "light") : theme;
+      document.documentElement.classList.add(effectiveTheme);
+    })();
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
+  <!-- React app loads AFTER theme is applied -->
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

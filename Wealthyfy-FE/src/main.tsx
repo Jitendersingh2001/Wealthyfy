@@ -15,7 +15,6 @@ root.render(
       <AuthProvider>
         <ThemeProvider
           defaultTheme={SITE_CONFIG.DEFAULT_THEME}
-          storageKey={SITE_CONFIG.THEME_STORAGE_KEY}
         >
           <App />
         </ThemeProvider>

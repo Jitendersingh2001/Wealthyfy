@@ -60,6 +60,7 @@ class KeycloakService {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
     }
+    sessionStorage.setItem("kc_login_initiated", "true");
     return this.keycloak.login(options);
   }
 
@@ -74,6 +75,7 @@ class KeycloakService {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
     }
+    sessionStorage.setItem("kc_logout_initiated", "true");
     return this.keycloak.logout(options);
   }
 

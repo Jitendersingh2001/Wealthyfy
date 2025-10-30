@@ -1,0 +1,9 @@
+.wealthyfy-sonner-toaster li[data-type="success"]{
+  background-color: var(--color-primary) !important;
+  color: var(--color-primary-foreground) !important;
+}
+
+.wealthyfy-sonner-toaster li[data-type="error"]{
+  background-color: var(--color-destructive) !important;
+  color: var(--color-primary-foreground) !important;
+}
