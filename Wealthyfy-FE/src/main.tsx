@@ -6,12 +6,14 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { SITE_CONFIG } from "@/constants/site";
+import { Toaster } from "@/components/ui/toaster/sonner";
 
 const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <StrictMode>
     <BrowserRouter>
+      <Toaster />
       <AuthProvider>
         <ThemeProvider
           defaultTheme={SITE_CONFIG.DEFAULT_THEME}
