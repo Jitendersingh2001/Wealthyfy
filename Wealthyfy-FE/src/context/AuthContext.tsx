@@ -40,6 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     token?: string;
     refreshToken?: string;
   }>({});
+  const [showLoginToast, setShowLoginToast] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
 
   const updateAuthData = (
@@ -54,11 +55,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const initAuth = async () => {
       try {
+        const isRedirect = keycloakService.isLoginRedirect();
         await keycloakService.init();
         const kc = keycloakService.getKeycloakInstance();
 
         if (!kc?.authenticated) {
           updateAuthData();
+          sessionStorage.removeItem("kc_login_toast_shown");
         } else {
           const { given_name, family_name, name, email, email_verified } =
             kc.idTokenParsed || {};
@@ -71,6 +74,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           };
 
           updateAuthData(userProfile, kc.token, kc.refreshToken);
+          if (isRedirect && !sessionStorage.getItem("kc_login_toast_shown")) {
+            setShowLoginToast(true);
+            sessionStorage.setItem("kc_login_toast_shown", "true");
+          }
         }
 
         // Set logout toast trigger flag
@@ -91,9 +98,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (!isLoading) {
+      if (showLoginToast) toast.success("Logged in successfully");
       if (showLogoutToast) toast.success("Logged out successfully");
     }
-  }, [isLoading, showLogoutToast]);
+  }, [isLoading, showLoginToast, showLogoutToast]);
 
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
