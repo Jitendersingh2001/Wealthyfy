@@ -1,4 +1,9 @@
-import React, { createContext, useEffect, useState, type ReactNode } from "react";
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { keycloakService } from "@/services/keycloak";
 import { toast } from "sonner";
 import Loader from "@/components/ui/loader";
@@ -25,7 +30,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [authData, setAuthData] = useState<{
@@ -33,10 +40,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     token?: string;
     refreshToken?: string;
   }>({});
-  const [showLoginToast, setShowLoginToast] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
 
-  const updateAuthData = (user?: UserProfile, token?: string, refreshToken?: string) => {
+  const updateAuthData = (
+    user?: UserProfile,
+    token?: string,
+    refreshToken?: string
+  ) => {
     setIsAuthenticated(!!user);
     setAuthData({ user, token, refreshToken });
   };
@@ -50,7 +60,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!kc?.authenticated) {
           updateAuthData();
         } else {
-          const { given_name, family_name, name, email, email_verified } = kc.idTokenParsed || {};
+          const { given_name, family_name, name, email, email_verified } =
+            kc.idTokenParsed || {};
           const userProfile: UserProfile = {
             firstName: given_name,
             lastName: family_name,
@@ -60,12 +71,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           };
 
           updateAuthData(userProfile, kc.token, kc.refreshToken);
-
-          // Set toast trigger flag (do NOT show immediately)
-          if (sessionStorage.getItem("kc_login_initiated")) {
-            setShowLoginToast(true);
-            sessionStorage.removeItem("kc_login_initiated");
-          }
         }
 
         // Set logout toast trigger flag
@@ -86,14 +91,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     if (!isLoading) {
-      if (showLoginToast) toast.success("Logged in successfully");
       if (showLogoutToast) toast.success("Logged out successfully");
     }
-  }, [isLoading, showLoginToast, showLogoutToast]);
+  }, [isLoading, showLogoutToast]);
 
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
-  const logout = () => keycloakService.logout({ redirectUri: window.location.origin });
+  const logout = () =>
+    keycloakService.logout({ redirectUri: window.location.origin });
   const setTokens = (token?: string, refreshToken?: string) =>
     setAuthData((prev) => ({ ...prev, token, refreshToken }));
 

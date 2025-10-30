@@ -60,7 +60,6 @@ class KeycloakService {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
     }
-    sessionStorage.setItem("kc_login_initiated", "true");
     return this.keycloak.login(options);
   }
 
@@ -85,6 +84,15 @@ class KeycloakService {
 
   public isAuthenticated(): boolean {
     return !!this.keycloak?.authenticated;
+  }
+
+  public isLoginRedirect(): boolean {
+     const url = new URL(window.location.href);
+          const fragmentParams = new URLSearchParams(url.hash.substring(1));
+          const code = fragmentParams.get("code");
+    const state = fragmentParams.get("state");
+    
+    return (code && state) ? true : false;
   }
 }
 
