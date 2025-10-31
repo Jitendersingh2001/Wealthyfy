@@ -1,4 +1,5 @@
 services:
+  # --- Keycloak Postgres DB ---
   postgres:
     image: postgres:18
     container_name: keycloak_db
@@ -13,6 +14,7 @@ services:
     networks:
       - keycloak_net
 
+  # --- Keycloak Server ---
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.2
     container_name: keycloak
@@ -26,26 +28,40 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
 
-      # Webhook HTTP configuration
+      # Optional webhook configs
       WEBHOOK_HTTP_BASE_PATH: ${WEBHOOK_HTTP_BASE_PATH}
       WEBHOOK_EVENTS_TAKEN: ${WEBHOOK_EVENTS_TAKEN}
       WEBHOOK_HTTP_AUTH_USERNAME: ${WEBHOOK_USERNAME}
       WEBHOOK_HTTP_AUTH_PASSWORD: ${WEBHOOK_PASSWORD}
-
     ports:
       - "8080:8080"
     depends_on:
       - postgres
-    command:
-      - start-dev
+    command: ["start-dev"]
     volumes:
       - ./keycloak-themes/Wealthyfy-Theme:/opt/keycloak/themes/Wealthyfy-Theme:Z
       - ./keycloak-extensions:/opt/keycloak/providers:ro
     networks:
       - keycloak_net
 
+  # --- Wealthyfy Backend DB ---
+  wealthyfy_db:
+    image: postgres:18
+    container_name: wealthyfy_db
+    environment:
+      POSTGRES_DB: ${WEALTHYFY_DB}
+      POSTGRES_USER: ${WEALTHYFY_DB_USER}
+      POSTGRES_PASSWORD: ${WEALTHYFY_DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - wealthyfy_db_data:/var/lib/postgresql/data
+    networks:
+      - keycloak_net
+
 volumes:
   keycloak_db_data:
+  wealthyfy_db_data:
 
 networks:
   keycloak_net:
