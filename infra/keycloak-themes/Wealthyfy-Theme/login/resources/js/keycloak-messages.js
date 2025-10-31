@@ -43,5 +43,7 @@ const KeycloakMessages = Object.freeze({
     usernameExistsMessage: 'This username is already taken. Please choose another.',
 
 
-    federatedIdentityConfirmLinkMessage: "We found an existing account with this email."
+    federatedIdentityConfirmLinkMessage: "We found an existing account with this email.",
+      "Your login attempt timed out.  Login will start from the beginning.": 
+        "Your session has timed out. Please restart the login process."
 });

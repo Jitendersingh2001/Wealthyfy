@@ -39,11 +39,6 @@
                 <button type="submit" id="resend-btn" class="btn btn-primary btn-lg w-100 mb-3">
                     <span class="button-text fw-semibold">Resend Verification Email</span>
                 </button>
-
-                <!-- Back to Login -->
-                 <div class="d-flex justify-content-center align-items-center mb-3">
-                    <a href="${url.loginUrl}" class="text-decoration-none">Back to Login</a>
-                </div>
             </form>
         </div>
     </div>
