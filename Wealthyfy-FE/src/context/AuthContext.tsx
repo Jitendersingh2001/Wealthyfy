@@ -98,10 +98,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (!isLoading) {
-      if (showLoginToast) toast.success("Logged in successfully");
+      if (showLoginToast && authData.user?.fullName) {
+        toast.success(
+          `Hi ${authData.user.fullName}, you’ve logged in successfully!`
+        );
+      }
       if (showLogoutToast) toast.success("Logged out successfully");
     }
-  }, [isLoading, showLoginToast, showLogoutToast]);
+  }, [isLoading, showLoginToast, showLogoutToast, authData.user]);
 
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
