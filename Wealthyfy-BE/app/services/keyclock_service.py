@@ -6,6 +6,7 @@ from app.models.user import User
 from app.constants.message import Messages
 from app.config.setting import settings
 from app.schemas.user import UserCreate
+from app.constants.keycloak_urls import KeycloakURLs
 
 logger = logging.getLogger(__name__)
 
@@ -72,25 +73,16 @@ class KeycloakService:
         Retrieves an admin access token from Keycloak using the client credentials flow.
         This synchronous version uses 'requests' instead of 'httpx'.
         """
-        token_url = (
-            f"{settings.keycloak.KEYCLOAK_URL}/realms/"
-            f"{settings.keycloak.KEYCLOAK_REALM}/protocol/openid-connect/token"
-        )
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {
             "client_id": settings.keycloak.KEYCLOAK_CLIENT_ID,
             "client_secret": settings.keycloak.KEYCLOAK_CLIENT_SECRET,
             "grant_type": "client_credentials",
         }
-        logger.info(
-            "Fetching Keycloak admin token.\nURL: %s\nPayload: %s",
-            token_url,
-            data
-         )
         try:
-            response = requests.post(token_url, headers=headers, data=data, timeout=10)
+            response = requests.post(KeycloakURLs.TOKEN_URL, headers=headers, data=data, timeout=10)
             logger.info("Response status code: %s", response.json())
-            # response.raise_for_status()
+            response.raise_for_status()
             token_data = response.json()
             access_token = token_data.get("access_token")
 
@@ -119,7 +111,7 @@ class KeycloakService:
         """
         try:
             access_token = KeycloakService.get_keycloak_admin_token()
-            url = f"{settings.keycloak.KEYCLOAK_URL}/admin/realms/{settings.keycloak.KEYCLOAK_REALM}/users/{user_id}"
+            url = KeycloakURLs.user_detail(user_id)
 
             headers = {"Authorization": f"Bearer {access_token}"}
             response = requests.get(url, headers=headers, timeout=10)
