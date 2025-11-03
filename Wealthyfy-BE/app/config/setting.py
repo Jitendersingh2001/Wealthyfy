@@ -23,10 +23,16 @@ class DatabaseSettings(BaseSettings):
         password = quote_plus(self.DB_PASSWORD)
         return f"{self.DB_CONNECTION}+{self.DB_DRIVER}://{self.DB_USERNAME}:{password}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
 
-
+class KeycloakSettings(BaseSettings):
+    KEYCLOAK_URL: str
+    KEYCLOAK_REALM: str
+    KEYCLOAK_CLIENT_ID: str
+    KEYCLOAK_CLIENT_SECRET: str
+    
 class Settings(BaseSettings):
     app: AppSettings
     db: DatabaseSettings
+    keycloak: KeycloakSettings
 
     class Config:
         env_file = ".env"
