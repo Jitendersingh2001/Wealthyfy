@@ -12,6 +12,7 @@ class User(Base):
     last_name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
     email_verified = Column(Boolean, default=False)
+    is_setup_complete = Column(Boolean, default=False)
 
     # Automatically set timestamp when row is created
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
