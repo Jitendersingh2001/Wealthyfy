@@ -7,7 +7,7 @@ interface LoaderProps extends React.SVGProps<SVGSVGElement> {
 }
 
 const Loader: React.FC<LoaderProps> = ({
-  size = 48,
+  size = 50,
   className,
   fullscreen = false,
   ...props

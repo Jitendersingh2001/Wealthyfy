@@ -122,7 +122,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       <header
         ref={ref}
         className={cn(
-          "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 [&_*]:no-underline",
+          "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 **:no-underline",
           className
         )}
         {...props}
@@ -152,7 +152,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  className="text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer"
                   onClick={handleClick(onSignInClick)}
                 >
                   {signInText}
@@ -160,7 +160,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
 
                 <Button
                   size="sm"
-                  className="text-sm font-medium px-4 h-9 rounded-md shadow-sm"
+                  className="text-sm font-medium px-4 h-9 rounded-md shadow-sm cursor-pointer"
                   onClick={handleClick(onCtaClick)}
                 >
                   {ctaText}

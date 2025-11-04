@@ -1,0 +1,6 @@
+ACTIVE = "active"
+INACTIVE = "inactive"
+DELETED = "deleted"
+CAP_ACTIVE = "ACTIVE"
+CAP_INACTIVE = "INACTIVE"
+CAP_DELETED = "DELETED"

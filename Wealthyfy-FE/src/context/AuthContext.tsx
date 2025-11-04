@@ -14,6 +14,7 @@ interface UserProfile {
   fullName: string;
   email: string;
   emailVerified: boolean;
+  keyclockUserId: string;
 }
 
 interface AuthContextType {
@@ -63,7 +64,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
           updateAuthData();
           sessionStorage.removeItem("kc_login_toast_shown");
         } else {
-          const { given_name, family_name, name, email, email_verified } =
+          const { given_name, family_name, name, email, email_verified, sub } =
             kc.idTokenParsed || {};
           const userProfile: UserProfile = {
             firstName: given_name,
@@ -71,6 +72,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             fullName: name,
             email,
             emailVerified: email_verified,
+            keyclockUserId: sub ?? ""
           };
 
           updateAuthData(userProfile, kc.token, kc.refreshToken);
@@ -115,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setAuthData((prev) => ({ ...prev, token, refreshToken }));
 
   if (isLoading) return <Loader fullscreen />;
-
+  console.log(authData);
   return (
     <AuthContext.Provider
       value={{

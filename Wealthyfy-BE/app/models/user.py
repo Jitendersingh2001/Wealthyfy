@@ -1,7 +1,16 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.sql import func
-from app.config.database import Base
 from sqlalchemy.orm import relationship
+from app.config.database import Base
+from enum import Enum
+from app.constants import constant
+
+
+class UserStatus(Enum):
+    ACTIVE = constant.CAP_ACTIVE
+    INACTIVE = constant.CAP_INACTIVE
+    DELETED = constant.CAP_DELETED
+
 
 class User(Base):
     __tablename__ = "users"
@@ -13,9 +22,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     email_verified = Column(Boolean, default=False)
     is_setup_complete = Column(Boolean, default=False)
+    status = Column(Enum(UserStatus), default=UserStatus.INACTIVE, nullable=False)
 
-    # Automatically set timestamp when row is created
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
-
-    # Automatically update timestamp whenever row is updated
-    updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)

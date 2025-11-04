@@ -20,6 +20,7 @@ async def handle_keycloak_event(request: Request,db: Session = Depends(get_db)):
     """
     try:
         user_service = UserService(db)
+        keycloak_service = KeycloakService()
         # Parse incoming JSON payload
         payload: Dict[str, Any] = await request.json()
         logger.debug("Raw event payload: %s", payload)
@@ -30,7 +31,7 @@ async def handle_keycloak_event(request: Request,db: Session = Depends(get_db)):
 
         # Handle specific Keycloak event types
         if event_type == KeyclockEventTypes.REGISTER:
-            user_data = KeycloakService.process_user(payload)
+            user_data = keycloak_service.process_user(payload)
             if user_data:
                 user_service.create_user(user_data)
 
