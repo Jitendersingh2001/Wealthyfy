@@ -20,3 +20,11 @@ docker-compose.override.yml
 
 # Ignore any file or folder containing 'dump' in its name (case-insensitive)
 *[dD][uU][mM][pP]*
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.py.class

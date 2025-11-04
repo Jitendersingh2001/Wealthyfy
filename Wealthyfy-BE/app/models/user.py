@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SqlEnum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.config.database import Base
@@ -22,7 +22,7 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     email_verified = Column(Boolean, default=False)
     is_setup_complete = Column(Boolean, default=False)
-    status = Column(Enum(UserStatus), default=UserStatus.INACTIVE, nullable=False)
+    status = Column(SqlEnum(UserStatus), default=UserStatus.INACTIVE, nullable=False)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
