@@ -9,13 +9,13 @@ export interface AppRoute {
 }
 
 export const appRoutes: AppRoute[] = routesConfig.map((route: RouteConfig) => {
-  const content = route.isProtected ? (
-    <MainLayout>
-      <route.component />
-    </MainLayout>
-  ) : (
-    <route.component />
-  );
+   const content = route.useLayout
+    ? (
+        <MainLayout>
+          <route.component />
+        </MainLayout>
+      )
+    : <route.component />;
 
   return {
     path: route.path,

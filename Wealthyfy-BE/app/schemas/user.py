@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from app.constants.constant import INACTIVE
+from typing import Optional
 
 
 
@@ -25,6 +26,7 @@ class UserResponse(BaseModel):
     email_verified: bool
     is_setup_complete: bool
     status : str
+    phone_number: Optional[str] = None
 
     class Config:
         from_attributes = True  # Enable ORM mode

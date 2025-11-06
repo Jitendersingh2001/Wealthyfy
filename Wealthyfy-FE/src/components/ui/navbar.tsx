@@ -25,6 +25,10 @@ interface UserMenuProps {
   onItemClick?: (item: string) => void;
 }
 
+interface BrandProps {
+  logo: React.ReactNode;
+}
+
 const UserMenu: React.FC<UserMenuProps> = React.memo(
   ({
     userName = "John Doe",
@@ -80,12 +84,27 @@ const UserMenu: React.FC<UserMenuProps> = React.memo(
 );
 UserMenu.displayName = "UserMenu";
 
+const Brand: React.FC<BrandProps> = ({ logo }) => (
+  <div className="flex">
+    <button
+      onClick={(e) => e.preventDefault()}
+      className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors"
+    >
+      <div className="text-2xl">{logo}</div>
+      <span className="hidden font-semibold text-2xl sm:inline-block uppercase">
+        {SITE_CONFIG.NAME}
+      </span>
+    </button>
+  </div>
+);
+
 /* ----------------------------- Navbar ----------------------------- */
 export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   logo?: React.ReactNode;
   signInText?: string;
   ctaText?: string;
   dashboardLayout?: boolean;
+  sidebar?: boolean;
   userName?: string;
   userEmail?: string;
   userAvatar?: string;
@@ -102,6 +121,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       signInText = "Sign In",
       ctaText = "Get Started",
       dashboardLayout = false,
+      sidebar = false,
       userName = "John Doe",
       userEmail = "john@example.com",
       userAvatar,
@@ -130,19 +150,11 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
         <div className="flex h-15 w-full items-center justify-between gap-4 md:pr-5 md:pl-2">
           {/* Left: Logo + Name */}
           {!dashboardLayout ? (
-            <div className="flex">
-              <button
-                onClick={(e) => e.preventDefault()}
-                className="flex items-center space-x-2 text-primary hover:text-primary/90 transition-colors"
-              >
-                <div className="text-2xl">{logo}</div>
-                <span className="hidden font-semibold text-2xl sm:inline-block uppercase">
-                  {SITE_CONFIG.NAME}
-                </span>
-              </button>
-            </div>
+            <Brand logo={logo} />
+          ) : sidebar ? (
+            <SidebarTrigger className="cursor-pointer" />
           ) : (
-            <SidebarTrigger className="cursor-pointer"/>
+            <Brand logo={logo} />
           )}
 
           {/* Right: Auth / CTA / User */}

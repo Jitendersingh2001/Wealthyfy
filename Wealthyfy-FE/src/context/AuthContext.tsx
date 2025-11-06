@@ -3,146 +3,154 @@ import React, {
   useEffect,
   useState,
   type ReactNode,
+  useCallback,
 } from "react";
 import { keycloakService } from "@/services/keycloak";
 import { toast } from "sonner";
 import Loader from "@/components/ui/loader";
-import { GENERAL_MESSAGES } from "@/constants/messages";
+import { GENERAL_MESSAGES, ERROR_MESSAGES } from "@/constants/messages";
 import { SESSION_KEYS } from "@/constants/sessionKeys";
+import { userService } from "@/services/userService";
 
-/* --------------------------------------------------------------------------
- * Types
- * -------------------------------------------------------------------------- */
+/* -------------------------------- Types ----------------------------------- */
+interface UserApiResponse {
+  id: number;
+  keycloak_user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string;
+  email_verified: boolean;
+  is_setup_complete: boolean;
+  status: string;
+  phone_number: string | null;
+}
+
 interface UserProfile {
+  id: number;
+  keycloakUserId: string;
   firstName: string;
   lastName: string;
   fullName: string;
   email: string;
+  createdAt: string;
   emailVerified: boolean;
-  keyclockUserId: string;
+  isSetupComplete: boolean;
+  status: string;
+  phoneNumber: string | null;
 }
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user?: UserProfile;
   isLoading: boolean;
+  isSetupComplete: boolean;
   login: () => void;
   register: () => void;
   logout: () => void;
 }
 
-/* --------------------------------------------------------------------------
- * Context
- * -------------------------------------------------------------------------- */
+/* ----------------------------- Context Setup ------------------------------ */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/* --------------------------------------------------------------------------
- * Provider
- * -------------------------------------------------------------------------- */
+/* --------------------------- Helper Functions ----------------------------- */
+const mapUserResponse = (data: UserApiResponse): UserProfile => ({
+  id: data.id,
+  keycloakUserId: data.keycloak_user_id,
+  firstName: data.first_name,
+  lastName: data.last_name,
+  fullName: `${data.first_name} ${data.last_name}`,
+  email: data.email,
+  createdAt: data.created_at,
+  emailVerified: data.email_verified,
+  isSetupComplete: data.is_setup_complete,
+  status: data.status,
+  phoneNumber: data.phone_number ?? null,
+});
+
+/* ----------------------------- Provider ----------------------------------- */
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  /* ------------------------------------------------------------------------
-   * State
-   * ------------------------------------------------------------------------ */
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<UserProfile | undefined>(undefined);
-  const [showLoginToast, setShowLoginToast] = useState(false);
-  const [showLogoutToast, setShowLogoutToast] = useState(false);
+  const [user, setUser] = useState<UserProfile>();
+  const [isSetupComplete, setIsSetupComplete] = useState(false);
 
-  /* ------------------------------------------------------------------------
-   * Helpers
-   * ------------------------------------------------------------------------ */
-  const updateUser = (profile?: UserProfile) => {
-    setIsAuthenticated(!!profile);
+  const updateUserState = useCallback((profile?: UserProfile) => {
+    setIsAuthenticated(Boolean(profile));
     setUser(profile);
-  };
+  }, []);
 
-  /* ------------------------------------------------------------------------
-   * Initialize Authentication
-   * ------------------------------------------------------------------------ */
   useEffect(() => {
-    const initAuth = async () => {
+    const initialize = async () => {
       try {
-        const isRedirect = keycloakService.isLoginRedirect();
+        const isRedirectFromLogin = keycloakService.isLoginRedirect();
         await keycloakService.init();
+
         const kc = keycloakService.getKeycloakInstance();
+        const userId = kc?.idTokenParsed?.sub;
 
-        if (!kc?.authenticated) {
-          updateUser();
-          sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN);
-        } else {
-          const { given_name, family_name, name, email, email_verified, sub } =
-            kc.idTokenParsed || {};
+        if (kc?.authenticated && userId) {
+          try {
+            const data = await userService.getUserById<UserApiResponse>(userId);
+            const mappedUser = mapUserResponse(data);
 
-          const userProfile: UserProfile = {
-            firstName: given_name,
-            lastName: family_name,
-            fullName: name,
-            email,
-            emailVerified: email_verified,
-            keyclockUserId: sub ?? "",
-          };
+            updateUserState(mappedUser);
 
-          updateUser(userProfile);
+            // Setup completion state
+            setIsSetupComplete(
+              Boolean(mappedUser.phoneNumber && mappedUser.isSetupComplete)
+            );
 
-          if (isRedirect && !sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN)) {
-            setShowLoginToast(true);
-            sessionStorage.setItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN, "true");
+            // Login toast
+            if (
+              isRedirectFromLogin &&
+              !sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN)
+            ) {
+              toast.success(GENERAL_MESSAGES.LOGIN_SUCCESSFULLY(mappedUser.fullName));
+              sessionStorage.setItem(
+                SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN,
+                "true"
+              );
+            }
+          } catch (error) {
+            console.error("User fetch failed:", error);
+            toast.error(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
+            updateUserState();
           }
+        } else {
+          updateUserState();
+          sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN);
         }
 
+        // Logout message handling
         if (sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY)) {
-          setShowLogoutToast(true);
+          toast.success(GENERAL_MESSAGES.LOGOUT_SUCCESSFULLY);
           sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY);
         }
-      } catch (err) {
-        console.error("Failed to initialize Keycloak:", err);
-        updateUser();
+      } catch (error) {
+        console.error("Keycloak initialization failed:", error);
+        updateUserState();
       } finally {
         setIsLoading(false);
       }
     };
 
-    initAuth();
-  }, []);
+    initialize();
+  }, [updateUserState]);
 
-  /* ------------------------------------------------------------------------
-   * Toast Notifications
-   * ------------------------------------------------------------------------ */
-  useEffect(() => {
-    if (!isLoading) {
-      if (showLoginToast && user?.fullName) {
-        toast.success(GENERAL_MESSAGES.LOGIN_SUCCESSFULLY(user.fullName));
-      }
-      if (showLogoutToast) toast.success(GENERAL_MESSAGES.LOGOUT_SUCCESSFULLY);
-    }
-  }, [isLoading, showLoginToast, showLogoutToast, user]);
-
-  /* ------------------------------------------------------------------------
-   * Auth Actions
-   * ------------------------------------------------------------------------ */
+  /* ----------------------------- Auth Actions ----------------------------- */
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
   const logout = () =>
     keycloakService.logout({ redirectUri: window.location.origin });
 
-  /* ------------------------------------------------------------------------
-   * Render
-   * ------------------------------------------------------------------------ */
   if (isLoading) return <Loader fullscreen />;
 
   return (
     <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        isLoading,
-        user,
-        login,
-        register,
-        logout,
-      }}
+      value={{ isAuthenticated, isLoading, user, isSetupComplete, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>
