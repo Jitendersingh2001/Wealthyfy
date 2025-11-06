@@ -70,6 +70,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             userName={auth.user?.fullName}
             userEmail={auth.user?.email}
             onUserItemClick={handleUserItemClick}
+            sidebar= {true}
           />
           <main className="flex-1 p-6">{children}</main>
         </SidebarInset>
