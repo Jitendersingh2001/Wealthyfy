@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Navbar } from "@/components/ui/navbar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import { useTheme } from "@/hooks/use-theme";
 import {
   SidebarProvider,
   Sidebar,
   SidebarInset,
 } from "@/components/ui/sidebar";
+import { useUserMenuActions } from "@/hooks/use-user-menu-actions";
+import { useRestoreThemePreference } from "@/hooks/use-restore-theme";
 
 // Utility function to read sidebar state from cookie
 function getSidebarStateFromCookie(): boolean {
@@ -31,32 +31,9 @@ function getSidebarStateFromCookie(): boolean {
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
-  const { setTheme } = useTheme();
-  const navigate = useNavigate();
+  useRestoreThemePreference();
   const [sidebarOpen, setSidebarOpen] = useState(() => getSidebarStateFromCookie());
-
-  // Restore user's original theme preference
-  useEffect(() => {
-    const themePref = localStorage.getItem("user-theme-preference") as
-      | "light"
-      | "dark"
-      | "system"
-      | null;
-
-    if (themePref && themePref !== "light") {
-      setTheme(themePref);
-      localStorage.removeItem("user-theme-preference");
-    }
-  }, [setTheme]);
-
-  const handleUserItemClick = (item: string) => {
-    const actions: Record<string, () => void> = {
-      logout: auth.logout,
-      profile: () => navigate("/profile"),
-      settings: () => navigate("/settings"),
-    };
-    actions[item]?.();
-  };
+  const handleUserItemClick = useUserMenuActions();
 
   return (
     <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>

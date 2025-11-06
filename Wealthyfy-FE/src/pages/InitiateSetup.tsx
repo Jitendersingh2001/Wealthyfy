@@ -1,19 +1,12 @@
 import { Navbar } from "@/components/ui/navbar";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "react-router-dom";
+import { useUserMenuActions } from "@/hooks/use-user-menu-actions";
+import { useRestoreThemePreference } from "@/hooks/use-restore-theme";
 
 function InitiateSetup() {
   const auth = useAuth();
-  const navigate = useNavigate();
-
-  const handleUserItemClick = (item: string) => {
-    const actions: Record<string, () => void> = {
-      logout: auth.logout,
-      profile: () => navigate("/profile"),
-      settings: () => navigate("/settings"),
-    };
-    actions[item]?.();
-  };
+  const handleUserItemClick = useUserMenuActions();
+  useRestoreThemePreference();
   return (
     <>
       <Navbar
@@ -21,6 +14,7 @@ function InitiateSetup() {
         userName={auth.user?.fullName}
         userEmail={auth.user?.email}
         onUserItemClick={handleUserItemClick}
+        isInitateSetup={true}
       />
     </>
   );

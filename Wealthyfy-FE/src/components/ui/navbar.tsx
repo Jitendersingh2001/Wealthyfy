@@ -22,6 +22,7 @@ interface UserMenuProps {
   userName?: string;
   userEmail?: string;
   userAvatar?: string;
+  isInitateSetup?: boolean;
   onItemClick?: (item: string) => void;
 }
 
@@ -34,6 +35,7 @@ const UserMenu: React.FC<UserMenuProps> = React.memo(
     userName = "John Doe",
     userEmail = "john@example.com",
     userAvatar,
+    isInitateSetup,
     onItemClick,
   }) => {
     const initials = React.useMemo(
@@ -67,10 +69,16 @@ const UserMenu: React.FC<UserMenuProps> = React.memo(
           </DropdownMenuLabel>
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleItemClick("profile")}>
+          <DropdownMenuItem
+            onClick={handleItemClick("profile")}
+            disabled={isInitateSetup}
+          >
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleItemClick("settings")}>
+          <DropdownMenuItem
+            onClick={handleItemClick("settings")}
+            disabled={isInitateSetup}
+          >
             Settings
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -108,6 +116,7 @@ export interface NavbarProps extends React.HTMLAttributes<HTMLElement> {
   userName?: string;
   userEmail?: string;
   userAvatar?: string;
+  isInitateSetup?: boolean;
   onSignInClick?: () => void;
   onCtaClick?: () => void;
   onUserItemClick?: (item: string) => void;
@@ -125,6 +134,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
       userName = "John Doe",
       userEmail = "john@example.com",
       userAvatar,
+      isInitateSetup = false,
       onSignInClick,
       onCtaClick,
       onUserItemClick,
@@ -185,6 +195,7 @@ export const Navbar = React.forwardRef<HTMLElement, NavbarProps>(
                   userName={userName}
                   userEmail={userEmail}
                   userAvatar={userAvatar}
+                  isInitateSetup={isInitateSetup}
                   onItemClick={onUserItemClick}
                 />
               </>
