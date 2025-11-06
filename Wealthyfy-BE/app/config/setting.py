@@ -6,7 +6,7 @@ class AppSettings(BaseSettings):
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     APP_PORT: int = 8000
-
+    APP_ENCRYPTION_KEY: str
 
 class DatabaseSettings(BaseSettings):
     DB_CONNECTION: str = "postgresql"
