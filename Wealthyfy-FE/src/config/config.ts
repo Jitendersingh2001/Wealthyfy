@@ -5,4 +5,8 @@ export const config = {
     realm: import.meta.env.VITE_KEYCLOAK_REALM,
     clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
   },
+  app: {
+    name: import.meta.env.VITE_APP_NAME,
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+  },
 };

@@ -12,8 +12,8 @@ def authenticate_user(credentials: HTTPAuthorizationCredentials = Depends(securi
     Attaches the lock icon in Swagger and enforces Bearer authentication.
     """
     token = credentials.credentials
-
-    is_valid = KeycloakService.get_authenticate(token)
+    keycloak = KeycloakService()
+    is_valid = keycloak.get_authenticate(token)
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

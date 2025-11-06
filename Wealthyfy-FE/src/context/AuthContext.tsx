@@ -7,7 +7,12 @@ import React, {
 import { keycloakService } from "@/services/keycloak";
 import { toast } from "sonner";
 import Loader from "@/components/ui/loader";
+import { GENERAL_MESSAGES } from "@/constants/messages";
+import { SESSION_KEYS } from "@/constants/sessionKeys";
 
+/* --------------------------------------------------------------------------
+ * Types
+ * -------------------------------------------------------------------------- */
 interface UserProfile {
   firstName: string;
   lastName: string;
@@ -20,39 +25,43 @@ interface UserProfile {
 interface AuthContextType {
   isAuthenticated: boolean;
   user?: UserProfile;
-  token?: string;
-  refreshToken?: string;
   isLoading: boolean;
   login: () => void;
   register: () => void;
   logout: () => void;
-  setTokens: (token?: string, refreshToken?: string) => void;
 }
 
+/* --------------------------------------------------------------------------
+ * Context
+ * -------------------------------------------------------------------------- */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/* --------------------------------------------------------------------------
+ * Provider
+ * -------------------------------------------------------------------------- */
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  /* ------------------------------------------------------------------------
+   * State
+   * ------------------------------------------------------------------------ */
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [authData, setAuthData] = useState<{
-    user?: UserProfile;
-    token?: string;
-    refreshToken?: string;
-  }>({});
+  const [user, setUser] = useState<UserProfile | undefined>(undefined);
   const [showLoginToast, setShowLoginToast] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
 
-  const updateAuthData = (
-    user?: UserProfile,
-    token?: string,
-    refreshToken?: string
-  ) => {
-    setIsAuthenticated(!!user);
-    setAuthData({ user, token, refreshToken });
+  /* ------------------------------------------------------------------------
+   * Helpers
+   * ------------------------------------------------------------------------ */
+  const updateUser = (profile?: UserProfile) => {
+    setIsAuthenticated(!!profile);
+    setUser(profile);
   };
 
+  /* ------------------------------------------------------------------------
+   * Initialize Authentication
+   * ------------------------------------------------------------------------ */
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -61,35 +70,36 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         const kc = keycloakService.getKeycloakInstance();
 
         if (!kc?.authenticated) {
-          updateAuthData();
-          sessionStorage.removeItem("kc_login_toast_shown");
+          updateUser();
+          sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN);
         } else {
           const { given_name, family_name, name, email, email_verified, sub } =
             kc.idTokenParsed || {};
+
           const userProfile: UserProfile = {
             firstName: given_name,
             lastName: family_name,
             fullName: name,
             email,
             emailVerified: email_verified,
-            keyclockUserId: sub ?? ""
+            keyclockUserId: sub ?? "",
           };
 
-          updateAuthData(userProfile, kc.token, kc.refreshToken);
-          if (isRedirect && !sessionStorage.getItem("kc_login_toast_shown")) {
+          updateUser(userProfile);
+
+          if (isRedirect && !sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN)) {
             setShowLoginToast(true);
-            sessionStorage.setItem("kc_login_toast_shown", "true");
+            sessionStorage.setItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN, "true");
           }
         }
 
-        // Set logout toast trigger flag
-        if (sessionStorage.getItem("kc_logout_initiated")) {
+        if (sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY)) {
           setShowLogoutToast(true);
-          sessionStorage.removeItem("kc_logout_initiated");
+          sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY);
         }
       } catch (err) {
         console.error("Failed to initialize Keycloak:", err);
-        updateAuthData();
+        updateUser();
       } finally {
         setIsLoading(false);
       }
@@ -98,36 +108,40 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     initAuth();
   }, []);
 
+  /* ------------------------------------------------------------------------
+   * Toast Notifications
+   * ------------------------------------------------------------------------ */
   useEffect(() => {
     if (!isLoading) {
-      if (showLoginToast && authData.user?.fullName) {
-        toast.success(
-          `Hi ${authData.user.fullName}, you’ve logged in successfully!`
-        );
+      if (showLoginToast && user?.fullName) {
+        toast.success(GENERAL_MESSAGES.LOGIN_SUCCESSFULLY(user.fullName));
       }
-      if (showLogoutToast) toast.success("Logged out successfully");
+      if (showLogoutToast) toast.success(GENERAL_MESSAGES.LOGOUT_SUCCESSFULLY);
     }
-  }, [isLoading, showLoginToast, showLogoutToast, authData.user]);
+  }, [isLoading, showLoginToast, showLogoutToast, user]);
 
+  /* ------------------------------------------------------------------------
+   * Auth Actions
+   * ------------------------------------------------------------------------ */
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
   const logout = () =>
     keycloakService.logout({ redirectUri: window.location.origin });
-  const setTokens = (token?: string, refreshToken?: string) =>
-    setAuthData((prev) => ({ ...prev, token, refreshToken }));
 
+  /* ------------------------------------------------------------------------
+   * Render
+   * ------------------------------------------------------------------------ */
   if (isLoading) return <Loader fullscreen />;
-  console.log(authData);
+
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
         isLoading,
-        ...authData,
+        user,
         login,
         register,
         logout,
-        setTokens,
       }}
     >
       {children}

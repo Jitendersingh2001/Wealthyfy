@@ -5,6 +5,7 @@ import Keycloak, {
   type KeycloakRegisterOptions,
 } from "keycloak-js";
 import { config } from "@/config/config";
+import { SESSION_KEYS } from "@/constants/sessionKeys";
 
 class KeycloakService {
   private keycloak?: Keycloak;
@@ -12,7 +13,6 @@ class KeycloakService {
   private initPromise?: Promise<Keycloak>;
 
   public async init(options?: KeycloakInitOptions): Promise<Keycloak> {
-
     if (this.initialized && this.keycloak) {
       return this.keycloak;
     }
@@ -74,7 +74,7 @@ class KeycloakService {
     if (!this.keycloak) {
       return Promise.reject(new Error("Keycloak not initialized"));
     }
-    sessionStorage.setItem("kc_logout_initiated", "true");
+    sessionStorage.setItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY, "true");
     return this.keycloak.logout(options);
   }
 
@@ -87,12 +87,30 @@ class KeycloakService {
   }
 
   public isLoginRedirect(): boolean {
-     const url = new URL(window.location.href);
-          const fragmentParams = new URLSearchParams(url.hash.substring(1));
-          const code = fragmentParams.get("code");
+    const url = new URL(window.location.href);
+    const fragmentParams = new URLSearchParams(url.hash.substring(1));
+    const code = fragmentParams.get("code");
     const state = fragmentParams.get("state");
-    
-    return (code && state) ? true : false;
+
+    return code && state ? true : false;
+  }
+
+  public async getValidToken(
+    minValidity: number = 60
+  ): Promise<string | undefined> {
+    if (!this.keycloak) return undefined;
+
+    try {
+      // Refresh the token if it will expire soon
+      await this.keycloak.updateToken(minValidity);
+      return this.keycloak.token;
+    } catch (err) {
+      console.warn(
+        "[KeycloakService] Token refresh failed. Redirecting to login.",err
+      );
+      this.logout({ redirectUri: window.location.origin });
+      return undefined;
+    }
   }
 }
 
