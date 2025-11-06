@@ -10,7 +10,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { useUserMenuActions } from "@/hooks/use-user-menu-actions";
-import { useRestoreThemePreference } from "@/hooks/use-restore-theme";
+import { useTheme } from "@/hooks/use-theme";
 
 // Utility function to read sidebar state from cookie
 function getSidebarStateFromCookie(): boolean {
@@ -31,7 +31,7 @@ function getSidebarStateFromCookie(): boolean {
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
-  useRestoreThemePreference();
+  useTheme(true);
   const [sidebarOpen, setSidebarOpen] = useState(() => getSidebarStateFromCookie());
   const handleUserItemClick = useUserMenuActions();
 
