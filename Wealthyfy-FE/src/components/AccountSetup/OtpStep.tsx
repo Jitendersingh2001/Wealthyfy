@@ -66,10 +66,10 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
     <div className="w-full max-w-md mx-auto text-center space-y-6">
       <CardHeader className="space-y-4 pb-2">
         <CardTitle className="text-3xl font-bold tracking-tight">
-          Verify your pan
+          Verify Your Mobile Number
         </CardTitle>
         <CardDescription className="text-base">
-          A 6-digit OTP has been sent to the mobile number linked with your PAN.
+          A 6-digit OTP has been sent to the mobile number.
           Please enter it below to continue.
         </CardDescription>
       </CardHeader>
