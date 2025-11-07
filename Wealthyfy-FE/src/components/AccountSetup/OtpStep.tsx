@@ -75,13 +75,13 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
         <div className="relative w-32 h-32 flex items-center justify-center">
           {/* Animated Background Circles */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute w-24 h-24 rounded-full bg-primary/5 animate-pulse" style={{ animationDelay: '0s' }} />
-            <div className="absolute w-20 h-20 rounded-full bg-primary/10 animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute w-24 h-24 rounded-full bg-primary/15 animate-pulse" style={{ animationDelay: '0s' }} />
+            <div className="absolute w-20 h-20 rounded-full bg-primary/30 animate-pulse" style={{ animationDelay: '0.5s' }} />
           </div>
           
           {/* Phone Icon */}
           <div className="relative z-10">
-            <Smartphone className="w-12 h-12 text-primary/60" />
+            <Smartphone className="w-12 h-12 text-primary/80" />
           </div>
         </div>
       </div>
