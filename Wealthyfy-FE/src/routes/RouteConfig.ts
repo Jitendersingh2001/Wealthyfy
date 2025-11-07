@@ -1,7 +1,7 @@
 import HomePage from "@/pages/Home";
 import DashboardPage from "@/pages/Dashboard";
 import MutualFundsPage from "@/pages/MutualFunds";
-import InitiateSetupPage from "@/pages/InitiateSetup";
+import IInitiateAccountSetupPage from "@/pages/InitiateAccountSetup";
 import { ROUTES } from "./routes";
 
 export interface RouteConfig {
@@ -36,7 +36,7 @@ export const routesConfig: RouteConfig[] = [
   },
   {
     path: ROUTES.INITIATE_SETUP,
-    component: InitiateSetupPage,
+    component: IInitiateAccountSetupPage,
     isProtected: true,
   },
 ];
