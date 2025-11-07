@@ -1,13 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,19 +54,19 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
   /* --------------------------------- UI ----------------------------------- */
   return (
-    <div className="w-full max-w-md mx-auto text-center space-y-6">
+    <div className="w-full space-y-6">
       {/* ---------------------------- Form Header ---------------------------- */}
-      <CardHeader className="space-y-4 pb-2">
-        <CardTitle className="text-3xl font-bold tracking-tight">
-          Enter Your Details
-        </CardTitle>
-        <CardDescription className="text-base">
-          Please provide your PAN and mobile number to continue
-        </CardDescription>
-      </CardHeader>
+      <div className="space-y-4 pb-2">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Your info
+        </h1>
+        <p className="text-base text-muted-foreground">
+          Please provide your PAN and mobile number to continue.
+        </p>
+      </div>
 
       {/* ------------------------------- Form -------------------------------- */}
-      <CardContent className="space-y-4 pt-2">
+      <div className="space-y-4 pt-2">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
           {/* --------------------------- PAN Field ---------------------------- */}
           <div className="space-y-2">
@@ -123,22 +116,22 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
           </div>
 
           {/* -------------------------- Submit Button ------------------------- */}
-          <CardFooter className="pt-4 px-0">
+          <div className="pt-4 flex justify-end">
             <Button
               type="submit"
               size="lg"
               disabled={isSubmitting || !isValid}
-              className="w-full group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              className="group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <span className="relative z-10 flex items-center justify-center gap-2">
-                Continue
+                Next Step
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
               <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </CardContent>
+      </div>
     </div>
   );
 }

@@ -1,13 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   InputOTP,
@@ -63,18 +56,18 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto text-center space-y-6">
-      <CardHeader className="space-y-4 pb-2">
-        <CardTitle className="text-3xl font-bold tracking-tight">
+    <div className="w-full space-y-6">
+      <div className="space-y-4 pb-2">
+        <h1 className="text-3xl font-bold tracking-tight">
           Verify Your Mobile Number
-        </CardTitle>
-        <CardDescription className="text-base">
+        </h1>
+        <p className="text-base text-muted-foreground">
           A 6-digit OTP has been sent to the mobile number.
           Please enter it below to continue.
-        </CardDescription>
-      </CardHeader>
+        </p>
+      </div>
 
-      <CardContent className="space-y-4 pt-2">
+      <div className="space-y-4 pt-2">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <div className="flex justify-center">
@@ -105,7 +98,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
           </div>
 
           <div className="text-sm text-muted-foreground pt-2">
-            Didn’t receive the OTP?{" "}
+            Didn't receive the OTP?{" "}
             <button
               type="button"
               className="text-primary hover:underline font-medium cursor-pointer"
@@ -115,15 +108,15 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
             </button>
           </div>
 
-          <CardFooter className="pt-4 px-0 flex flex-col gap-3">
+          <div className="pt-4 flex justify-between">
             <Button
               type="button"
               variant="outline"
               size="lg"
               onClick={onBack}
-              className="w-full cursor-pointer"
+              className="cursor-pointer"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
 
@@ -131,14 +124,14 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
               type="submit"
               size="lg"
               disabled={isSubmitting || !isValid || otp.length !== 6}
-              className="w-full cursor-pointer"
+              className="cursor-pointer"
             >
-              Continue
-              <ArrowRight className="w-4 h-4" />
+              Next Step
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </CardContent>
+      </div>
     </div>
   );
 }
