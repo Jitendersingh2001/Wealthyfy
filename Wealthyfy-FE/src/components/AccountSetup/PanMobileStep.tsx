@@ -69,7 +69,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full h-full flex flex-col">
       {/* Header */}
       <div className="space-y-2 mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Your info</h1>
@@ -120,7 +120,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
             type="submit"
             size="lg"
             disabled={isSubmitting || !isValid}
-            className="group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] min-w-[140px]"
+            className="group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] min-w-[140px] cursor-pointer"
           >
             <span className="relative z-10 flex items-center gap-2">
               Next Step

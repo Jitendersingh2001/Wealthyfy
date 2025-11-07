@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, Smartphone } from "lucide-react";
 import { REGEX } from "@/constants/regexConstant";
 
 interface OtpStepProps {
@@ -69,19 +69,35 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
   }, [otp, isValid, isSubmitting, handleSubmit, onSubmit]);
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full h-full flex flex-col">
+      {/* Animated Visual Element */}
+      <div className="flex justify-center">
+        <div className="relative w-32 h-32 flex items-center justify-center">
+          {/* Animated Background Circles */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-24 h-24 rounded-full bg-primary/5 animate-pulse" style={{ animationDelay: '0s' }} />
+            <div className="absolute w-20 h-20 rounded-full bg-primary/10 animate-pulse" style={{ animationDelay: '0.5s' }} />
+          </div>
+          
+          {/* Phone Icon */}
+          <div className="relative z-10">
+            <Smartphone className="w-12 h-12 text-primary/60" />
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="space-y-4 pb-2 text-center">
+      <div className="space-y-4 pb-4 text-center">
         <h1 className="text-3xl font-bold">Verify Your Mobile Number</h1>
         <p className="text-base text-muted-foreground">
-          We’ve sent a 6-digit verification code to the mobile number. Enter the code below.
+          We've sent a 6-digit verification code to the mobile number. Enter the code below.
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col space-y-4">
         {/* OTP Input */}
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-2">
           <Controller
             name="otp"
             control={control}
@@ -106,7 +122,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
         )}
 
         {/* Resend Timer */}
-        <div className="text-sm text-muted-foreground text-center pt-2">
+        <div className="text-sm text-muted-foreground text-center">
           {timer > 0 ? (
             <>Resend OTP in <span className="font-semibold">{timer}s</span></>
           ) : (
@@ -121,8 +137,8 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="pt-4 flex justify-between">
-          <Button type="button" variant="outline" size="lg" onClick={onBack}>
+        <div className="pt-4 mt-auto flex justify-between">
+          <Button type="button" variant="outline" size="lg" onClick={onBack} >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
