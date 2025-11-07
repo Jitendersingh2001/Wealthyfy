@@ -10,7 +10,6 @@ import { Card } from "@/components/ui/card";
 import { useBlockBackNavigation } from "@/hooks/use-block-back-navigation";
 import WelcomeStep from "@/components/AccountSetup/WelcomeStep";
 import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
-import OtpStep from "@/components/AccountSetup/OtpStep";
 import StepNavigation from "@/components/AccountSetup/StepNavigation";
 
 /* ------------------------------ Component --------------------------------- */
@@ -28,7 +27,6 @@ function InitiateAccountSetupPage() {
   const steps = [
     <WelcomeStep onNext={() => setCurrentStep(1)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
-    <OtpStep onNext={() => setCurrentStep(3)} onBack={() => setCurrentStep(1)} />,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */
