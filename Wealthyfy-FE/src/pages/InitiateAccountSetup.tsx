@@ -28,13 +28,19 @@ function InitiateAccountSetupPage() {
   const steps = [
     <WelcomeStep onNext={() => setCurrentStep(1)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
-    <OtpStep onNext={() => setCurrentStep(3)} onBack={() => setCurrentStep(1)} />,
+    <OtpStep
+      onNext={() => setCurrentStep(3)}
+      onBack={() => setCurrentStep(1)}
+    />,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */
   const stepConfig = [
-    { number: 1, title: "Your info" },
-    { number: 2, title: "Verification" },
+    { number: 1, title: "Your Info" },
+    { number: 2, title: "Verify" },
+    { number: 3, title: "Link Bank" },
+    { number: 4, title: "Fetch Data" },
+    { number: 5, title: "Finish" },
   ];
 
   const isWelcomeStep = currentStep === 0;
@@ -62,15 +68,16 @@ function InitiateAccountSetupPage() {
         >
           {isWelcomeStep ? (
             /* --------------------------- Welcome Step ----------------------- */
-            <div className="p-2">
-              {steps[0]}
-            </div>
+            <div className="p-2">{steps[0]}</div>
           ) : (
             /* ------------------------- Multi-Step Layout -------------------- */
             <>
               {/* Step Navigation Sidebar */}
               <div className="w-64 min-w-[256px] shrink-0 h-full">
-                <StepNavigation steps={stepConfig} currentStep={currentStep - 1} />
+                <StepNavigation
+                  steps={stepConfig}
+                  currentStep={currentStep - 1}
+                />
               </div>
 
               {/* Active Step Content */}
@@ -80,8 +87,8 @@ function InitiateAccountSetupPage() {
                     <div className="text-center space-y-4">
                       <h1 className="text-3xl font-bold">Setup Complete!</h1>
                       <p className="text-base text-muted-foreground">
-                          Your account setup has been completed successfully.
-                          You will be redirected to the dashboard shortly.
+                        Your account setup has been completed successfully. You
+                        will be redirected to the dashboard shortly.
                       </p>
                     </div>
                   )}
