@@ -128,7 +128,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
           </Button>
 
           <Button type="submit" size="lg" disabled>
-            Next Step (Auto)
+            Next Step
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>

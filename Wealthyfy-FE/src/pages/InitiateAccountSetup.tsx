@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { useBlockBackNavigation } from "@/hooks/use-block-back-navigation";
 import WelcomeStep from "@/components/AccountSetup/WelcomeStep";
 import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
+import OtpStep from "@/components/AccountSetup/OtpStep";
 import StepNavigation from "@/components/AccountSetup/StepNavigation";
 
 /* ------------------------------ Component --------------------------------- */
@@ -27,6 +28,7 @@ function InitiateAccountSetupPage() {
   const steps = [
     <WelcomeStep onNext={() => setCurrentStep(1)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
+    <OtpStep onNext={() => setCurrentStep(3)} onBack={() => setCurrentStep(1)} />,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */
@@ -74,7 +76,15 @@ function InitiateAccountSetupPage() {
               {/* Active Step Content */}
               <div className="border-l border-border flex-1 bg-card p-8 rounded-r-xl overflow-y-auto flex items-center">
                 <div className="w-full max-w-lg">
-                  {steps[currentStep]}
+                  {steps[currentStep] || (
+                    <div className="text-center space-y-4">
+                      <h1 className="text-3xl font-bold">Setup Complete!</h1>
+                      <p className="text-base text-muted-foreground">
+                          Your account setup has been completed successfully.
+                          You will be redirected to the dashboard shortly.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

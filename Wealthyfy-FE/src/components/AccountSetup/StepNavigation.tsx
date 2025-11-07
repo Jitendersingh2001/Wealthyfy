@@ -16,7 +16,9 @@ interface StepNavigationProps {
 function StepNavigation({ steps, currentStep }: StepNavigationProps) {
   /* ---------------------------- Computations ------------------------------ */
   const totalSteps = steps.length - 1;
-  const progressHeight = (currentStep / totalSteps) * 100;
+  const progressHeight = currentStep >= steps.length 
+    ? 100 
+    : (currentStep / totalSteps) * 100;
 
   /* ------------------------ UI Style Helpers ------------------------------ */
   const getCircleClasses = (isActive: boolean, isCompleted: boolean) =>
@@ -68,8 +70,8 @@ function StepNavigation({ steps, currentStep }: StepNavigationProps) {
         {/* Steps List */}
         <div className="space-y-10">
           {steps.map((step, index) => {
-            const isActive = index === currentStep;
-            const isCompleted = index < currentStep;
+            const isActive = index === currentStep && currentStep < steps.length;
+            const isCompleted = index < currentStep || currentStep >= steps.length;
 
             return (
               <div key={step.number} className="flex items-start gap-4 relative group">
