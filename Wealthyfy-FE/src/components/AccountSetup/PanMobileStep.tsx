@@ -69,52 +69,58 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full flex flex-col">
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Your info</h1>
+      <div className="space-y-2 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Your info</h1>
         <p className="text-base text-muted-foreground">
           Please provide your PAN and mobile number to continue.
         </p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-left">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col space-y-6">
         {/* PAN */}
         <div className="space-y-2">
-          <Label htmlFor="pan">PAN Number</Label>
+          <Label htmlFor="pan" className="text-sm font-medium">
+            PAN Number
+          </Label>
           <Input
             id="pan"
             placeholder="ABCDE1234F"
             maxLength={10}
+            className="h-11"
             {...register("pan")}
           />
           {errors.pan && (
-            <p className="text-sm text-destructive">{errors.pan.message}</p>
+            <p className="text-sm text-destructive mt-1">{errors.pan.message}</p>
           )}
         </div>
 
         {/* Mobile */}
         <div className="space-y-2">
-          <Label htmlFor="mobile">Mobile Number</Label>
+          <Label htmlFor="mobile" className="text-sm font-medium">
+            Mobile Number
+          </Label>
           <Input
             id="mobile"
             placeholder="9876543210"
             maxLength={10}
+            className="h-11"
             {...register("mobile")}
           />
           {errors.mobile && (
-            <p className="text-sm text-destructive">{errors.mobile.message}</p>
+            <p className="text-sm text-destructive mt-1">{errors.mobile.message}</p>
           )}
         </div>
 
         {/* Submit */}
-        <div className="pt-4 flex justify-end">
+        <div className="pt-4 mt-auto flex justify-end">
           <Button
             type="submit"
             size="lg"
             disabled={isSubmitting || !isValid}
-            className="group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="group relative overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] min-w-[140px]"
           >
             <span className="relative z-10 flex items-center gap-2">
               Next Step

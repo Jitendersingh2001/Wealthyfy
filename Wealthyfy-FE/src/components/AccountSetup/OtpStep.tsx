@@ -74,7 +74,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
       <div className="space-y-4 pb-2 text-center">
         <h1 className="text-3xl font-bold">Verify Your Mobile Number</h1>
         <p className="text-base text-muted-foreground">
-          Enter the 6-digit code sent to your mobile number.
+          We’ve sent a 6-digit verification code to the mobile number. Enter the code below.
         </p>
       </div>
 

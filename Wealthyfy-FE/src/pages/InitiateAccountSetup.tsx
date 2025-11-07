@@ -81,17 +81,19 @@ function InitiateAccountSetupPage() {
               </div>
 
               {/* Active Step Content */}
-              <div className="border-l border-border flex-1 bg-card p-8 rounded-r-xl overflow-y-auto flex items-center">
-                <div className="w-full max-w-lg">
-                  {steps[currentStep] || (
-                    <div className="text-center space-y-4">
-                      <h1 className="text-3xl font-bold">Setup Complete!</h1>
-                      <p className="text-base text-muted-foreground">
-                        Your account setup has been completed successfully. You
-                        will be redirected to the dashboard shortly.
-                      </p>
-                    </div>
-                  )}
+              <div className="border-l border-border flex-1 bg-card rounded-r-xl overflow-y-auto">
+                <div className="w-full h-full flex items-start justify-center p-8">
+                  <div className="w-full max-w-lg">
+                    {steps[currentStep] || (
+                      <div className="text-center space-y-4">
+                        <h1 className="text-3xl font-bold">Setup Complete!</h1>
+                        <p className="text-base text-muted-foreground">
+                          Your account setup has been completed successfully. You
+                          will be redirected to the dashboard shortly.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </>
