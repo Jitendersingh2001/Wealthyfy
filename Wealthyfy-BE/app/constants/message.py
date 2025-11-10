@@ -13,3 +13,7 @@ class Messages:
     CREATED_SUCCESSFULLY = ":name created successfully."
     FETCH_SUCCESSFULLY = ":name fetch successfully."
     UPDATE_SUCCESSFULLY = ":name update successfully."
+    ALREADY_EXIST = ":name already exist."
+    IS_REQUIRED = ":name is required."
+    IS_VALID = ":name is valid."
+    IS_NOT_VALID= ":name is not valid."

@@ -41,6 +41,8 @@ class BaseService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=Messages.DATABASE_ERROR
             )
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
             self.db.rollback()

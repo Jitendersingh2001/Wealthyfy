@@ -8,6 +8,7 @@ class AppSettings(BaseSettings):
     APP_PORT: int = 8000
     APP_ENCRYPTION_KEY: str
 
+
 class DatabaseSettings(BaseSettings):
     DB_CONNECTION: str = "postgresql"
     DB_DRIVER: str = "psycopg"
@@ -27,11 +28,19 @@ class KeycloakSettings(BaseSettings):
     KEYCLOAK_REALM: str
     KEYCLOAK_CLIENT_ID: str
     KEYCLOAK_CLIENT_SECRET: str
-    
+
+
+class SetuSettings(BaseSettings):
+    SETU_PANCARD_CLIENT_ID: str
+    SETU_PANCARD_CLIENT_SECRET: str
+    SETU_PANCARD_PRODUCT_INSTANCE_ID: str
+    SETU_PANCARD_BASE_URL: str
+
 class Settings(BaseSettings):
     app: AppSettings
     db: DatabaseSettings
     keycloak: KeycloakSettings
+    setu: SetuSettings
 
     class Config:
         env_file = ".env"
