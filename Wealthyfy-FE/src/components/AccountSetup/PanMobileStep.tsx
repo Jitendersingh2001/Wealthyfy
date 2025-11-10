@@ -9,6 +9,11 @@ import { ArrowRight } from "lucide-react";
 import { REGEX } from "@/constants/regexConstant";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { updateFormData } from "@/store/slices/accountSetupSlice";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 /* ---------------------------------- Types ---------------------------------- */
 interface PanMobileStepProps {
@@ -79,21 +84,38 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col space-y-6">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex-1 flex flex-col space-y-6"
+      >
         {/* PAN */}
         <div className="space-y-2">
           <Label htmlFor="pan" className="text-sm font-medium">
             PAN Number
           </Label>
-          <Input
-            id="pan"
-            placeholder="ABCDE1234F"
-            maxLength={10}
-            className="h-11"
-            {...register("pan")}
-          />
+          <div className="flex gap-2">
+            <Input
+              id="pan"
+              placeholder="ABCDE1234F"
+              maxLength={10}
+              className="h-11 flex-1"
+              {...register("pan")}
+            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="button" className="h-11 min-w-[100px]">
+                  Verify
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click here to verify the Pan card</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           {errors.pan && (
-            <p className="text-sm text-destructive mt-1">{errors.pan.message}</p>
+            <p className="text-sm text-destructive mt-1">
+              {errors.pan.message}
+            </p>
           )}
         </div>
 
@@ -110,7 +132,9 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
             {...register("mobile")}
           />
           {errors.mobile && (
-            <p className="text-sm text-destructive mt-1">{errors.mobile.message}</p>
+            <p className="text-sm text-destructive mt-1">
+              {errors.mobile.message}
+            </p>
           )}
         </div>
 
