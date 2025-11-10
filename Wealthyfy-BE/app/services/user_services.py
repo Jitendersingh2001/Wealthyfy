@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from app.services.base_service import BaseService
 from app.constants.constant import CAP_ACTIVE
 from app.models.pancard import Pancard
+from typing import Optional
 
 
 class UserService(BaseService):
@@ -51,7 +52,6 @@ class UserService(BaseService):
             return user
 
         return self.execute_safely(_update)
-    
 
     # -----------------------------------------------------------------------
 
@@ -72,18 +72,51 @@ class UserService(BaseService):
             return user
 
         return self.execute_safely(_get)
-    
-     # -----------------------------------------------------------------------
-    
-    def add_user_pancard(self, user_id:str, pancard:str) -> Pancard:
-        def _create():
-            new_pancard = Pancard(
-                user_id= user_id,
-                pancard= pancard
-            ) 
-            self.db.add(new_pancard)
-            self.commit()
-            self.db.refresh(new_pancard)
-            return new_pancard
 
-        return self.execute_safely(_create)
+    # -----------------------------------------------------------------------
+
+
+    def add_or_update_user_pancard(self, user_id: str, pancard: str, pancard_id: Optional[str]=  None) -> Pancard:
+        def _save():
+            if pancard_id:
+                # Update existing
+                record = self.db.query(Pancard).filter(
+                    Pancard.id == pancard_id
+                ).first()
+
+                if not record:
+                    raise ValueError("Invalid pancard_id")
+
+                record.pancard = pancard
+                self.db.commit()
+                self.db.refresh(record)
+                return record
+
+            # Create new
+            new_record = Pancard(
+                user_id=user_id,
+                pancard=pancard
+            )
+            self.db.add(new_record)
+            self.db.commit()
+            self.db.refresh(new_record)
+            return new_record
+
+        return self.execute_safely(_save)
+
+    # -----------------------------------------------------------------------
+
+    def update_user_phone_no(self, id: str, phone_number: str) -> User:
+        def _update():
+            user = (
+                self.db.query(User)
+                .filter(User.id == id)
+                .first()
+            )
+
+            user.phone_number = phone_number
+            self.commit()
+            self.db.refresh(user)
+            return user
+
+        return self.execute_safely(_update)

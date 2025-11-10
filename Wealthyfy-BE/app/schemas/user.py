@@ -1,11 +1,9 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
-from app.constants.constant import INACTIVE
 from typing import Optional
+from app.constants.constant import INACTIVE
+from app.constants.regex import PHONE_NO_REGEX, PAN_REGEX
 
-
-
-# Request schema (for creating a user)
 class UserCreate(BaseModel):
     keycloak_user_id: str
     first_name: str
@@ -15,7 +13,7 @@ class UserCreate(BaseModel):
     is_setup_complete: bool = False
     status: str = INACTIVE
 
-# Response schema (for returning user info)
+
 class UserResponse(BaseModel):
     id: int
     keycloak_user_id: str
@@ -25,8 +23,20 @@ class UserResponse(BaseModel):
     created_at: datetime
     email_verified: bool
     is_setup_complete: bool
-    status : str
+    status: str
     phone_number: Optional[str] = None
 
     class Config:
-        from_attributes = True  # Enable ORM mode
+        from_attributes = True
+
+class CreateUserPanAndPhoneRequest(BaseModel):
+    phone_number: str = Field(
+        ...,
+        pattern=PHONE_NO_REGEX,
+        description="Valid 10-digit mobile number"
+    )
+    pancard: str = Field(
+        ...,
+        pattern=PAN_REGEX,
+        description="Valid PAN card number (ABCDE1234F format)"
+    )

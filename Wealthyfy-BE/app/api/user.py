@@ -2,8 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
-from app.schemas.user import UserResponse
-from app.schemas.pancard import PancardRequest,PancardResponse
+from app.schemas.user import UserResponse, CreateUserPanAndPhoneRequest
 from app.schemas.response import ApiResponse
 from app.utils.response import success_response
 from app.services.user_services import UserService
@@ -33,27 +32,29 @@ def get_user_by_id(
         message=Messages.FETCH_SUCCESSFULLY.replace(":name", "User")
     )
 
-
 @router.post(
-    "/pancard",
-    response_model=ApiResponse[PancardResponse],
-    dependencies=[Depends(authenticate_user)]
+    "/create_pan_and_phone_no",
+    response_model=ApiResponse
 )
-def add_user_pancard(
-    payload: PancardRequest,
+def update_pan_and_phone_no(
+    payload:CreateUserPanAndPhoneRequest,
     db: Session = Depends(get_db),
     current_user=Depends(authenticate_user)
 ):
-    """
-    Add or update the PAN card of the current user.
-    Requires a valid Keycloak Bearer token.
-    """
     user_service = UserService(db)
-    result = user_service.add_user_pancard(
+
+    pancard = user_service.add_or_update_user_pancard(
         user_id=current_user.id,
         pancard=payload.pancard
     )
+
+    phone_number = user_service.update_user_phone_no(
+        id=current_user.id,
+        phone_number=payload.phone_number
+    )
+
+    result = bool(pancard) and bool(phone_number)
     return success_response(
         data=result,
-        message=Messages.CREATED_SUCCESSFULLY.replace(":name", "PAN card")
+        message=Messages.CREATED_SUCCESSFULLY.replace(":name", "Phone No and Pan card")
     )

@@ -8,3 +8,6 @@ class ApiResponse(BaseModel, Generic[T]):
     success: bool = True
     data: Optional[T] = None
     message: Optional[str] = None
+
+    class Config:
+        from_attributes = True

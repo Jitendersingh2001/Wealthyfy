@@ -12,3 +12,4 @@ class Messages:
     USER_NOT_FOUND = "User not found."
     CREATED_SUCCESSFULLY = ":name created successfully."
     FETCH_SUCCESSFULLY = ":name fetch successfully."
+    UPDATE_SUCCESSFULLY = ":name update successfully."
