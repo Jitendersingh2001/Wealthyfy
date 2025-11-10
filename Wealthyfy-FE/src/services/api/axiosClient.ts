@@ -22,7 +22,7 @@ axiosClient.interceptors.request.use(async (req) => {
 
 // Normalize errors
 axiosClient.interceptors.response.use(
-  (res) => res,
+  (res) => res.data,
   (error: AxiosError) => {
     const status = error.response?.status;
 

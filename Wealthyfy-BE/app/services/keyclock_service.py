@@ -155,7 +155,7 @@ class KeycloakService:
                     detail=Messages.INVALID_TOKEN,
                 )
 
-            return True
+            return token_info
 
         except HTTPException:
             raise

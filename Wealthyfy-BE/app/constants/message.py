@@ -1,5 +1,4 @@
 class Messages:
-    CREATED = "User created successfully."
     EXISTS = "A user with this email already exists."
     INVALID_CREDENTIALS = "Invalid email or password."
     UNAUTHORIZED = "You are not authorized to perform this action."
@@ -11,3 +10,5 @@ class Messages:
     TOKEN_EXPIRED = "Token has expired. Please log in again."
     SOMETHING_WENT_WRONG = "Something went wrong. Please try again later."
     USER_NOT_FOUND = "User not found."
+    CREATED_SUCCESSFULLY = ":name created successfully."
+    FETCH_SUCCESSFULLY = ":name fetch successfully."

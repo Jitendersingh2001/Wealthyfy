@@ -4,6 +4,7 @@ from app.constants.message import Messages
 from fastapi import HTTPException, status
 from app.services.base_service import BaseService
 from app.constants.constant import CAP_ACTIVE
+from app.models.pancard import Pancard
 
 
 class UserService(BaseService):
@@ -73,3 +74,16 @@ class UserService(BaseService):
         return self.execute_safely(_get)
     
      # -----------------------------------------------------------------------
+    
+    def add_user_pancard(self, user_id:str, pancard:str) -> Pancard:
+        def _create():
+            new_pancard = Pancard(
+                user_id= user_id,
+                pancard= pancard
+            ) 
+            self.db.add(new_pancard)
+            self.commit()
+            self.db.refresh(new_pancard)
+            return new_pancard
+
+        return self.execute_safely(_create)
