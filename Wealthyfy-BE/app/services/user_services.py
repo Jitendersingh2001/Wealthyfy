@@ -9,11 +9,18 @@ from typing import Optional
 
 
 class UserService(BaseService):
+    """
+    Service class responsible for handling user profile related operations.
+    Uses BaseService for safe DB execution and transaction handling.
+    """
 
-    """Handles user-related operations."""
-
-    # -----------------------------------------------------------------------
+    # ======================================================================
+    # Create User
+    # ======================================================================
     def create_user(self, user: UserCreate) -> User:
+        """
+        Creates a new user record.
+        """
         def _create():
             new_user = User(
                 keycloak_user_id=user.keycloak_user_id,
@@ -29,9 +36,13 @@ class UserService(BaseService):
 
         return self.execute_safely(_create)
 
-    # -----------------------------------------------------------------------
-
+    # ======================================================================
+    # Update User Status (After email verification)
+    # ======================================================================
     def update_user_status(self, payload: dict) -> User:
+        """
+        Marks user status as active and email as verified.
+        """
         def _update():
             user = (
                 self.db.query(User)
@@ -53,9 +64,13 @@ class UserService(BaseService):
 
         return self.execute_safely(_update)
 
-    # -----------------------------------------------------------------------
-
+    # ======================================================================
+    # Fetch User by ID
+    # ======================================================================
     def get_user_by_id(self, id: str) -> User:
+        """
+        Returns user details based on Keycloak user ID.
+        """
         def _get():
             user = (
                 self.db.query(User)
@@ -73,13 +88,17 @@ class UserService(BaseService):
 
         return self.execute_safely(_get)
 
-    # -----------------------------------------------------------------------
-
-
-    def add_or_update_user_pancard(self, user_id: str, pancard: str, pancard_id: Optional[str]=  None) -> Pancard:
+    # ======================================================================
+    # Create or Update User Pancard
+    # ======================================================================
+    def add_or_update_user_pancard(self, user_id: str, pancard: str, pancard_id: Optional[str] = None) -> Pancard:
+        """
+        Creates a new PAN record if `pancard_id` is not provided,
+        otherwise updates the existing PAN record.
+        """
         def _save():
             if pancard_id:
-                # Update existing
+                # Update existing pancard record
                 record = self.db.query(Pancard).filter(
                     Pancard.id == pancard_id
                 ).first()
@@ -92,7 +111,7 @@ class UserService(BaseService):
                 self.db.refresh(record)
                 return record
 
-            # Create new
+            # Insert a new pancard record
             new_record = Pancard(
                 user_id=user_id,
                 pancard=pancard
@@ -104,9 +123,13 @@ class UserService(BaseService):
 
         return self.execute_safely(_save)
 
-    # -----------------------------------------------------------------------
-
+    # ======================================================================
+    # Update User Phone Number
+    # ======================================================================
     def update_user_phone_no(self, id: str, phone_number: str) -> User:
+        """
+        Updates the phone number of the user.
+        """
         def _update():
             user = (
                 self.db.query(User)
