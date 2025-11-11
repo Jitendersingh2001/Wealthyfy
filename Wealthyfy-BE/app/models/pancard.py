@@ -13,6 +13,10 @@ class PancardStatus(Enum):
     VERIFIED = constant.VERIFIED
     NOTVERIFIED = constant.NOTVERIFIED
 
+class ConsentEnum(str, Enum):
+    YES = "Y"
+    NO = "N"
+
 
 def _hash_pan(value: str) -> str:
     """Return deterministic SHA-256 hash of PAN."""
@@ -42,6 +46,13 @@ class Pancard(Base):
         SqlEnum(PancardStatus),
         default=PancardStatus.VERIFIED,
         nullable=False
+    )
+
+    consent = Column(
+        SqlEnum(ConsentEnum, name="consent_enum"),
+        default=ConsentEnum.NO,
+        nullable=False,
+        index=True
     )
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

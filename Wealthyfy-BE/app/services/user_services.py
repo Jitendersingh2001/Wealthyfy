@@ -91,7 +91,7 @@ class UserService(BaseService):
     # ======================================================================
     # Create or Update User Pancard
     # ======================================================================
-    def add_or_update_user_pancard(self, user_id: str, pancard: str, pancard_id: Optional[str] = None) -> Pancard:
+    def add_or_update_user_pancard(self, user_id: str, pancard: str, consent:str, pancard_id: Optional[str] = None) -> Pancard:
         """
         Creates a new PAN record if `pancard_id` is not provided,
         otherwise updates the existing PAN record.
@@ -107,6 +107,7 @@ class UserService(BaseService):
                     raise ValueError("Invalid pancard_id")
 
                 record.pancard = pancard
+                record.consent = consent
                 self.db.commit()
                 self.db.refresh(record)
                 return record
@@ -114,7 +115,8 @@ class UserService(BaseService):
             # Insert a new pancard record
             new_record = Pancard(
                 user_id=user_id,
-                pancard=pancard
+                pancard=pancard,
+                consent=consent
             )
             self.db.add(new_record)
             self.db.commit()
@@ -143,3 +145,15 @@ class UserService(BaseService):
             return user
 
         return self.execute_safely(_update)
+
+    # ======================================================================
+    # Get User Pan Card
+    # ======================================================================
+    def get_pancard(self,id:str) -> Pancard:
+        def _get():
+            return (
+                self.db.query(Pancard).
+                filter(Pancard.user_id == id)
+                .first()
+            )
+        return self.execute_safely(_get)

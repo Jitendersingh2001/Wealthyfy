@@ -47,6 +47,16 @@ class CreateUserPanAndPhoneRequest(BaseModel):
         description="Valid PAN card number (ABCDE1234F format)",
         examples=["ABCDE1234F"]
     )
+    consent: str = Field(
+        ...,
+        description="User consent to verify PAN card (Y/N)",
+        examples=["Y"]
+    )
+    pancard_id: Optional[str] = Field(
+        default=None,
+        description="Pan card id for updtae",
+        examples=["1"]
+    )
 
     @field_validator("phone_number")
     def validate_phone(cls, value):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends,Response
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.schemas.user import UserResponse, CreateUserPanAndPhoneRequest
@@ -7,8 +7,8 @@ from app.utils.response import success_response, error_response
 from app.services.user_services import UserService
 from app.dependencies.auth import authenticate_user
 from app.constants.message import Messages
-from app.schemas.pancard import VerifyPancardRequest, ConsentEnum
-from app.models.pancard import Pancard
+from app.schemas.pancard import VerifyPancardRequest,PanCardResponse
+from app.models.pancard import Pancard, ConsentEnum
 from app.services.setu_service import SetuService
 
 # ---------------------------------------------------------------------------
@@ -65,7 +65,9 @@ def update_pan_and_phone_no(
 
     pancard = user_service.add_or_update_user_pancard(
         user_id=current_user.id,
-        pancard=payload.pancard
+        pancard=payload.pancard,
+        consent = payload.consent,
+        pancard_id= payload.pancard_id
     )
 
     phone_number = user_service.update_user_phone_no(
@@ -125,4 +127,36 @@ def verify_user_pancard(
     # PAN is valid
     return success_response(
         data=Messages.IS_VALID.replace(":name", "Pan card")
+    )
+
+# ===========================================================================
+# get user PAN Card
+# ===========================================================================
+@router.get(
+    "/pancard",
+    response_model=ApiResponse[PanCardResponse],
+    responses={
+        204: {"description": "No PAN card found"},
+    }
+)
+@router.get(
+    "/pancard",
+    response_model=ApiResponse[PanCardResponse],
+    responses={
+        204: {"description": "No PAN card found"},
+    }
+)
+def get_pancard(
+    db: Session = Depends(get_db),
+    current_user=Depends(authenticate_user),
+):
+    user_service = UserService(db)
+    pancard = user_service.get_pancard(current_user.id)
+
+    if pancard is None:
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    return success_response(
+        data=PanCardResponse.model_validate(pancard),
+        message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Pan card"),
     )

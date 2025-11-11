@@ -20,6 +20,36 @@ class UserService {
     const url = ENDPOINTS.USER.VERIFY_PANCARD;
     return apiRequest.post<T>(url, { pancard, consent });
   }
+
+  /**
+   * Create or update PAN card and phone number
+   * @param phoneNumber - 10-digit mobile number
+   * @param pancard - PAN card number
+   * @param consent - User consent (Y/N)
+   * @param pancardId - Optional PAN card ID for update
+   */
+  async createPanAndPhoneNo<T = unknown>(
+    phoneNumber: string,
+    pancard: string,
+    consent: string,
+    pancardId?: string
+  ): Promise<T> {
+    const url = ENDPOINTS.USER.CREATE_PAN_AND_PHONE_NO;
+    return apiRequest.post<T>(url, {
+      phone_number: phoneNumber,
+      pancard,
+      consent,
+      pancard_id: pancardId,
+    });
+  }
+
+  /**
+   * Get user's PAN card details
+   */
+  async getPancard<T = unknown>(): Promise<T> {
+    const url = ENDPOINTS.USER.GET_PANCARD;
+    return apiRequest.get<T>(url);
+  }
 }
 
 export const userService = new UserService();

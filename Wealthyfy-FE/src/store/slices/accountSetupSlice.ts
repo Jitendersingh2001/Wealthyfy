@@ -4,6 +4,9 @@ import { createSlice } from "@reduxjs/toolkit";
 interface AccountSetupFormData {
   pan: string;
   mobile: string;
+  panVerify: boolean;
+  consent: string;
+  pancardId?: number | string;
 }
 
 interface AccountSetupState {
@@ -15,6 +18,8 @@ const initialState: AccountSetupState = {
   formData: {
     pan: "",
     mobile: "",
+    panVerify: false,
+    consent: "",
   },
 };
 
@@ -29,6 +34,12 @@ const accountSetupSlice = createSlice({
     updateMobile: (state, action: { payload: string }) => {
       state.formData.mobile = action.payload;
     },
+    updatePanVerify: (state, action: { payload: boolean }) => {
+      state.formData.panVerify = action.payload;
+    },
+    updateConsent: (state, action: { payload: string }) => {
+      state.formData.consent = action.payload;
+    },
     updateFormData: (state, action: { payload: Partial<AccountSetupFormData> }) => {
       state.formData = { ...state.formData, ...action.payload };
     },
@@ -36,12 +47,15 @@ const accountSetupSlice = createSlice({
       state.formData = {
         pan: "",
         mobile: "",
+        panVerify: false,
+        consent: "",
+        pancardId: undefined,
       };
     },
   },
 });
 
-export const { updatePan, updateMobile, updateFormData, clearFormData } =
+export const { updatePan, updateMobile, updatePanVerify, updateConsent, updateFormData, clearFormData } =
   accountSetupSlice.actions;
 
 export default accountSetupSlice.reducer;
