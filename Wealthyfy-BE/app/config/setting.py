@@ -1,6 +1,10 @@
 from pydantic_settings import BaseSettings
 from urllib.parse import quote_plus
 
+
+# ---------------------------------------------------------
+# App Configuration
+# ---------------------------------------------------------
 class AppSettings(BaseSettings):
     APP_NAME: str
     APP_ENV: str = "development"
@@ -9,6 +13,9 @@ class AppSettings(BaseSettings):
     APP_ENCRYPTION_KEY: str
 
 
+# ---------------------------------------------------------
+# Database Configuration
+# ---------------------------------------------------------
 class DatabaseSettings(BaseSettings):
     DB_CONNECTION: str = "postgresql"
     DB_DRIVER: str = "psycopg"
@@ -21,8 +28,15 @@ class DatabaseSettings(BaseSettings):
     @property
     def DB_DATABASE_URL(self) -> str:
         password = quote_plus(self.DB_PASSWORD)
-        return f"{self.DB_CONNECTION}+{self.DB_DRIVER}://{self.DB_USERNAME}:{password}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
+        return (
+            f"{self.DB_CONNECTION}+{self.DB_DRIVER}://{self.DB_USERNAME}:{password}"
+            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
+        )
 
+
+# ---------------------------------------------------------
+# Keycloak Configuration
+# ---------------------------------------------------------
 class KeycloakSettings(BaseSettings):
     KEYCLOAK_URL: str
     KEYCLOAK_REALM: str
@@ -30,17 +44,34 @@ class KeycloakSettings(BaseSettings):
     KEYCLOAK_CLIENT_SECRET: str
 
 
+# ---------------------------------------------------------
+# Setu Configuration
+# ---------------------------------------------------------
 class SetuSettings(BaseSettings):
     SETU_PANCARD_CLIENT_ID: str
     SETU_PANCARD_CLIENT_SECRET: str
     SETU_PANCARD_PRODUCT_INSTANCE_ID: str
     SETU_PANCARD_BASE_URL: str
 
+
+# ---------------------------------------------------------
+# Twilio Configuration
+# ---------------------------------------------------------
+class TwilloSettings(BaseSettings):
+    TWILIO_ACCOUNT_SID: str
+    TWILIO_AUTH_TOKEN: str
+    TWILIO_VERIFICATION_SERVICE_SID: str
+
+
+# ---------------------------------------------------------
+# Root Configuration
+# ---------------------------------------------------------
 class Settings(BaseSettings):
     app: AppSettings
     db: DatabaseSettings
     keycloak: KeycloakSettings
     setu: SetuSettings
+    twillo: TwilloSettings
 
     class Config:
         env_file = ".env"
@@ -48,4 +79,5 @@ class Settings(BaseSettings):
         env_nested_delimiter = "__"
 
 
+# Instantiate once and import wherever needed
 settings = Settings()

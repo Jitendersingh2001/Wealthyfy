@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends,Response
+from fastapi import APIRouter, status, Depends, Response
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.schemas.user import UserResponse, CreateUserPanAndPhoneRequest
@@ -7,9 +7,11 @@ from app.utils.response import success_response, error_response
 from app.services.user_services import UserService
 from app.dependencies.auth import authenticate_user
 from app.constants.message import Messages
-from app.schemas.pancard import VerifyPancardRequest,PanCardResponse
+from app.schemas.pancard import VerifyPancardRequest, PanCardResponse
 from app.models.pancard import Pancard, ConsentEnum
 from app.services.setu_service import SetuService
+from app.services.twillo_service import TwilioService
+from app.schemas.otp import SendOtpRequest, VerifyOtpRequest
 
 # ---------------------------------------------------------------------------
 # Router Configuration
@@ -66,8 +68,8 @@ def update_pan_and_phone_no(
     pancard = user_service.add_or_update_user_pancard(
         user_id=current_user.id,
         pancard=payload.pancard,
-        consent = payload.consent,
-        pancard_id= payload.pancard_id
+        consent=payload.consent,
+        pancard_id=payload.pancard_id
     )
 
     phone_number = user_service.update_user_phone_no(
@@ -79,7 +81,8 @@ def update_pan_and_phone_no(
 
     return success_response(
         data=result,
-        message=Messages.CREATED_SUCCESSFULLY.replace(":name", "Phone No and Pan card")
+        message=Messages.CREATED_SUCCESSFULLY.replace(
+            ":name", "Phone No and Pan card")
     )
 
 
@@ -132,13 +135,8 @@ def verify_user_pancard(
 # ===========================================================================
 # get user PAN Card
 # ===========================================================================
-@router.get(
-    "/pancard",
-    response_model=ApiResponse[PanCardResponse],
-    responses={
-        204: {"description": "No PAN card found"},
-    }
-)
+
+
 @router.get(
     "/pancard",
     response_model=ApiResponse[PanCardResponse],
@@ -159,4 +157,53 @@ def get_pancard(
     return success_response(
         data=PanCardResponse.model_validate(pancard),
         message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Pan card"),
+    )
+
+# ===========================================================================
+# SEND OTP TO USER'S PHONE NUMBER
+# ===========================================================================
+
+
+@router.post(
+    "/send-otp",
+    response_model=ApiResponse,
+    dependencies=[Depends(authenticate_user)]
+)
+def send_otp(payload: SendOtpRequest):
+    """
+    Sends an OTP to the specified phone number using Twilio Verify service.
+    """
+    twillo_service = TwilioService()
+    result = twillo_service.send_otp(phone_number=payload.phone_number)
+
+    return success_response(
+        data=result,
+        message=Messages.SENT_SUCCESSFULLY.replace(":name", "OTP"),
+    )
+
+# ===========================================================================
+# VERIFY OTP
+# ===========================================================================
+
+
+@router.post(
+    "/verify-otp",
+    response_model=ApiResponse,
+    dependencies=[Depends(authenticate_user)]
+)
+def verify_otp(payload= VerifyOtpRequest):
+    """
+    Verifies the OTP received on the user's phone using Twilio Verify API.
+    """
+    twillo_service = TwilioService()
+    result = twillo_service.verify_otp(payload.phone_number, payload.otp)
+
+    if result is True:
+        return success_response(
+            data=result,
+            message=Messages.VERIFIED_SUCCESSFULLY.replace(":name", "OTP"),
+        )
+
+    return error_response(
+        message=Messages.INVALID_OR_EXPIRED_OTP
     )

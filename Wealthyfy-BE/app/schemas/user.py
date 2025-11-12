@@ -1,13 +1,9 @@
-import re
 from datetime import datetime
 from typing import Optional
-from enum import Enum
-
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from pydantic_core import PydanticCustomError
-
+from pydantic import BaseModel, EmailStr, Field
 from app.constants.constant import INACTIVE
-from app.constants.regex import PHONE_NO_REGEX, PAN_REGEX
+from app.types.phone import PhoneNumber
+from app.types.pan import PanCard
 
 
 class UserCreate(BaseModel):
@@ -37,41 +33,25 @@ class UserResponse(BaseModel):
 
 
 class CreateUserPanAndPhoneRequest(BaseModel):
-    phone_number: str = Field(
+    """Schema for verifying PAN and phone number during user onboarding."""
+
+    phone_number: PhoneNumber = Field(
         ...,
-        description="Valid 10-digit mobile number",
-        examples=["9876543210"] 
+        description="Valid 10-digit Indian mobile number",
+        examples=["9876543210"]
     )
-    pancard: str = Field(
+    pancard: PanCard = Field(
         ...,
-        description="Valid PAN card number (ABCDE1234F format)",
+        description="Valid Indian PAN in the format: 5 letters, 4 digits, 1 letter).",
         examples=["ABCDE1234F"]
     )
     consent: str = Field(
         ...,
-        description="User consent to verify PAN card (Y/N)",
+        description="User consent for PAN verification. Must be 'Y' (Yes) or 'N' (No).",
         examples=["Y"]
     )
     pancard_id: Optional[str] = Field(
         default=None,
-        description="Pan card id for updtae",
-        examples=["1"]
+        description="Unique identifier for an existing PAN card record (used during updates).",
+        examples=["123"]
     )
-
-    @field_validator("phone_number")
-    def validate_phone(cls, value):
-        if not re.match(PHONE_NO_REGEX, value):
-            raise PydanticCustomError(
-                "invalid_phone_number",
-                "Invalid phone number format. Must be a 10-digit Indian mobile number."
-            )
-        return value
-
-    @field_validator("pancard")
-    def validate_pan(cls, value):
-        if not re.match(PAN_REGEX, value):
-            raise PydanticCustomError(
-                "invalid_pan",
-                "Invalid PAN card format. Expected: ABCDE1234F"
-            )
-        return value

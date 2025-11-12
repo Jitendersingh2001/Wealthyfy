@@ -17,3 +17,6 @@ class Messages:
     IS_REQUIRED = ":name is required."
     IS_VALID = ":name is valid."
     IS_NOT_VALID= ":name is not valid."
+    SENT_SUCCESSFULLY= ":name sent successfully."
+    VERIFIED_SUCCESSFULLY=":name verifed successfully."
+    INVALID_OR_EXPIRED_OTP="Invalid or expired OTP"

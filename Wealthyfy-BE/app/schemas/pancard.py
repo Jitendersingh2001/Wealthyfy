@@ -1,27 +1,27 @@
-import re
-from enum import Enum
 from pydantic import BaseModel, Field, field_validator
-from pydantic_core import PydanticCustomError
-from app.constants.regex import PAN_REGEX
 from app.models.pancard import PancardStatus, ConsentEnum
+from app.types.pan import PanCard
+
 
 class VerifyPancardRequest(BaseModel):
-    pancard: str = Field(..., description="Valid PAN (ABCDE1234F)", examples=[
-                         "ABCDE1234F"])
-    consent: ConsentEnum = Field(..., description="Consent Y/N")
+    """Schema for verifying a user's PAN card with consent."""
 
-    @field_validator("pancard")
-    def validate_pan(cls, value):
-        if not re.match(PAN_REGEX, value):
-            raise PydanticCustomError(
-                "invalid_pan",
-                "Invalid PAN card format."
-            )
-        return value
+    pancard: PanCard = Field(
+        ...,
+        description="Valid Indian PAN number. Format: 5 letters, 4 digits, 1 letter.",
+        examples=["ABCDE1234F"]
+    )
+    consent: ConsentEnum = Field(
+        ...,
+        description="User consent for PAN verification. Allowed values: 'Y' or 'N'.",
+        examples=["Y"]
+    )
 
     @field_validator("consent", mode="before")
     def normalize_consent(cls, value):
+        """Normalize consent input (Y/N) to uppercase before validation."""
         return value.upper() if isinstance(value, str) else value
+
 
 class PanCardResponse(BaseModel):
     id: int
