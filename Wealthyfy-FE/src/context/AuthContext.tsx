@@ -93,8 +93,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
         if (kc?.authenticated && userId) {
           try {
-            const data = await userService.getUserById<UserApiResponse>(userId);
-            const mappedUser = mapUserResponse(data);
+            const response = await userService.getUserById<{ data: UserApiResponse; message: string | null }>(userId);
+            const mappedUser = mapUserResponse(response.data);
 
             updateUserState(mappedUser);
 

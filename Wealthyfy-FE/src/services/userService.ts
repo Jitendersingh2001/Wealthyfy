@@ -50,6 +50,25 @@ class UserService {
     const url = ENDPOINTS.USER.GET_PANCARD;
     return apiRequest.get<T>(url);
   }
+
+  /**
+   * Send OTP to the specified phone number
+   * @param phoneNumber - 10-digit mobile number
+   */
+  async sendOtp<T = unknown>(phoneNumber: string): Promise<T> {
+    const url = ENDPOINTS.USER.SEND_OTP;
+    return apiRequest.post<T>(url, { phone_number: phoneNumber });
+  }
+
+  /**
+   * Verify OTP for the specified phone number
+   * @param phoneNumber - 10-digit mobile number
+   * @param otp - 6-digit OTP code
+   */
+  async verifyOtp<T = unknown>(phoneNumber: string, otp: string): Promise<T> {
+    const url = ENDPOINTS.USER.VERIFY_OTP;
+    return apiRequest.post<T>(url, { phone_number: phoneNumber, otp });
+  }
 }
 
 export const userService = new UserService();

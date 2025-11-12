@@ -1,11 +1,9 @@
-// src/services/api/axiosClient.ts
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, type AxiosResponse } from "axios";
 import { config } from "@/config/config";
 import { keycloakService } from "@/services/keycloak";
 import { StatusCodes } from "http-status-codes";
 import { toast } from "sonner";
 import { ERROR_MESSAGES } from "@/constants/messages";
-
 
 const axiosClient = axios.create({
   baseURL: config.app.apiBaseUrl,
@@ -13,16 +11,20 @@ const axiosClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach token before every request
 axiosClient.interceptors.request.use(async (req) => {
   const token = await keycloakService.getValidToken();
   if (token) req.headers.Authorization = `Bearer ${token}`;
   return req;
 });
 
-// Normalize errors
 axiosClient.interceptors.response.use(
-  (res) => res.data,
+  (res: AxiosResponse) => {
+    res.data = {
+      data: res.data?.data ?? res.data,
+      message: res.data?.message ?? null,
+    };
+    return res;
+  },
   (error: AxiosError) => {
     const status = error.response?.status;
 

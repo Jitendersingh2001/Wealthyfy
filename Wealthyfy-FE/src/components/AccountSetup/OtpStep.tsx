@@ -1,11 +1,14 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ArrowRight, ArrowLeft, Smartphone } from "lucide-react";
 import { REGEX } from "@/constants/regexConstant";
+import { useAppSelector } from "@/store/hooks";
+import { userService } from "@/services/userService";
+import { toast } from "sonner";
 
 interface OtpStepProps {
   onNext: () => void;
@@ -23,10 +26,14 @@ const otpSchema = z.object({
 type OtpFormData = z.infer<typeof otpSchema>;
 
 function OtpStep({ onNext, onBack }: OtpStepProps) {
+  const phoneNumber = useAppSelector((state) => state.accountSetup.formData.mobile);
+  const hasSentOtpRef = useRef(false);
+
   const {
     control,
     handleSubmit,
     watch,
+    reset,
     formState: { errors, isSubmitting, isValid },
   } = useForm<OtpFormData>({
     resolver: zodResolver(otpSchema),
@@ -38,6 +45,8 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
 
   /* ------------------------- Resend Timer ------------------------- */
   const [timer, setTimer] = useState(30);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   useEffect(() => {
     if (timer <= 0) return;
@@ -45,28 +54,83 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const handleResend = useCallback(() => {
-    console.log("✅ OTP Resent");
-    // TODO: Call your resend OTP API here
-    setTimer(30); // Reset timer
-  }, []);
+  /* ------------------------- Send OTP on Mount ------------------------- */
+  useEffect(() => {
+    const sendOtpOnMount = async () => {
+      if (!phoneNumber || hasSentOtpRef.current) return;
+
+      hasSentOtpRef.current = true;
+      setIsSendingOtp(true);
+
+      try {
+        const response = await userService.sendOtp<{ data: unknown; message: string | null }>(phoneNumber);
+        const message = response?.message || "OTP sent successfully";
+        toast.success(message);
+        setTimer(30); // Start the timer
+      } catch (error) {
+        const msg =
+          (error as { data?: { message?: string } })?.data?.message ||
+          "Failed to send OTP";
+        toast.error(msg);
+        hasSentOtpRef.current = false; // Allow retry on error
+      } finally {
+        setIsSendingOtp(false);
+      }
+    };
+
+    sendOtpOnMount();
+  }, [phoneNumber]);
+
+  const handleResend = useCallback(async () => {
+    if (!phoneNumber || isSendingOtp) return;
+
+    setIsSendingOtp(true);
+    try {
+      const response = await userService.sendOtp<{ data: unknown; message: string | null }>(phoneNumber);
+      const message = response?.message || "OTP resent successfully";
+      toast.success(message);
+      setTimer(30);
+    } catch (error) {
+      const msg =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to resend OTP";
+      toast.error(msg);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  }, [phoneNumber, isSendingOtp]);
 
   /* -------------------------- Submit --------------------------- */
   const onSubmit = useCallback(
-    (data: OtpFormData) => {
-      console.log(data);
-      // TODO: Handle OTP verification here
-      onNext();
+    async (data: OtpFormData) => {
+      if (!phoneNumber || isVerifyingOtp) return;
+
+      setIsVerifyingOtp(true);
+      try {
+        const response = await userService.verifyOtp<{ data: unknown; message: string | null }>(phoneNumber, data.otp);
+        const message = response?.message || "OTP verified successfully";
+        toast.success(message);
+        onNext();
+      } catch (error) {
+        const msg =
+          (error as { data?: { message?: string } })?.data?.message ||
+          "Invalid or expired OTP";
+        toast.error(msg);
+        // Clear the OTP input on error
+        reset({ otp: "" });
+      } finally {
+        setIsVerifyingOtp(false);
+      }
     },
-    [onNext]
+    [phoneNumber, isVerifyingOtp, onNext, reset]
   );
 
   /* ----------------------- Auto Submit -------------------------- */
   useEffect(() => {
-    if (otp && otp.length === 6 && isValid && !isSubmitting) {
+    if (otp && otp.length === 6 && isValid && !isSubmitting && !isVerifyingOtp) {
       handleSubmit(onSubmit)();
     }
-  }, [otp, isValid, isSubmitting, handleSubmit, onSubmit]);
+  }, [otp, isValid, isSubmitting, isVerifyingOtp, handleSubmit, onSubmit]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -90,7 +154,9 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
       <div className="space-y-4 pb-4 text-center">
         <h1 className="text-3xl font-bold">Verify Your Mobile Number</h1>
         <p className="text-base text-muted-foreground">
-          We've sent a 6-digit verification code to the mobile number. Enter the code below.
+          {isSendingOtp
+            ? "Sending verification code..."
+            : "We've sent a 6-digit verification code to the mobile number. Enter the code below."}
         </p>
       </div>
 
@@ -123,13 +189,16 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
 
         {/* Resend Timer */}
         <div className="text-sm text-muted-foreground text-center">
-          {timer > 0 ? (
+          {isSendingOtp ? (
+            <span>Sending OTP...</span>
+          ) : timer > 0 ? (
             <>Resend OTP in <span className="font-semibold">{timer}s</span></>
           ) : (
             <button
               type="button"
-              className="text-primary hover:underline font-medium"
+              className="text-primary hover:underline font-medium cursor-pointer"
               onClick={handleResend}
+              disabled={isSendingOtp}
             >
               Resend OTP
             </button>
@@ -143,9 +212,13 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
             Back
           </Button>
 
-          <Button type="submit" size="lg" disabled>
-            Next Step
-            <ArrowRight className="w-4 h-4 ml-2" />
+          <Button 
+            type="submit" 
+            size="lg" 
+            disabled={!isValid || isSubmitting || isVerifyingOtp}
+          >
+            {isVerifyingOtp ? "Verifying..." : "Next Step"}
+            {!isVerifyingOtp && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </div>
       </form>

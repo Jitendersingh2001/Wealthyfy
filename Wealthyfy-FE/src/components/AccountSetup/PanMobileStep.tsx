@@ -81,17 +81,20 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
   /* ---------------------- Fetch & Hydrate Existing PAN --------------------- */
   useEffect(() => {
     const fetchPancardData = async () => {
-        const pancardData = await userService.getPancard<{
-          id: number;
-          pancard: string;
-          consent: string;
-          status: string;
+        const response = await userService.getPancard<{
+          data: {
+            id: number;
+            pancard: string;
+            consent: string;
+            status: string;
+          };
+          message: string | null;
         }>();
 
-        if (!pancardData) return;
+        if (!response?.data) return;
 
-        const { id, pancard, consent } = pancardData;
-        const phone = user?.phoneNumber || saved.mobile || "";
+      const { id, pancard, consent } = response.data;
+      const phone = user?.phoneNumber || saved.mobile || "";
 
         // Store PAN value as the last verified PAN
         setLastVerifiedPan(pancard);
@@ -102,14 +105,14 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
             pan: pancard,
             mobile: phone,
             pancardId: id,
-            consent,
+            consent: consent,
             panVerify: true,
           })
         );
     };
 
     fetchPancardData();
-  }, [user?.phoneNumber, dispatch, reset, saved.mobile]);
+  }, [user?.phoneNumber, dispatch, reset]);
 
   /* ------------------ Sync Form State → Redux Store ------------------------ */
   useEffect(() => {

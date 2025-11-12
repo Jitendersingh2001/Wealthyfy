@@ -195,7 +195,7 @@ def send_otp(payload: SendOtpRequest):
     response_model=ApiResponse,
     dependencies=[Depends(authenticate_user)]
 )
-def verify_otp(payload= VerifyOtpRequest):
+def verify_otp(payload: VerifyOtpRequest):
     """
     Verifies the OTP received on the user's phone using Twilio Verify API.
     """

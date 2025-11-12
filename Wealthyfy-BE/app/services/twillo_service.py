@@ -34,7 +34,8 @@ class TwilioService:
                 channel="sms",
             )
             return verification.status
-        except Exception:
+        except Exception as e:
+            print(e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=Messages.SOMETHING_WENT_WRONG,
