@@ -12,6 +12,7 @@ from app.models.pancard import Pancard, ConsentEnum
 from app.services.setu_service import SetuService
 from app.services.twillo_service import TwilioService
 from app.schemas.otp import SendOtpRequest, VerifyOtpRequest
+from app.constants.constant import PENDING
 
 # ---------------------------------------------------------------------------
 # Router Configuration
@@ -175,10 +176,13 @@ def send_otp(payload: SendOtpRequest):
     """
     twillo_service = TwilioService()
     result = twillo_service.send_otp(phone_number=payload.phone_number)
-
-    return success_response(
-        data=result,
-        message=Messages.SENT_SUCCESSFULLY.replace(":name", "OTP"),
+    if result == PENDING:
+        return success_response(
+            data=result,
+            message=Messages.SENT_SUCCESSFULLY.replace(":name", "OTP"),
+        )
+    return error_response(
+        message=Messages.FAILED_TO_SEND_OTP
     )
 
 # ===========================================================================

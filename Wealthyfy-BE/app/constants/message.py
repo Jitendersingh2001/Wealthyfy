@@ -20,3 +20,4 @@ class Messages:
     SENT_SUCCESSFULLY= ":name sent successfully."
     VERIFIED_SUCCESSFULLY=":name verifed successfully."
     INVALID_OR_EXPIRED_OTP="Invalid or expired OTP"
+    FAILED_TO_SEND_OTP = "Failed to send OTP. Please try again later."
