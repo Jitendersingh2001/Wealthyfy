@@ -83,7 +83,7 @@ def update_pan_and_phone_no(
     return success_response(
         data=result,
         message=Messages.CREATED_SUCCESSFULLY.replace(
-            ":name", "Phone No and Pan card")
+            ":name", "Pan card and Mobile Number")
     )
 
 

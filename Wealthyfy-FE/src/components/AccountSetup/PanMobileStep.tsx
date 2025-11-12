@@ -57,7 +57,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
   const dispatch = useAppDispatch();
   const saved = useAppSelector((state) => state.accountSetup.formData);
   const { user } = useAuth();
-
+  const phone = user?.phoneNumber || saved.mobile || "";
   const [isConsentDialogOpen, setConsentDialogOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [lastVerifiedPan, setLastVerifiedPan] = useState<string>("");
@@ -94,7 +94,6 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
         if (!response?.data) return;
 
       const { id, pancard, consent } = response.data;
-      const phone = user?.phoneNumber || saved.mobile || "";
 
         // Store PAN value as the last verified PAN
         setLastVerifiedPan(pancard);
@@ -112,7 +111,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
     };
 
     fetchPancardData();
-  }, [user?.phoneNumber, dispatch, reset]);
+  }, [dispatch, reset, phone]);
 
   /* ------------------ Sync Form State → Redux Store ------------------------ */
   useEffect(() => {
@@ -176,14 +175,15 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
   const onSubmit = async (data: PanMobileFormData) => {
     try {
-      await userService.createPanAndPhoneNo(
+      const response = await userService.createPanAndPhoneNo<{ data: unknown; message: string | null }>(
         data.mobile,
         data.pan,
         saved.consent,
         saved.pancardId ? String(saved.pancardId) : undefined
       );
 
-      toast.success("PAN and phone number saved successfully");
+      const message = response?.message;
+      toast.success(message);
       onNext();
     } catch (error) {
       const msg =
