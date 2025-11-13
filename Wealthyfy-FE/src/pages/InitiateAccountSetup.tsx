@@ -12,6 +12,7 @@ import WelcomeStep from "@/components/AccountSetup/WelcomeStep";
 import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
 import OtpStep from "@/components/AccountSetup/OtpStep";
 import StepNavigation from "@/components/AccountSetup/StepNavigation";
+import LinkBankStep from "@/components/AccountSetup/LinkBankStep";
 
 /* ------------------------------ Component --------------------------------- */
 function InitiateAccountSetupPage() {
@@ -26,11 +27,15 @@ function InitiateAccountSetupPage() {
 
   /* ------------------------------- Steps ----------------------------------- */
   const steps = [
-    <WelcomeStep onNext={() => setCurrentStep(1)} />,
+    <WelcomeStep onNext={() => setCurrentStep(3)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
     <OtpStep
       onNext={() => setCurrentStep(3)}
       onBack={() => setCurrentStep(1)}
+    />,
+    <LinkBankStep 
+      onNext={() => setCurrentStep(4)}
+      onBack={() => setCurrentStep(2)}
     />,
   ];
 

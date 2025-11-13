@@ -9,11 +9,8 @@ import { REGEX } from "@/constants/regexConstant";
 import { useAppSelector } from "@/store/hooks";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
-
-interface OtpStepProps {
-  onNext: () => void;
-  onBack: () => void;
-}
+import AnimatedIconDisplay from "../custom/AnimatedIconDisplay";
+import { type StepWithBackProps } from "@/types/step";
 
 const otpSchema = z.object({
   otp: z
@@ -25,7 +22,7 @@ const otpSchema = z.object({
 
 type OtpFormData = z.infer<typeof otpSchema>;
 
-function OtpStep({ onNext, onBack }: OtpStepProps) {
+function OtpStep({ onNext, onBack }: StepWithBackProps) {
   const phoneNumber = useAppSelector((state) => state.accountSetup.formData.mobile);
   const hasSentOtpRef = useRef(false);
 
@@ -63,7 +60,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
       setIsSendingOtp(true);
 
       try {
-        const response = await userService.sendOtp<{ data: unknown; message: string | null }>(phoneNumber);
+        const response = await userService.sendOtp(phoneNumber);
         const message = response?.message || "OTP sent successfully";
         toast.success(message);
         setTimer(30); // Start the timer
@@ -86,7 +83,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
 
     setIsSendingOtp(true);
     try {
-      const response = await userService.sendOtp<{ data: unknown; message: string | null }>(phoneNumber);
+      const response = await userService.sendOtp(phoneNumber);
       const message = response?.message || "OTP resent successfully";
       toast.success(message);
       setTimer(30);
@@ -107,7 +104,7 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
 
       setIsVerifyingOtp(true);
       try {
-        const response = await userService.verifyOtp<{ data: unknown; message: string | null }>(phoneNumber, data.otp);
+        const response = await userService.verifyOtp(phoneNumber, data.otp);
         const message = response?.message || "OTP verified successfully";
         toast.success(message);
         onNext();
@@ -135,20 +132,13 @@ function OtpStep({ onNext, onBack }: OtpStepProps) {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Animated Visual Element */}
-      <div className="flex justify-center">
-        <div className="relative w-32 h-32 flex items-center justify-center">
-          {/* Animated Background Circles */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="absolute w-24 h-24 rounded-full bg-primary/15 animate-pulse" style={{ animationDelay: '0s' }} />
-            <div className="absolute w-20 h-20 rounded-full bg-primary/30 animate-pulse" style={{ animationDelay: '0.5s' }} />
-          </div>
-          
-          {/* Phone Icon */}
-          <div className="relative z-10">
-            <Smartphone className="w-12 h-12 text-primary/80" />
-          </div>
-        </div>
-      </div>
+      <AnimatedIconDisplay
+        icon={Smartphone}
+        iconSize="w-12 h-12"
+        iconColor="text-primary/80"
+        containerSize="w-32 h-32"
+        showCircularBackground={false}
+      />
 
       {/* Header */}
       <div className="space-y-4 pb-4 text-center">

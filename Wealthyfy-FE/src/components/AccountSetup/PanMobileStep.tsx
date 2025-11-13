@@ -92,15 +92,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
     const fetchPancardData = async () => {
       try {
-        const response = await userService.getPancard<{
-          data: {
-            id: number;
-            pancard: string;
-            consent: string;
-            status: string;
-          };
-          message: string | null;
-        }>();
+        const response = await userService.getPancard();
 
         if (!response?.data) return;
 
@@ -191,7 +183,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
   const onSubmit = async (data: PanMobileFormData) => {
     try {
-      const response = await userService.createPanAndPhoneNo<{ data: unknown; message: string | null }>(
+      const response = await userService.createPanAndPhoneNo(
         data.mobile,
         data.pan,
         saved.consent,

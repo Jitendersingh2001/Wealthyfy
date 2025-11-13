@@ -1,14 +1,17 @@
 import { ENDPOINTS } from "@/services/api/endpoints";
 import { apiRequest } from "@/services/api/request";
+import type { ApiResponse } from "@/types/api";
+import type { UserResponse } from "@/types/user";
+import type { PanCardResponse } from "@/types/pancard";
 
 class UserService {
   /**
    * Fetch user details by user id
    * @param id - User ID (string or number)
    */
-  async getUserById<T = unknown>(id: number | string): Promise<T> {
+  async getUserById(id: number | string): Promise<ApiResponse<UserResponse>> {
     const url = ENDPOINTS.USER.GET_USER(id);
-    return apiRequest.get<T>(url);
+    return apiRequest.get<ApiResponse<UserResponse>>(url);
   }
 
   /**
@@ -16,9 +19,9 @@ class UserService {
    * @param pancard - PAN card number
    * @param consent - User consent (Y/N)
    */
-  async verifyPancard<T = unknown>(pancard: string, consent: "Y" | "N" = "Y"): Promise<T> {
+  async verifyPancard(pancard: string, consent: "Y" | "N" = "Y"): Promise<ApiResponse<string>> {
     const url = ENDPOINTS.USER.VERIFY_PANCARD;
-    return apiRequest.post<T>(url, { pancard, consent });
+    return apiRequest.post<ApiResponse<string>>(url, { pancard, consent });
   }
 
   /**
@@ -28,14 +31,14 @@ class UserService {
    * @param consent - User consent (Y/N)
    * @param pancardId - Optional PAN card ID for update
    */
-  async createPanAndPhoneNo<T = unknown>(
+  async createPanAndPhoneNo(
     phoneNumber: string,
     pancard: string,
     consent: string,
     pancardId?: string
-  ): Promise<T> {
+  ): Promise<ApiResponse<boolean>> {
     const url = ENDPOINTS.USER.CREATE_PAN_AND_PHONE_NO;
-    return apiRequest.post<T>(url, {
+    return apiRequest.post<ApiResponse<boolean>>(url, {
       phone_number: phoneNumber,
       pancard,
       consent,
@@ -46,18 +49,18 @@ class UserService {
   /**
    * Get user's PAN card details
    */
-  async getPancard<T = unknown>(): Promise<T> {
+  async getPancard(): Promise<ApiResponse<PanCardResponse>> {
     const url = ENDPOINTS.USER.GET_PANCARD;
-    return apiRequest.get<T>(url);
+    return apiRequest.get<ApiResponse<PanCardResponse>>(url);
   }
 
   /**
    * Send OTP to the specified phone number
    * @param phoneNumber - 10-digit mobile number
    */
-  async sendOtp<T = unknown>(phoneNumber: string): Promise<T> {
+  async sendOtp(phoneNumber: string): Promise<ApiResponse<string>> {
     const url = ENDPOINTS.USER.SEND_OTP;
-    return apiRequest.post<T>(url, { phone_number: phoneNumber });
+    return apiRequest.post<ApiResponse<string>>(url, { phone_number: phoneNumber });
   }
 
   /**
@@ -65,9 +68,9 @@ class UserService {
    * @param phoneNumber - 10-digit mobile number
    * @param otp - 6-digit OTP code
    */
-  async verifyOtp<T = unknown>(phoneNumber: string, otp: string): Promise<T> {
+  async verifyOtp(phoneNumber: string, otp: string): Promise<ApiResponse<boolean>> {
     const url = ENDPOINTS.USER.VERIFY_OTP;
-    return apiRequest.post<T>(url, { phone_number: phoneNumber, otp });
+    return apiRequest.post<ApiResponse<boolean>>(url, { phone_number: phoneNumber, otp });
   }
 }
 

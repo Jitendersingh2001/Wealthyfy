@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/ui/navbar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/custom/app-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import {
   SidebarProvider,

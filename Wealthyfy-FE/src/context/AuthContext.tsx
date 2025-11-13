@@ -11,20 +11,9 @@ import Loader from "@/components/ui/loader";
 import { GENERAL_MESSAGES, ERROR_MESSAGES } from "@/constants/messages";
 import { SESSION_KEYS } from "@/constants/sessionKeys";
 import { userService } from "@/services/userService";
+import type { UserResponse } from "@/types/user";
 
 /* -------------------------------- Types ----------------------------------- */
-interface UserApiResponse {
-  id: number;
-  keycloak_user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  created_at: string;
-  email_verified: boolean;
-  is_setup_complete: boolean;
-  status: string;
-  phone_number: string | null;
-}
 
 interface UserProfile {
   id: number;
@@ -54,7 +43,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /* --------------------------- Helper Functions ----------------------------- */
-const mapUserResponse = (data: UserApiResponse): UserProfile => ({
+const mapUserResponse = (data: UserResponse): UserProfile => ({
   id: data.id,
   keycloakUserId: data.keycloak_user_id,
   firstName: data.first_name,
@@ -93,7 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
         if (kc?.authenticated && userId) {
           try {
-            const response = await userService.getUserById<{ data: UserApiResponse; message: string | null }>(userId);
+            const response = await userService.getUserById(userId);
             const mappedUser = mapUserResponse(response.data);
 
             updateUserState(mappedUser);
