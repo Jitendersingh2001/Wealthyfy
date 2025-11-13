@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import {
   updateConsent,
   updatePanVerify,
 } from "@/store/slices/accountSetupSlice";
+
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { userService } from "@/services/userService";
@@ -57,10 +59,15 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
   const dispatch = useAppDispatch();
   const saved = useAppSelector((state) => state.accountSetup.formData);
   const { user } = useAuth();
+
   const phone = user?.phoneNumber || saved.mobile || "";
+
   const [isConsentDialogOpen, setConsentDialogOpen] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [lastVerifiedPan, setLastVerifiedPan] = useState<string>("");
+
+  // Prevent running the hydration logic more than once
+  const hasHydrated = useRef(false);
 
   const {
     register,
@@ -78,9 +85,13 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
     },
   });
 
-  /* ---------------------- Fetch & Hydrate Existing PAN --------------------- */
+  /* ------------------ First-time Data Hydration (Server) ------------------ */
   useEffect(() => {
+    if (hasHydrated.current) return;
+    hasHydrated.current = true;
+
     const fetchPancardData = async () => {
+      try {
         const response = await userService.getPancard<{
           data: {
             id: number;
@@ -93,25 +104,31 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
         if (!response?.data) return;
 
-      const { id, pancard, consent } = response.data;
+        const { id, pancard, consent } = response.data;
 
-        // Store PAN value as the last verified PAN
-        setLastVerifiedPan(pancard);
+        // 🚨 Only hydrate if user has NOT entered anything previously
+        if (!saved.pan && !saved.mobile) {
+          reset({ pan: pancard, mobile: phone });
 
-        reset({ pan: pancard, mobile: phone });
-        dispatch(
-          updateFormData({
-            pan: pancard,
-            mobile: phone,
-            pancardId: id,
-            consent: consent,
-            panVerify: true,
-          })
-        );
+          dispatch(
+            updateFormData({
+              pan: pancard,
+              mobile: phone,
+              pancardId: id,
+              consent,
+              panVerify: true,
+            })
+          );
+        }
+
+        setLastVerifiedPan(saved.pan || pancard);
+      } catch (err) {
+        console.error("PAN Fetch Error:", err);
+      }
     };
 
     fetchPancardData();
-  }, [dispatch, reset, phone]);
+  }, [dispatch, reset, phone, saved.pan, saved.mobile]);
 
   /* ------------------ Sync Form State → Redux Store ------------------------ */
   useEffect(() => {
@@ -121,14 +138,13 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
   /* ------------------ Reset Verification if PAN Changes -------------------- */
   const currentPan = watch("pan");
+
   useEffect(() => {
     if (!currentPan) return;
-    
-    // If PAN changed from the last verified PAN, reset verification
+
     if (lastVerifiedPan && currentPan !== lastVerifiedPan) {
       dispatch(updatePanVerify(false));
     } else if (lastVerifiedPan && currentPan === lastVerifiedPan) {
-      // Restore verification if PAN matches the last verified PAN
       dispatch(updatePanVerify(true));
     }
   }, [currentPan, lastVerifiedPan, dispatch]);
@@ -182,8 +198,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
         saved.pancardId ? String(saved.pancardId) : undefined
       );
 
-      const message = response?.message;
-      toast.success(message);
+      toast.success(response?.message);
       onNext();
     } catch (error) {
       const msg =
