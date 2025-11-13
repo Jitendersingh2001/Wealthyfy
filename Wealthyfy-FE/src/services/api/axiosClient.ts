@@ -1,9 +1,6 @@
 import axios, { AxiosError, type AxiosResponse } from "axios";
 import { config } from "@/config/config";
 import { keycloakService } from "@/services/keycloak";
-import { StatusCodes } from "http-status-codes";
-import { toast } from "sonner";
-import { ERROR_MESSAGES } from "@/constants/messages";
 
 const axiosClient = axios.create({
   baseURL: config.app.apiBaseUrl,
@@ -27,12 +24,6 @@ axiosClient.interceptors.response.use(
   },
   (error: AxiosError) => {
     const status = error.response?.status;
-
-    if (status === StatusCodes.INTERNAL_SERVER_ERROR) {
-      toast.error(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
-    } else if (status === StatusCodes.NOT_FOUND) {
-      toast.error(ERROR_MESSAGES.NOT_FOUND);
-    }
 
     return Promise.reject({
       message: error.message,

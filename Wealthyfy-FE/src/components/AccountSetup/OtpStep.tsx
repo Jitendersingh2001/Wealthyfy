@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ArrowRight, ArrowLeft, Smartphone } from "lucide-react";
 import { REGEX } from "@/constants/regexConstant";
+import { ERROR_MESSAGES } from "@/constants/messages";
 import { useAppSelector } from "@/store/hooks";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 import AnimatedIconDisplay from "../custom/AnimatedIconDisplay";
 import { type StepWithBackProps } from "@/types/step";
+import { getErrorMessage } from "@/utils/errorHelper";
 
 const otpSchema = z.object({
   otp: z
@@ -65,10 +67,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
         toast.success(message);
         setTimer(30); // Start the timer
       } catch (error) {
-        const msg =
-          (error as { data?: { message?: string } })?.data?.message ||
-          "Failed to send OTP";
-        toast.error(msg);
+        toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_SEND_OTP));
         hasSentOtpRef.current = false; // Allow retry on error
       } finally {
         setIsSendingOtp(false);
@@ -88,10 +87,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
       toast.success(message);
       setTimer(30);
     } catch (error) {
-      const msg =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to resend OTP";
-      toast.error(msg);
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_RESEND_OTP));
     } finally {
       setIsSendingOtp(false);
     }
@@ -109,10 +105,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
         toast.success(message);
         onNext();
       } catch (error) {
-        const msg =
-          (error as { data?: { message?: string } })?.data?.message ||
-          "Invalid or expired OTP";
-        toast.error(msg);
+        toast.error(getErrorMessage(error, ERROR_MESSAGES.INVALID_OR_EXPIRED_OTP));
         // Clear the OTP input on error
         reset({ otp: "" });
       } finally {

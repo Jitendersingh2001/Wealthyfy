@@ -8,3 +8,14 @@ export interface ApiResponse<T> {
   data: T;
   message: string | null;
 }
+
+/**
+ * API Error Type
+ * Represents the error structure returned by the API
+ */
+export interface ApiError {
+  data?: {
+    detail?: string;
+    message?: string;
+  };
+}

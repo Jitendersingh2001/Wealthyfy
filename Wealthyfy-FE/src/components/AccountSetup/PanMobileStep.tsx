@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
 import { REGEX } from "@/constants/regexConstant";
+import { ERROR_MESSAGES } from "@/constants/messages";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   updateFormData,
@@ -27,6 +28,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { toast } from "sonner";
 import { userService } from "@/services/userService";
 import { useAuth } from "@/hooks/use-auth";
+import { getErrorMessage } from "@/utils/errorHelper";
 
 /* ---------------------------------- Types ---------------------------------- */
 interface PanMobileStepProps {
@@ -152,10 +154,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
       dispatch(updatePanVerify(true));
       toast.success("PAN card verified successfully");
     } catch (error) {
-      const msg =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to verify PAN card";
-      toast.error(msg);
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_VERIFY_PAN));
       dispatch(updatePanVerify(false));
     } finally {
       setIsVerifying(false);
@@ -193,10 +192,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
       toast.success(response?.message);
       onNext();
     } catch (error) {
-      const msg =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to save PAN and phone number";
-      toast.error(msg);
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_SAVE_PAN_AND_PHONE));
     }
   };
 
