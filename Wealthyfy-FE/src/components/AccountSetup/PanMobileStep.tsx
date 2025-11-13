@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight } from "lucide-react";
+import { ERROR_MESSAGES, GENERAL_MESSAGES,VALIDATION_ERROR_MESSAGES } from "@/constants/messages";
+import { FIELD_NAMES } from "@/constants/fieldDefinitions";
 import { REGEX } from "@/constants/regexConstant";
-import { ERROR_MESSAGES } from "@/constants/messages";
+import { panValidation, mobileValidation } from "@/utils/commonValidations";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   updateFormData,
@@ -37,21 +39,8 @@ interface PanMobileStepProps {
 
 /* ------------------------------ Form Schema -------------------------------- */
 const panMobileSchema = z.object({
-  pan: z
-    .string()
-    .min(1, "PAN number is required")
-    .length(10, "PAN number must be exactly 10 characters")
-    .regex(REGEX.PAN_REGEX, "Invalid PAN format (e.g., ABCDE1234F)")
-    .transform((v) =>
-      v.toUpperCase().replace(REGEX.NON_ALPHANUMERIC_PAN_CHARS_REGEX, "")
-    ),
-
-  mobile: z
-    .string()
-    .min(1, "Mobile number is required")
-    .length(10, "Mobile number must be exactly 10 digits")
-    .regex(REGEX.MOBILE_REGEX, "Mobile number must contain only digits")
-    .transform((v) => v.replace(REGEX.NON_DIGITS_REGEX, "")),
+  pan: panValidation,
+  mobile: mobileValidation,
 });
 
 type PanMobileFormData = z.infer<typeof panMobileSchema>;
@@ -152,7 +141,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
       await userService.verifyPancard(panValue);
       setLastVerifiedPan(panValue);
       dispatch(updatePanVerify(true));
-      toast.success("PAN card verified successfully");
+      toast.success(GENERAL_MESSAGES.VERIFIED_SUCCESSFULLY(FIELD_NAMES.PAN_NUMBER.name));
     } catch (error) {
       toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_VERIFY_PAN));
       dispatch(updatePanVerify(false));
@@ -177,7 +166,7 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
   const handleConsentCancel = () => {
     setConsentDialogOpen(false);
-    toast.error("Consent is required.");
+    toast.error(VALIDATION_ERROR_MESSAGES.IS_REQUIRED(FIELD_NAMES.CONSENT.name));
   };
 
   const onSubmit = async (data: PanMobileFormData) => {
@@ -213,11 +202,11 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
           <div className="flex gap-2">
             <Input
               id="pan"
-              maxLength={10}
+              maxLength={FIELD_NAMES.PAN_NUMBER.length}
               placeholder="ABCDE1234F"
               {...register("pan", {
                 onChange: (e) => {
-                  const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+                  const value = e.target.value.toUpperCase().replace(REGEX.NON_ALPHANUMERIC_UPPERCASE_REGEX, "");
                   setValue("pan", value, { shouldValidate: true });
                 },
               })}
@@ -241,7 +230,13 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
         {/* Mobile Field */}
         <div className="space-y-2">
           <Label htmlFor="mobile">Mobile Number</Label>
-          <Input id="mobile" maxLength={10} placeholder="9876543210" {...register("mobile")} />
+          <Input
+            id="mobile"
+            type="tel"
+            maxLength={FIELD_NAMES.MOBILE_NUMBER.length}
+            placeholder="9876543210"
+            {...register("mobile")}
+          />
           {errors.mobile && <p className="text-sm text-destructive">{errors.mobile.message}</p>}
         </div>
 

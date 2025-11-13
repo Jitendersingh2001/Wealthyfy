@@ -11,6 +11,7 @@ import Loader from "@/components/ui/loader";
 import { GENERAL_MESSAGES, ERROR_MESSAGES } from "@/constants/messages";
 import { SESSION_KEYS } from "@/constants/sessionKeys";
 import { userService } from "@/services/userService";
+import { getErrorMessage } from "@/utils/errorHelper";
 import type { UserResponse } from "@/types/user";
 
 /* -------------------------------- Types ----------------------------------- */
@@ -105,7 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             }
           } catch (error) {
             console.error("User fetch failed:", error);
-            toast.error(ERROR_MESSAGES.INTERNAL_SERVER_ERROR);
+            toast.error(getErrorMessage(error, ERROR_MESSAGES.INTERNAL_SERVER_ERROR));
             updateUserState();
           }
         } else {

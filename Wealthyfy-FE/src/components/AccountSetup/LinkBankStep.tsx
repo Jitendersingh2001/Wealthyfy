@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
 import FeatureCard, { type FeatureCardData } from "@/components/custom/FeatureCard";
 import { type StepWithBackProps } from "@/types/step";
+import { ERROR_MESSAGES } from "@/constants/messages";
+import { getErrorMessage } from "@/utils/errorHelper";
 
 const featureCards: FeatureCardData[] = [
   {
@@ -36,10 +38,7 @@ function LinkBankStep({ onNext, onBack }: StepWithBackProps) {
       toast.success("Bank account linked successfully");
       onNext();
     } catch (error) {
-      const msg =
-        (error as { data?: { message?: string } })?.data?.message ||
-        "Failed to link bank account";
-      toast.error(msg);
+      toast.error(getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_LINK_BANK_ACCOUNT));
     } finally {
       setIsLinking(false);
     }

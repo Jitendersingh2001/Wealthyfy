@@ -5,21 +5,18 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ArrowRight, ArrowLeft, Smartphone } from "lucide-react";
-import { REGEX } from "@/constants/regexConstant";
-import { ERROR_MESSAGES } from "@/constants/messages";
+import { ERROR_MESSAGES, GENERAL_MESSAGES } from "@/constants/messages";
+import { FIELD_NAMES } from "@/constants/fieldDefinitions";
 import { useAppSelector } from "@/store/hooks";
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 import AnimatedIconDisplay from "../custom/AnimatedIconDisplay";
 import { type StepWithBackProps } from "@/types/step";
 import { getErrorMessage } from "@/utils/errorHelper";
+import { otpValidation } from "@/utils/commonValidations";
 
 const otpSchema = z.object({
-  otp: z
-    .string()
-    .regex(REGEX.ONLY_DIGITS_REGEX, "OTP must contain only digits")
-    .length(6, "OTP must be exactly 6 digits")
-    .transform((v) => v.trim()),
+  otp: otpValidation,
 });
 
 type OtpFormData = z.infer<typeof otpSchema>;
@@ -63,7 +60,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
 
       try {
         const response = await userService.sendOtp(phoneNumber);
-        const message = response?.message || "OTP sent successfully";
+        const message = response?.message || GENERAL_MESSAGES.SENT_SUCCESSFULLY(FIELD_NAMES.OTP.name);
         toast.success(message);
         setTimer(30); // Start the timer
       } catch (error) {
@@ -83,7 +80,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
     setIsSendingOtp(true);
     try {
       const response = await userService.sendOtp(phoneNumber);
-      const message = response?.message || "OTP resent successfully";
+      const message = response?.message || GENERAL_MESSAGES.RESENT_SUCCESSFULLY(FIELD_NAMES.OTP.name);
       toast.success(message);
       setTimer(30);
     } catch (error) {
@@ -101,7 +98,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
       setIsVerifyingOtp(true);
       try {
         const response = await userService.verifyOtp(phoneNumber, data.otp);
-        const message = response?.message || "OTP verified successfully";
+        const message = response?.message || GENERAL_MESSAGES.VERIFIED_SUCCESSFULLY(FIELD_NAMES.OTP.name);
         toast.success(message);
         onNext();
       } catch (error) {
@@ -117,7 +114,7 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
 
   /* ----------------------- Auto Submit -------------------------- */
   useEffect(() => {
-    if (otp && otp.length === 6 && isValid && !isSubmitting && !isVerifyingOtp) {
+    if (otp && otp.length === FIELD_NAMES.OTP.length && isValid && !isSubmitting && !isVerifyingOtp) {
       handleSubmit(onSubmit)();
     }
   }, [otp, isValid, isSubmitting, isVerifyingOtp, handleSubmit, onSubmit]);
@@ -151,9 +148,9 @@ function OtpStep({ onNext, onBack }: StepWithBackProps) {
             name="otp"
             control={control}
             render={({ field }) => (
-              <InputOTP maxLength={6} value={field.value} onChange={field.onChange}>
+              <InputOTP maxLength={FIELD_NAMES.OTP.length} value={field.value} onChange={field.onChange}>
                 <InputOTPGroup className="gap-3">
-                  {Array.from({ length: 6 }).map((_, index) => (
+                  {Array.from({ length: FIELD_NAMES.OTP.length }).map((_, index) => (
                     <InputOTPSlot
                       key={index}
                       index={index}
