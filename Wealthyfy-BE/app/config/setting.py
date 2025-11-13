@@ -48,10 +48,17 @@ class KeycloakSettings(BaseSettings):
 # Setu Configuration
 # ---------------------------------------------------------
 class SetuSettings(BaseSettings):
+    # PAN Verification
     SETU_PANCARD_CLIENT_ID: str
     SETU_PANCARD_CLIENT_SECRET: str
     SETU_PANCARD_PRODUCT_INSTANCE_ID: str
     SETU_PANCARD_BASE_URL: str
+
+    # Account Aggregator (AA)
+    SETU_AA_BASE_URL: str
+    SETU_AA_PRODUCT_INSTANCE_ID: str
+    SETU_AA_CLIENT_ID: str
+    SETU_AA_CLIENT_SECRET: str
 
 
 # ---------------------------------------------------------

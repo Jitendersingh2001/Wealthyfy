@@ -211,3 +211,18 @@ def verify_otp(payload: VerifyOtpRequest):
     return error_response(
         message=Messages.INVALID_OR_EXPIRED_OTP
     )
+
+@router.post(
+    "/link-bank",
+    response_model=ApiResponse
+)
+def link_bank(
+    phone_number: str,
+    current_user=Depends(authenticate_user)
+):
+    setu_service = SetuService()
+    data = setu_service.get_aa_token()
+    return success_response(
+            data=data,
+            message=Messages.SENT_SUCCESSFULLY.replace(":name", "OTP"),
+        )
