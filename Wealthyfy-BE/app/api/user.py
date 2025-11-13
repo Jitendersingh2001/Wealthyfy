@@ -220,6 +220,8 @@ def link_bank(
     phone_number: str,
     current_user=Depends(authenticate_user)
 ):
+    pancard = current_user.pancard.pancard
+    user_Id = current_user.id
     setu_service = SetuService()
     data = setu_service.get_aa_token()
     return success_response(

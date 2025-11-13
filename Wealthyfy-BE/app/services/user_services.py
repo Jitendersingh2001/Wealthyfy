@@ -6,6 +6,7 @@ from app.services.base_service import BaseService
 from app.constants.constant import CAP_ACTIVE
 from app.models.pancard import Pancard
 from typing import Optional
+from sqlalchemy.orm import joinedload
 
 
 class UserService(BaseService):
@@ -74,6 +75,7 @@ class UserService(BaseService):
         def _get():
             user = (
                 self.db.query(User)
+                .options(joinedload(User.pancard))
                 .filter(User.keycloak_user_id == id)
                 .first()
             )

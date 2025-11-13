@@ -85,7 +85,8 @@ class SetuService:
             logger.debug("PAN verification API response: %s", result)
         except ValueError:
             logger.error("Non-JSON response received from PAN API")
-            raise RuntimeError("Invalid JSON response from PAN verification API")
+            raise RuntimeError(
+                "Invalid JSON response from PAN verification API")
 
         verification_status = result.get("verification", "").lower()
 
@@ -126,8 +127,6 @@ class SetuService:
             "Content-Type": "application/json",
         }
 
-        logger.info("Requesting AA token from Setu")
-
         try:
             response = requests.post(
                 SetuAPI.AA_AUTH_TOKEN, json=payload, headers=headers, timeout=10
@@ -138,10 +137,12 @@ class SetuService:
 
         except requests.exceptions.RequestException as exc:
             logger.exception("Connection to Setu AA Auth API failed")
-            raise RuntimeError(f"Failed connecting to auth token: {exc}") from exc
+            raise RuntimeError(
+                f"Failed connecting to auth token: {exc}") from exc
         except ValueError:
             logger.error("Non-JSON response received from AA token API")
-            raise RuntimeError("Invalid JSON response received from AA Auth API")
+            raise RuntimeError(
+                "Invalid JSON response received from AA Auth API")
 
         if not data.get("success", False):
             logger.error("Setu AA Auth API returned unsuccessful status")
@@ -155,3 +156,52 @@ class SetuService:
 
         logger.info("Successfully retrieved AA token")
         return token
+
+    # -----------------------------------------------------------------------
+    # Create consent URL
+    # -----------------------------------------------------------------------
+    def create_consent(self, phone_number: str, pancard: str, start_date: str, end_date: str, fitype: list):
+        payload = {
+            "consentDuration": {
+                "unit": "YEAR",
+                "value": "5"
+            },
+            "PAN": pancard,
+            "vua":  phone_number,
+            "dataRange": {
+                "from": start_date,
+                "to": end_date
+            },
+            "purpose": {
+                "code": "101",
+                "text": "Wealth or portfolio management",
+                "category": {
+                    "type": "Wealth or portfolio management"
+                },
+                "refUri": "https://api.rebit.org.in/aa/purpose/101.xml"
+            },
+            "fiTypes": fitype,
+            "context": [
+            ],
+            "additionalParams": {
+                "tags": []
+            }
+        }
+
+        headers = {
+            "x-product-instance-id": self._aa_product_instance_id,
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.post(
+                SetuAPI.CREATE_CONSENT_API, json=payload, headers=headers, timeout=10
+            )
+
+            data = response.json()
+            logger.debug("AA token API response: %s", data)
+
+        except requests.exceptions.RequestException as exc:
+            logger.exception("Connection to Setu AA Auth API failed")
+            raise RuntimeError(
+                f"Failed connecting to auth token: {exc}") from exc
