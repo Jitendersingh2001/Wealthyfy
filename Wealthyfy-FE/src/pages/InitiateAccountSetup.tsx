@@ -11,8 +11,8 @@ import { useBlockBackNavigation } from "@/hooks/use-block-back-navigation";
 import WelcomeStep from "@/components/AccountSetup/WelcomeStep";
 import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
 import OtpStep from "@/components/AccountSetup/OtpStep";
-import StepNavigation from "@/components/AccountSetup/StepNavigation";
-import LinkBankStep from "@/components/AccountSetup/LinkBankStep";
+import StepNavigation from "@/components/custom/StepNavigation";
+import SelectDataStep from "@/components/AccountSetup/SelectDataStep";
 
 /* ------------------------------ Component --------------------------------- */
 function InitiateAccountSetupPage() {
@@ -33,7 +33,7 @@ function InitiateAccountSetupPage() {
       onNext={() => setCurrentStep(3)}
       onBack={() => setCurrentStep(1)}
     />,
-    <LinkBankStep 
+    <SelectDataStep 
       onNext={() => setCurrentStep(4)}
       onBack={() => setCurrentStep(2)}
     />,
@@ -43,7 +43,7 @@ function InitiateAccountSetupPage() {
   const stepConfig = [
     { number: 1, title: "Your Info" },
     { number: 2, title: "Verify" },
-    { number: 3, title: "Link Bank" },
+    { number: 3, title: "Select Data" },
     { number: 4, title: "Fetch Data" },
     { number: 5, title: "Finish" },
   ];
