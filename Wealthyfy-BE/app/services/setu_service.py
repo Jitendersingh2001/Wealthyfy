@@ -160,14 +160,25 @@ class SetuService:
     # -----------------------------------------------------------------------
     # Create consent URL
     # -----------------------------------------------------------------------
-    def create_consent(self, phone_number: str, pancard: str, start_date: str, end_date: str, fitype: list):
+
+    def create_consent(
+        self,
+        phone_number: str,
+        pancard: str,
+        start_date: str,
+        end_date: str,
+        fi_type: list,
+        consent_duration: dict,
+        fetch_type: str,
+        frequency: dict | None = None
+    ):
         payload = {
             "consentDuration": {
-                "unit": "YEAR",
-                "value": "5"
+                "unit": consent_duration.get("unit"),
+                "value": consent_duration.get("value")
             },
             "PAN": pancard,
-            "vua":  phone_number,
+            "vua": phone_number,
             "dataRange": {
                 "from": start_date,
                 "to": end_date
@@ -175,18 +186,19 @@ class SetuService:
             "purpose": {
                 "code": "101",
                 "text": "Wealth or portfolio management",
-                "category": {
-                    "type": "Wealth or portfolio management"
-                },
+                "category": {"type": "Wealth or portfolio management"},
                 "refUri": "https://api.rebit.org.in/aa/purpose/101.xml"
             },
-            "fiTypes": fitype,
-            "context": [
-            ],
-            "additionalParams": {
-                "tags": []
-            }
+            "fiTypes": fi_type,
+            "fetchType": fetch_type,
         }
+
+        # Add frequency only if periodic
+        if fetch_type.upper() == "PERIODIC":
+            payload["frequency"] = {
+                "unit": frequency.get("unit"),
+                "value": frequency.get("value")
+            }
 
         headers = {
             "x-product-instance-id": self._aa_product_instance_id,

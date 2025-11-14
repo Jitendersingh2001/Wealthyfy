@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 import { ERROR_MESSAGES, GENERAL_MESSAGES,VALIDATION_ERROR_MESSAGES } from "@/constants/messages";
 import { FIELD_NAMES } from "@/constants/fieldDefinitions";
 import { REGEX } from "@/constants/regexConstant";
@@ -16,6 +16,7 @@ import {
   updateConsent,
   updatePanVerify,
 } from "@/store/slices/accountSetupSlice";
+import FeatureCard from "@/components/custom/FeatureCard";
 
 import {
   Dialog,
@@ -239,6 +240,13 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
           />
           {errors.mobile && <p className="text-sm text-destructive">{errors.mobile.message}</p>}
         </div>
+
+        {/* Feature Card - Mobile Number and Data Types Info */}
+        <FeatureCard
+          icon={Info}
+          title="Important Information"
+          description="Ensure your mobile number is linked with your bank and investment accounts."
+        />
 
         {/* Submit */}
         <div className="pt-4 mt-auto flex justify-end">
