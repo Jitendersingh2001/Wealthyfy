@@ -6,5 +6,6 @@ export const ENDPOINTS = {
     GET_PANCARD: `/users/pancard`,
     SEND_OTP: `/users/send-otp`,
     VERIFY_OTP: `/users/verify-otp`,
+    LINK_BANK: `/users/link-bank`,
   },
 };

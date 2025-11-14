@@ -72,6 +72,22 @@ class UserService {
     const url = ENDPOINTS.USER.VERIFY_OTP;
     return apiRequest.post<ApiResponse<boolean>>(url, { phone_number: phoneNumber, otp });
   }
+
+  /**
+   * Link bank account by creating consent
+   * @param payload - Link bank request payload
+   */
+  async linkBank(payload: {
+    start_date: string;
+    end_date: string;
+    fi_type: string[];
+    consent_duration: { unit: string; value: string };
+    fetch_type: string;
+    frequency?: { unit: string; value: string };
+  }): Promise<ApiResponse<string>> {
+    const url = ENDPOINTS.USER.LINK_BANK;
+    return apiRequest.post<ApiResponse<string>>(url, payload);
+  }
 }
 
 export const userService = new UserService();

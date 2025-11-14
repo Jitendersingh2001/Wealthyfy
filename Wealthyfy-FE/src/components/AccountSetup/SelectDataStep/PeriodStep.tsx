@@ -37,7 +37,7 @@ export function PeriodStep({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {/* Start Date */}
         <div className="space-y-2">
           <Label htmlFor="start-date" className="text-sm font-medium">
@@ -49,7 +49,7 @@ export function PeriodStep({
               onSelect={onStartDateChange}
               placeholder="Select start date"
               maxDate={startDateMax}
-              className="w-full"
+              className="w-full h-12"
             />
           </div>
         </div>
@@ -66,7 +66,7 @@ export function PeriodStep({
               placeholder="Select end date"
               minDate={startDate}
               maxDate={today}
-              className="w-full"
+              className="w-full h-12"
             />
           </div>
         </div>

@@ -13,6 +13,7 @@ import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
 import OtpStep from "@/components/AccountSetup/OtpStep";
 import StepNavigation from "@/components/custom/StepNavigation";
 import SelectDataStep from "@/components/AccountSetup/SelectDataStep";
+import LinkAccountsStep from "@/components/AccountSetup/LinkAccountsStep";
 
 /* ------------------------------ Component --------------------------------- */
 function InitiateAccountSetupPage() {
@@ -24,6 +25,7 @@ function InitiateAccountSetupPage() {
 
   /* ----------------------------- State ------------------------------------- */
   const [currentStep, setCurrentStep] = useState(0);
+  const [consentUrl, setConsentUrl] = useState<string | null>(null);
 
   /* ------------------------------- Steps ----------------------------------- */
   const steps = [
@@ -35,8 +37,19 @@ function InitiateAccountSetupPage() {
     />,
     <SelectDataStep 
       onNext={() => setCurrentStep(4)}
+      onNextWithUrl={(url) => {
+        setConsentUrl(url);
+        setCurrentStep(4);
+      }}
       onBack={() => setCurrentStep(2)}
     />,
+    consentUrl ? (
+      <LinkAccountsStep
+        consentUrl={consentUrl}
+        onNext={() => setCurrentStep(5)}
+        onBack={() => setCurrentStep(3)}
+      />
+    ) : null,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */
@@ -44,8 +57,9 @@ function InitiateAccountSetupPage() {
     { number: 1, title: "Your Info" },
     { number: 2, title: "Verify" },
     { number: 3, title: "Select Data" },
-    { number: 4, title: "Fetch Data" },
-    { number: 5, title: "Finish" },
+    { number: 4, title: "Link Accounts" },
+    { number: 5, title: "Fetch Data" },
+    { number: 6, title: "Finish" },
   ];
 
   const isWelcomeStep = currentStep === 0;
@@ -88,7 +102,7 @@ function InitiateAccountSetupPage() {
               {/* Active Step Content */}
               <div className="border-l border-border flex-1 bg-card rounded-r-xl overflow-y-auto">
                 <div className="w-full h-full flex justify-center p-8">
-                  <div className="w-full max-w-lg h-full flex flex-col">
+                  <div className={`w-full ${currentStep === 4 ? 'max-w-5xl' : 'max-w-lg'} h-full flex flex-col`}>
                     {steps[currentStep] || (
                       <div className="text-center space-y-4">
                         <h1 className="text-3xl font-bold">Setup Complete!</h1>

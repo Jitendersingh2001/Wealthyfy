@@ -21,12 +21,13 @@ export function ConsentDurationStep({
           Define how long consent is valid to fetch data
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         {consentDurations.map((duration) => (
           <CheckboxCard
             key={duration.value}
             checked={consentDuration === duration.value}
             label={duration.label}
+            className="min-h-12"
             onCheckedChange={(checked) => {
               if (checked) {
                 onDurationChange(duration.value);

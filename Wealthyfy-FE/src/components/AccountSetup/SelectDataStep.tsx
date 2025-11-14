@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft} from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { type StepWithBackProps } from "@/types/step";
+import StepNavigation from "@/components/custom/StepNavigation";
+import { userService } from "@/services/userService";
 import { ERROR_MESSAGES } from "@/constants/messages";
 import { getErrorMessage } from "@/utils/errorHelper";
-import StepNavigation from "@/components/custom/StepNavigation";
 
 import { DataTypesStep } from "@/components/AccountSetup/SelectDataStep/DataTypesStep";
 import { PeriodStep } from "@/components/AccountSetup/SelectDataStep/PeriodStep";
@@ -19,7 +20,11 @@ import type {
   FrequencyUnit,
 } from "@/types/selectDataStep";
 
-function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
+interface SelectDataStepProps extends StepWithBackProps {
+  onNextWithUrl?: (url: string) => void;
+}
+
+function SelectDataStep({ onNext, onBack, onNextWithUrl }: SelectDataStepProps) {
   const [isLinking, setIsLinking] = useState(false);
   const [currentSubStep, setCurrentSubStep] = useState(1);
   const [selectedFiTypes, setSelectedFiTypes] = useState<FiType[]>([]);
@@ -102,11 +107,50 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
     }
   };
 
+  // Helper function to parse consent duration
+  const parseConsentDuration = (duration: ConsentDuration): { unit: string; value: string } => {
+    const parts = duration.split("_");
+    const value = parts[0];
+    const unit = parts[1] === "DAYS" ? "DAY" : parts[1] === "MONTHS" ? "MONTH" : "YEAR";
+    return { unit, value };
+  };
+
   const handleFinalSubmit = async () => {
+    if (!startDate || !endDate || !consentDuration || !fetchType) {
+      return;
+    }
+
     setIsLinking(true);
 
     try {
-      onNext();
+      // Parse consent duration
+      const consentDurationObj = parseConsentDuration(consentDuration);
+
+      // Prepare frequency if periodic
+      const frequency = fetchType === "PERIODIC" && frequencyUnit && frequencyValue
+        ? { unit: frequencyUnit, value: frequencyValue }
+        : undefined;
+
+      // Call the link bank API
+      const response = await userService.linkBank({
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+        fi_type: selectedFiTypes,
+        consent_duration: consentDurationObj,
+        fetch_type: fetchType,
+        frequency,
+      });
+
+      if (response?.data) {
+        // Pass URL to next step
+        if (onNextWithUrl) {
+          onNextWithUrl(response.data);
+        } else {
+          onNext();
+        }
+      } else {
+        toast.error("Failed to get consent URL");
+      }
     } catch (error) {
       toast.error(
         getErrorMessage(error, ERROR_MESSAGES.FAILED_TO_LINK_BANK_ACCOUNT)
@@ -180,7 +224,7 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="pt-6 mt-auto flex justify-between gap-4">
+      <div className=" mt-auto flex justify-between gap-4">
         <Button
           type="button"
           variant="outline"
@@ -200,7 +244,7 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
           className="flex-1"
         >
           {isLinking
-            ? "Linking..."
+            ? "Creating Link..."
             : currentSubStep === SUB_STEPS.length
             ? "Link Your Account"
             : "Next"}

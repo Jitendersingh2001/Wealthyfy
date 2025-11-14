@@ -149,14 +149,14 @@ export function FetchTypeStep({
           <p className="text-xs text-muted-foreground">Choose how you want to fetch the data</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {fetchTypes.map(({ value, label, description }) => (
             <div key={value} className="space-y-1">
               <CheckboxCard
                 checked={fetchType === value}
                 label={label}
                 onCheckedChange={(checked) => handleFetchType(value, checked)}
-                className="w-full"
+                className="w-full min-h-12"
               />
               <p className="text-xs text-muted-foreground mt-1 ml-1">{description}</p>
             </div>
