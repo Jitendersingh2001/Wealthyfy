@@ -34,10 +34,18 @@ export const fetchTypes: FetchTypeOption[] = [
   },
 ];
 
+export const FREQUENCY_UNIT_DAY = "DAY" as const;
+export const FREQUENCY_UNIT_MONTH = "MONTH" as const;
+export const FREQUENCY_UNIT_YEAR = "YEAR" as const;
+
+export const FREQUENCY_LIMIT_DAY = 30;
+export const FREQUENCY_LIMIT_MONTH = 12;
+export const FREQUENCY_LIMIT_YEAR = 10;
+
 export const frequencyUnits: FrequencyUnitOption[] = [
-  { label: "Day", value: "DAY" },
-  { label: "Month", value: "MONTH" },
-  { label: "Year", value: "YEAR" },
+  { label: "Day", value: FREQUENCY_UNIT_DAY },
+  { label: "Month", value: FREQUENCY_UNIT_MONTH },
+  { label: "Year", value: FREQUENCY_UNIT_YEAR },
 ];
 
 export const SUB_STEPS: SubStep[] = [
