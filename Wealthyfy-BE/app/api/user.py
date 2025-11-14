@@ -13,6 +13,8 @@ from app.services.setu_service import SetuService
 from app.services.twillo_service import TwilioService
 from app.schemas.otp import SendOtpRequest, VerifyOtpRequest
 from app.constants.constant import PENDING
+from app.schemas.setu import LinkBankRequest
+from app.utils.helper import to_utc_z_format
 
 # ---------------------------------------------------------------------------
 # Router Configuration
@@ -212,19 +214,34 @@ def verify_otp(payload: VerifyOtpRequest):
         message=Messages.INVALID_OR_EXPIRED_OTP
     )
 
+# ===========================================================================
+# LINK BANK
+# ===========================================================================
 @router.post(
     "/link-bank",
     response_model=ApiResponse
 )
 def link_bank(
-    phone_number: str,
+    payload: LinkBankRequest,
     current_user=Depends(authenticate_user)
 ):
     pancard = current_user.pancard.pancard
     user_Id = current_user.id
+    data_start_date = to_utc_z_format(payload.start_date)
+    data_end_date = to_utc_z_format(payload.end_date)
+
     setu_service = SetuService()
-    data = setu_service.get_aa_token()
+    data = setu_service.create_consent(
+            phone_number=current_user.phone_number,
+            pancard=pancard,
+            start_date=data_start_date,
+            end_date=data_end_date,
+            fi_type=payload.fi_type,
+            consent_duration=payload.consent_duration,
+            fetch_type=payload.fetch_type,
+            frequency=payload.frequency
+        )
     return success_response(
-            data=data,
-            message=Messages.SENT_SUCCESSFULLY.replace(":name", "OTP"),
+            data=data.get("url"),
+            message=Messages.CREATED_SUCCESSFULLY.replace(":name", "Consent"),
         )

@@ -1,4 +1,4 @@
-export type FiType = "DEPOSIT" | "TERM_DEPOSIT" | "MUTUAL_FUNDS" | "BONDS" | "EQUITIES" | "ETF";
+export type FiType = "DEPOSIT" | "TERM_DEPOSIT" | "MUTUAL_FUNDS" | "EQUITIES" | "ETF";
 
 export type ConsentDuration = "30_DAYS" | "6_MONTHS" | "1_YEAR" | "5_YEAR";
 

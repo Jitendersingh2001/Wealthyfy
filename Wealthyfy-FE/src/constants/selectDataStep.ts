@@ -13,7 +13,6 @@ export const bankingFiTypes: FiTypeOption[] = [
 
 export const investmentFiTypes: FiTypeOption[] = [
   { label: "Mutual Funds", value: "MUTUAL_FUNDS" },
-  { label: "Bonds", value: "BONDS" },
   { label: "Equity Shares", value: "EQUITIES" },
   { label: "Exchange Traded Funds (ETF)", value: "ETF" },
 ];

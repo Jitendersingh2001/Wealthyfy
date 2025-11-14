@@ -172,22 +172,25 @@ class SetuService:
         fetch_type: str,
         frequency: dict | None = None
     ):
+        token = self.get_aa_token()
         payload = {
             "consentDuration": {
                 "unit": consent_duration.get("unit"),
                 "value": consent_duration.get("value")
             },
             "PAN": pancard,
-            "vua": phone_number,
+            "vua": f"{phone_number}@setu",
             "dataRange": {
                 "from": start_date,
                 "to": end_date
             },
             "purpose": {
                 "code": "101",
-                "text": "Wealth or portfolio management",
-                "category": {"type": "Wealth or portfolio management"},
-                "refUri": "https://api.rebit.org.in/aa/purpose/101.xml"
+                "text": "Wealth management service",
+                "refUri": "https://api.rebit.org.in/aa/purpose/101.xml",
+                "category": {
+                    "type": "Wealth management service"
+                }
             },
             "fiTypes": fi_type,
             "fetchType": fetch_type,
@@ -203,16 +206,16 @@ class SetuService:
         headers = {
             "x-product-instance-id": self._aa_product_instance_id,
             "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
         }
 
         try:
             response = requests.post(
                 SetuAPI.CREATE_CONSENT_API, json=payload, headers=headers, timeout=10
             )
-
+            print(response)
             data = response.json()
-            logger.debug("AA token API response: %s", data)
-
+            return data
         except requests.exceptions.RequestException as exc:
             logger.exception("Connection to Setu AA Auth API failed")
             raise RuntimeError(
