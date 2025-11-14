@@ -46,11 +46,12 @@ export function FetchTypeStep({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {fetchTypes.map((type) => (
-            <div key={type.value}>
+            <div key={type.value} className="space-y-1">
               <CheckboxCard
                 checked={fetchType === type.value}
                 label={type.label}
                 onCheckedChange={(checked) => handleFetchTypeChange(type.value, checked)}
+                className="w-full"
               />
               <p className="text-xs text-muted-foreground mt-1 ml-1">
                 {type.description}
@@ -70,9 +71,11 @@ export function FetchTypeStep({
               Set how often to fetch data (e.g., Every 30 days, Every 1 month)
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="frequency-value">Frequency Value</Label>
+              <Label htmlFor="frequency-value" className="text-sm font-medium">
+                Frequency Value
+              </Label>
               <Input
                 id="frequency-value"
                 type="number"
@@ -80,11 +83,13 @@ export function FetchTypeStep({
                 placeholder="e.g., 30"
                 value={frequencyValue}
                 onChange={(e) => onFrequencyValueChange(e.target.value)}
-                className="w-full"
+                className="w-full [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="frequency-unit">Frequency Unit</Label>
+              <Label htmlFor="frequency-unit" className="text-sm font-medium">
+                Frequency Unit
+              </Label>
               <div className="grid grid-cols-3 gap-2">
                 {frequencyUnits.map((unit) => (
                   <CheckboxCard

@@ -1,6 +1,8 @@
 import { CheckboxCard } from "@/components/custom/checkbox-card";
 import type { FiType } from "@/types/selectDataStep";
 import { bankingFiTypes, investmentFiTypes } from "@/constants/selectDataStep";
+import FeatureCard from "@/components/custom/FeatureCard";
+import { Info } from "lucide-react";
 
 interface DataTypesStepProps {
   selectedFiTypes: FiType[];
@@ -21,6 +23,12 @@ export function DataTypesStep({
 
   return (
     <>
+        {/* Purpose of Data Sharing */}
+        <FeatureCard
+          icon={Info}
+          title="Purpose of Data Sharing"
+          description="We are requesting your financial data for Wealth or portfolio management."
+        />
       <div className="space-y-4">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Banking

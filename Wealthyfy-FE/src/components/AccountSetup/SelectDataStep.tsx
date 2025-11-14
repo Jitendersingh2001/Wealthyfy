@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft} from "lucide-react";
 import { toast } from "sonner";
 import { type StepWithBackProps } from "@/types/step";
 import { ERROR_MESSAGES } from "@/constants/messages";
 import { getErrorMessage } from "@/utils/errorHelper";
-import StepNavigation from "../custom/StepNavigation";
-import { DataTypesStep } from "./SelectDataStep/DataTypesStep";
-import { PeriodStep } from "./SelectDataStep/PeriodStep";
-import { ConsentDurationStep } from "./SelectDataStep/ConsentDurationStep";
-import { FetchTypeStep } from "./SelectDataStep/FetchTypeStep";
+import StepNavigation from "@/components/custom/StepNavigation";
+
+import { DataTypesStep } from "@/components/AccountSetup/SelectDataStep/DataTypesStep";
+import { PeriodStep } from "@/components/AccountSetup/SelectDataStep/PeriodStep";
+import { ConsentDurationStep } from "@/components/AccountSetup/SelectDataStep/ConsentDurationStep";
+import { FetchTypeStep } from "@/components/AccountSetup/SelectDataStep/FetchTypeStep";
 import { SUB_STEPS } from "@/constants/selectDataStep";
 import type {
   FiType,
@@ -29,9 +30,9 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
   >(undefined);
   const [fetchType, setFetchType] = useState<FetchType | undefined>(undefined);
   const [frequencyValue, setFrequencyValue] = useState<string>("");
-  const [frequencyUnit, setFrequencyUnit] = useState<
-    FrequencyUnit | undefined
-  >(undefined);
+  const [frequencyUnit, setFrequencyUnit] = useState<FrequencyUnit | undefined>(
+    undefined
+  );
 
   const validateCurrentStep = (): boolean => {
     switch (currentSubStep) {
@@ -166,9 +167,12 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
           {SUB_STEPS[currentSubStep - 1].title}
         </p>
       </div>
-
       {/* Step Indicators */}
-      <StepNavigation steps={SUB_STEPS} currentStep={currentSubStep - 1} variant="horizontal" />
+      <StepNavigation
+        steps={SUB_STEPS}
+        currentStep={currentSubStep - 1}
+        variant="horizontal"
+      />
 
       {/* Sub-step Content */}
       <div className="flex-1 flex flex-col gap-8 mb-8 overflow-y-auto px-1">
@@ -200,9 +204,7 @@ function SelectDataStep({ onNext, onBack }: StepWithBackProps) {
             : currentSubStep === SUB_STEPS.length
             ? "Link Your Account"
             : "Next"}
-          {!isLinking && (
-            <ArrowRight className="w-4 h-4 ml-2" />
-          )}
+          {!isLinking && <ArrowRight className="w-4 h-4 ml-2" />}
         </Button>
       </div>
     </div>
