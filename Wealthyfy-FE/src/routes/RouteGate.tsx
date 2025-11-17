@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { useSetuCallback } from "@/hooks/use-setu-callback";
 import { ROUTES } from "@/routes/routes";
 
 interface RouteGateProps {
@@ -19,6 +20,14 @@ const RouteGate: React.FC<RouteGateProps> = ({
   const { isAuthenticated, isSetupComplete } = useAuth();
   const location = useLocation();
   const isInitiateSetupRoute = location.pathname === ROUTES.INITIATE_SETUP;
+
+  // Use Setu callback hook to handle redirects (before any other redirects)
+  const { shouldRedirect, redirectPath } = useSetuCallback(undefined, location.pathname);
+
+  // If Setu callback params are present and we're not already on initiate-setup, redirect there with params
+  if (shouldRedirect && redirectPath) {
+    return <Navigate to={redirectPath} replace />;
+  }
 
   // 1. Protected route but user not logged in
   if (isProtected && !isAuthenticated) {

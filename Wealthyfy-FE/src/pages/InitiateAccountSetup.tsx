@@ -8,6 +8,7 @@ import { useUserMenuActions } from "@/hooks/use-user-menu-actions";
 import { useTheme } from "@/hooks/use-theme";
 import { Card } from "@/components/ui/card";
 import { useBlockBackNavigation } from "@/hooks/use-block-back-navigation";
+import { useSetuCallback } from "@/hooks/use-setu-callback";
 import WelcomeStep from "@/components/AccountSetup/WelcomeStep";
 import PanMobileStep from "@/components/AccountSetup/PanMobileStep";
 import OtpStep from "@/components/AccountSetup/OtpStep";
@@ -25,7 +26,11 @@ function InitiateAccountSetupPage() {
 
   /* ----------------------------- State ------------------------------------- */
   const [currentStep, setCurrentStep] = useState(0);
-  const [consentUrl, setConsentUrl] = useState<string | null>(null);
+
+  /* ----------------------------- Setu Callback Hook ----------------------- */
+  const { isSetuCallback, setuError } = useSetuCallback((step) =>
+    setCurrentStep(step)
+  );
 
   /* ------------------------------- Steps ----------------------------------- */
   const steps = [
@@ -37,19 +42,14 @@ function InitiateAccountSetupPage() {
     />,
     <SelectDataStep 
       onNext={() => setCurrentStep(4)}
-      onNextWithUrl={(url) => {
-        setConsentUrl(url);
-        setCurrentStep(4);
-      }}
       onBack={() => setCurrentStep(2)}
     />,
-    consentUrl ? (
-      <LinkAccountsStep
-        consentUrl={consentUrl}
-        onNext={() => setCurrentStep(5)}
-        onBack={() => setCurrentStep(3)}
-      />
-    ) : null,
+    <LinkAccountsStep
+      isSetuCallback={isSetuCallback}
+      setuError={setuError}
+      onNext={() => setCurrentStep(5)}
+      onBack={() => setCurrentStep(3)}
+    />,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */

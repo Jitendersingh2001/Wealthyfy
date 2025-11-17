@@ -179,7 +179,7 @@ class SetuService:
                 "value": consent_duration.get("value")
             },
             "PAN": pancard,
-            "vua": f"{phone_number}@setu",
+            "vua": phone_number,
             "dataRange": {
                 "from": start_date,
                 "to": end_date

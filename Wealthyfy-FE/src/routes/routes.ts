@@ -1,7 +1,7 @@
 export const ROUTES = {
-  HOME: "/",
-  DASHBOARD: "/dashboard",
-  KEYCLOAKCALLBACK: "/callback",
-  MUTUALFUNDS: "/mutualfunds",
-  INITIATE_SETUP: "/initiate-setup",
+  HOME: "/manual",
+  DASHBOARD: "/manual/dashboard",
+  KEYCLOAKCALLBACK: "/manual/callback",
+  MUTUALFUNDS: "/manual/mutualfunds",
+  INITIATE_SETUP: "/manual/initiate-setup",
 };

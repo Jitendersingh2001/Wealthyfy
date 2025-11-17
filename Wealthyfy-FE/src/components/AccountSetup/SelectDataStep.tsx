@@ -20,11 +20,7 @@ import type {
   FrequencyUnit,
 } from "@/types/selectDataStep";
 
-interface SelectDataStepProps extends StepWithBackProps {
-  onNextWithUrl?: (url: string) => void;
-}
-
-function SelectDataStep({ onNext, onBack, onNextWithUrl }: SelectDataStepProps) {
+function SelectDataStep({ onNext: _onNext, onBack }: StepWithBackProps) {
   const [isLinking, setIsLinking] = useState(false);
   const [currentSubStep, setCurrentSubStep] = useState(1);
   const [selectedFiTypes, setSelectedFiTypes] = useState<FiType[]>([]);
@@ -142,12 +138,8 @@ function SelectDataStep({ onNext, onBack, onNextWithUrl }: SelectDataStepProps) 
       });
 
       if (response?.data) {
-        // Pass URL to next step
-        if (onNextWithUrl) {
-          onNextWithUrl(response.data);
-        } else {
-          onNext();
-        }
+        // Redirect to consent URL in the same window
+        window.location.href = response.data;
       } else {
         toast.error("Failed to get consent URL");
       }
@@ -244,7 +236,7 @@ function SelectDataStep({ onNext, onBack, onNextWithUrl }: SelectDataStepProps) 
           className="flex-1"
         >
           {isLinking
-            ? "Creating Link..."
+            ? "Redirecting to the 3rd party service..."
             : currentSubStep === SUB_STEPS.length
             ? "Link Your Account"
             : "Next"}

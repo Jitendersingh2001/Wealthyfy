@@ -226,7 +226,7 @@ def link_bank(
     current_user=Depends(authenticate_user)
 ):
     pancard = current_user.pancard.pancard
-    user_Id = current_user.id
+    # user_Id = current_user.id
     data_start_date = to_utc_z_format(payload.start_date)
     data_end_date = to_utc_z_format(payload.end_date)
 

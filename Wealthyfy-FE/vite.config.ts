@@ -3,7 +3,6 @@ import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -13,5 +12,6 @@ export default defineConfig({
   },
   server: {
     port: Number(process.env.VITE_PORT) || 3000,
+    allowedHosts: ["wealthyfy.pagekite.me"], // ← add this line
   },
 })
