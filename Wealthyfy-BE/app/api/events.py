@@ -52,3 +52,21 @@ async def handle_keycloak_event(request: Request,db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing event: {str(e)}",
         )
+    
+@router.post("/setu_events",)
+async def setu_events(request: Request,db: Session = Depends(get_db)):
+    """
+    setu endpoint to log incoming event payloads.
+    """
+    try:
+        # Parse incoming JSON payload
+        payload: Dict[str, Any] = await request.json()
+        logger.info("📩 Received test event payload: %s", payload)
+        return {"status": "received", "payload": payload}
+
+    except Exception as e:
+        logger.exception("Failed to process test event")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing event: {str(e)}",
+        )
