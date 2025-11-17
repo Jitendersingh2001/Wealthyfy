@@ -1,11 +1,11 @@
-import logging
 import requests
 from fastapi import status
 from app.config.setting import settings
 from app.constants.setu_api import SetuAPI
 from app.constants import constant
-
-logger = logging.getLogger(__name__)
+from app.utils.logger_util import (
+    logger_info, logger_debug, logger_error, logger_exception, logger_success
+)
 
 
 class SetuService:
@@ -55,7 +55,7 @@ class SetuService:
             "Content-Type": "application/json",
         }
 
-        logger.info("Sending PAN verification request for PAN=%s", pancard)
+        logger_info(f"Sending PAN verification request", pan=pancard)
 
         try:
             response = requests.post(
@@ -65,16 +65,16 @@ class SetuService:
                 timeout=10,
             )
         except requests.exceptions.RequestException as exc:
-            logger.exception("Connection to Setu PAN Verification API failed")
+            logger_exception("Connection to Setu PAN Verification API failed")
             raise RuntimeError(
                 f"Failed connecting to PAN verification service: {exc}"
             ) from exc
 
         if response.status_code != status.HTTP_200_OK:
-            logger.error(
-                "Invalid PAN verification response: %s | %s",
-                response.status_code,
-                response.text,
+            logger_error(
+                f"Invalid PAN verification response: {response.status_code} | {response.text}",
+                status_code=response.status_code,
+                pan=pancard
             )
             raise RuntimeError(
                 f"PAN verification API error: {response.status_code} | {response.text}"
@@ -82,23 +82,23 @@ class SetuService:
 
         try:
             result = response.json()
-            logger.debug("PAN verification API response: %s", result)
+            logger_debug(f"PAN verification API response: {result}")
         except ValueError:
-            logger.error("Non-JSON response received from PAN API")
+            logger_error("Non-JSON response received from PAN API", pan=pancard)
             raise RuntimeError(
                 "Invalid JSON response from PAN verification API")
 
         verification_status = result.get("verification", "").lower()
 
         if verification_status == constant.SUCCESS:
-            logger.info("PAN verification successful for PAN=%s", pancard)
+            logger_success(f"PAN verification successful", pan=pancard)
             return True
 
         if verification_status == constant.FAILED:
-            logger.info("PAN verification failed for PAN=%s", pancard)
+            logger_info(f"PAN verification failed", pan=pancard)
             return False
 
-        logger.error("Unexpected verification status: %s", verification_status)
+        logger_error(f"Unexpected verification status: {verification_status}", status=verification_status)
         raise RuntimeError(
             f"Unexpected verification status received: {verification_status}"
         )
@@ -133,28 +133,28 @@ class SetuService:
             )
 
             data = response.json()
-            logger.debug("AA token API response: %s", data)
+            logger_debug(f"AA token API response: {data}")
 
         except requests.exceptions.RequestException as exc:
-            logger.exception("Connection to Setu AA Auth API failed")
+            logger_exception("Connection to Setu AA Auth API failed")
             raise RuntimeError(
                 f"Failed connecting to auth token: {exc}") from exc
         except ValueError:
-            logger.error("Non-JSON response received from AA token API")
+            logger_error("Non-JSON response received from AA token API")
             raise RuntimeError(
                 "Invalid JSON response received from AA Auth API")
 
         if not data.get("success", False):
-            logger.error("Setu AA Auth API returned unsuccessful status")
+            logger_error("Setu AA Auth API returned unsuccessful status")
             raise RuntimeError("Auth API returned unsuccessful status")
 
         token = data.get("data", {}).get("token")
 
         if not token:
-            logger.error("Token missing from Setu AA Auth response")
+            logger_error("Token missing from Setu AA Auth response")
             raise RuntimeError("Token not found in the auth response")
 
-        logger.info("Successfully retrieved AA token")
+        logger_success("Successfully retrieved AA token")
         return token
 
     # -----------------------------------------------------------------------
@@ -213,10 +213,10 @@ class SetuService:
             response = requests.post(
                 SetuAPI.CREATE_CONSENT_API, json=payload, headers=headers, timeout=10
             )
-            print(response)
             data = response.json()
+            logger_success("Consent created successfully", phone=phone_number)
             return data
         except requests.exceptions.RequestException as exc:
-            logger.exception("Connection to Setu AA Auth API failed")
+            logger_exception("Connection to Setu Create Consent API failed")
             raise RuntimeError(
-                f"Failed connecting to auth token: {exc}") from exc
+                f"Failed connecting to create consent API: {exc}") from exc

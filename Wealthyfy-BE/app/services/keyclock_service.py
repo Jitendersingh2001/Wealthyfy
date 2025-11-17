@@ -1,4 +1,3 @@
-import logging
 from fastapi import HTTPException, status
 from typing import Dict, Any, Optional
 from keycloak import KeycloakOpenID, KeycloakAdmin
@@ -7,8 +6,9 @@ from app.constants.message import Messages
 from app.config.setting import settings
 from app.utils.env_helper import EnvHelper
 from app.constants.constant import ACTIVE
-
-logger = logging.getLogger(__name__)
+from app.utils.logger_util import (
+    logger_info, logger_debug, logger_warning, logger_error, logger_exception, logger_success
+)
 
 
 class KeycloakService:
@@ -53,7 +53,11 @@ class KeycloakService:
             user_id = payload.get("userId")
             register_method = details.get("register_method", "unknown")
 
-            logger.info("Processing Keycloak event '%s' via '%s' method.", event_type, register_method)
+            logger_info(
+                f"Processing Keycloak event '{event_type}' via '{register_method}' method",
+                event_type=event_type,
+                register_method=register_method
+            )
 
             if register_method == "form":
                 user_data = {
@@ -65,7 +69,10 @@ class KeycloakService:
                 }
 
             elif register_method == "broker":
-                logger.info("Fetching user details for broker registration (userId=%s)", user_id)
+                logger_info(
+                    f"Fetching user details for broker registration",
+                    user_id=user_id
+                )
                 user_info = self.fetch_user_from_keycloak(user_id)
                 user_data = {
                     "keycloak_user_id": user_id,
@@ -76,14 +83,17 @@ class KeycloakService:
                 }
 
             else:
-                logger.warning("Unknown registration method: '%s'", register_method)
+                logger_warning(
+                    f"Unknown registration method: '{register_method}'",
+                    register_method=register_method
+                )
                 return None
 
-            logger.debug("Processed user data: %s", user_data)
+            logger_debug(f"Processed user data: {user_data}")
             return UserCreate(**user_data)
 
         except Exception as e:
-            logger.exception("Error processing Keycloak user event: %s", e)
+            logger_exception(f"Error processing Keycloak user event: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=Messages.SOMETHING_WENT_WRONG,
@@ -96,10 +106,10 @@ class KeycloakService:
         """
         try:
             user_info = self._admin.get_user(user_id)
-            logger.debug("Fetched user info from Keycloak: %s", user_info)
+            logger_debug(f"Fetched user info from Keycloak: {user_info}", user_id=user_id)
             return user_info
         except Exception as e:
-            logger.exception("Error fetching user from Keycloak: %s", e)
+            logger_exception(f"Error fetching user from Keycloak: {e}", user_id=user_id)
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Failed to fetch user from Keycloak: {str(e)}",
@@ -115,17 +125,19 @@ class KeycloakService:
             access_token = token_data.get("access_token")
 
             if not access_token:
-                logger.error("Missing 'access_token' in Keycloak response: %s", token_data)
+                logger_error(
+                    f"Missing 'access_token' in Keycloak response: {token_data}",
+                )
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Missing access token in Keycloak response.",
                 )
 
-            logger.info("Successfully retrieved Keycloak admin token.")
+            logger_success("Successfully retrieved Keycloak admin token")
             return access_token
 
         except Exception as e:
-            logger.exception("Failed to fetch Keycloak admin token: %s", e)
+            logger_exception(f"Failed to fetch Keycloak admin token: {e}")
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=f"Failed to get Keycloak token: {str(e)}",
@@ -149,7 +161,7 @@ class KeycloakService:
             token_info = self._openid.introspect(token)
 
             if not token_info.get(ACTIVE):
-                logger.warning("Inactive Keycloak token: %s", token_info)
+                logger_warning(f"Inactive Keycloak token: {token_info}")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=Messages.INVALID_TOKEN,
@@ -160,7 +172,7 @@ class KeycloakService:
         except HTTPException:
             raise
         except Exception as e:
-            logger.exception("Unexpected error validating token: %s", e)
+            logger_exception(f"Unexpected error validating token: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=Messages.SOMETHING_WENT_WRONG,

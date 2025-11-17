@@ -1,3 +1,7 @@
+# Configure logging FIRST before any other imports
+from app.config.logger import setup_logging
+setup_logging()
+
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
@@ -5,7 +9,6 @@ from fastapi.responses import JSONResponse
 
 from app.api import router as api_router
 from app.utils.response import error_response
-
 
 app = FastAPI(title="Todo App")
 
