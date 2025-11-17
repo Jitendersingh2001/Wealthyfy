@@ -84,9 +84,9 @@ class UserService {
     consent_duration: { unit: string; value: string };
     fetch_type: string;
     frequency?: { unit: string; value: string };
-  }): Promise<ApiResponse<string>> {
+  }): Promise<ApiResponse<{ url: string; consent_request_id: number | null }>> {
     const url = ENDPOINTS.USER.LINK_BANK;
-    return apiRequest.post<ApiResponse<string>>(url, payload);
+    return apiRequest.post<ApiResponse<{ url: string; consent_request_id: number | null }>>(url, payload);
   }
 }
 

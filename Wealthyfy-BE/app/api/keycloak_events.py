@@ -9,10 +9,10 @@ from sqlalchemy.orm import Session
 
 
 
-router = APIRouter(prefix="/keycloak", tags=["Keycloak Events"])
+router = APIRouter(prefix="/events", tags=["Callback Events"])
 logger = logging.getLogger(__name__)
 
-@router.post("/events")
+@router.post("/keyclock_events")
 async def handle_keycloak_event(request: Request,db: Session = Depends(get_db)):
     """
     Endpoint to handle Keycloak event notifications.

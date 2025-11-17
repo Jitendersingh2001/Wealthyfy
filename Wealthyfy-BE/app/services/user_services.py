@@ -5,8 +5,11 @@ from fastapi import HTTPException, status
 from app.services.base_service import BaseService
 from app.constants.constant import CAP_ACTIVE
 from app.models.pancard import Pancard
-from typing import Optional
+from app.models.consent_request import ConsentRequest, ConsentStatus, FetchType, UnitEnum
+from app.models.consent_fI_type import ConsentFIType, FITypeEnum, ConsentFITypeStatus
+from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
+from datetime import datetime
 
 
 class UserService(BaseService):
@@ -159,3 +162,179 @@ class UserService(BaseService):
                 .first()
             )
         return self.execute_safely(_get)
+
+    # ======================================================================
+    # Expire Existing Pending Consents
+    # ======================================================================
+    def expire_pending_consents(self, user_id: int) -> int:
+        """
+        Marks all pending and non-expired consent requests for a user as EXPIRED.
+        Also expires all associated FI types.
+        
+        Args:
+            user_id: User ID
+        
+        Returns:
+            int: Number of consents expired
+        """
+        def _expire():
+            # Find all pending consents for the user and mark them as expired
+            pending_consents = (
+                self.db.query(ConsentRequest)
+                .filter(
+                    ConsentRequest.user_id == user_id,
+                    ConsentRequest.status == ConsentStatus.PENDING
+                )
+                .all()
+            )
+            
+            expired_count = 0
+            for consent in pending_consents:
+                consent.status = ConsentStatus.EXPIRED
+                # Expire all associated FI types
+                for fi_type in consent.fi_types:
+                    fi_type.status = ConsentFITypeStatus.EXPIRE
+                expired_count += 1
+            
+            if expired_count > 0:
+                self.commit()
+            
+            return expired_count
+        
+        return self.execute_safely(_expire)
+
+    # ======================================================================
+    # Create Consent Request
+    # ======================================================================
+    def create_consent_request(
+        self,
+        user_id: int,
+        pan_id: int,
+        consent_data: Dict[str, Any]
+    ) -> ConsentRequest:
+        """
+        Creates and stores a consent request record from Setu API response.
+        
+        Args:
+            user_id: User ID
+            pan_id: PAN card ID
+            consent_data: Response data from Setu create_consent API
+        
+        Returns:
+            ConsentRequest: Created consent request record
+        """
+        def _create():
+            # Extract data from response
+            consent_id = consent_data.get("id")
+            if not consent_id:
+                raise ValueError("Missing consent ID in response")
+            
+            try:
+                consent_status = ConsentStatus[consent_data.get("status", "PENDING")]
+            except KeyError:
+                consent_status = ConsentStatus.PENDING
+            
+            detail = consent_data.get("detail", {})
+            
+            # Get data life from response
+            data_life = detail.get("dataLife", {})
+            try:
+                data_life_unit = UnitEnum[data_life.get("unit", "INF")]
+                data_life_value = data_life.get("value", 0)
+            except KeyError:
+                data_life_unit = UnitEnum.INF
+                data_life_value = 0
+            
+            # Get frequency from response (if present)
+            frequency = detail.get("frequency")
+            frequency_unit = None
+            frequency_value = None
+            if frequency:
+                try:
+                    frequency_unit = UnitEnum[frequency.get("unit")]
+                    frequency_value = frequency.get("value")
+                except KeyError:
+                    pass
+            
+            # Get fetch type from response
+            try:
+                fetch_type = FetchType[detail.get("fetchType", "ONETIME")]
+            except KeyError:
+                fetch_type = FetchType.ONETIME
+            
+            # Extract datetime values directly from response
+            data_range = detail.get("dataRange", {})
+            
+            # Create ConsentRequest record
+            consent_request = ConsentRequest(
+                consent_id=consent_id,
+                user_id=user_id,
+                pan_id=pan_id,
+                status=consent_status,
+                consent_mode=detail.get("consentMode", "STORE"),
+                vua=detail.get("vua", ""),
+                purpose_code=detail.get("purpose", {}).get("code", "101"),
+                purpose_text=detail.get("purpose", {}).get("text", "Wealth management service"),
+                purpose_ref_uri=detail.get("purpose", {}).get("refUri"),
+                purpose_category_type=detail.get("purpose", {}).get("category", {}).get("type"),
+                fetch_type=fetch_type,
+                data_range_from=data_range.get("from"),
+                data_range_to=data_range.get("to"),
+                consent_start=detail.get("consentStart"),
+                consent_expiry=detail.get("consentExpiry"),
+                data_life_unit=data_life_unit,
+                data_life_value=data_life_value,
+                frequency_unit=frequency_unit,
+                frequency_value=frequency_value,
+                redirect_url=consent_data.get("redirectUrl"),
+                trace_id=consent_data.get("traceId"),
+                tags=consent_data.get("tags"),
+                consent_types=detail.get("consentTypes"),
+                context=consent_data.get("context")
+            )
+            
+            self.db.add(consent_request)
+            self.db.flush()  # Flush to get the consent_request.id (not committing yet)
+            self.db.refresh(consent_request)
+            return consent_request
+        
+        return self.execute_safely(_create)
+
+    # ======================================================================
+    # Create Consent FI Types
+    # ======================================================================
+    def create_consent_fi_types(
+        self,
+        consent_request_id: int,
+        fi_types: List[str]
+    ) -> List[ConsentFIType]:
+        """
+        Creates and stores consent FI type records for a consent request.
+        
+        Args:
+            consent_request_id: ID of the consent request
+            fi_types: List of FI type strings from Setu API response
+        
+        Returns:
+            List[ConsentFIType]: List of created consent FI type records
+        """
+        def _create():
+            created_fi_types = []
+            for fi_type_str in fi_types:
+                try:
+                    fi_type_enum = FITypeEnum[fi_type_str]
+                    consent_fi_type = ConsentFIType(
+                        consent_request_id=consent_request_id,
+                        fi_type=fi_type_enum,
+                        status=ConsentFITypeStatus.ACTIVE
+                    )
+                    self.db.add(consent_fi_type)
+                    created_fi_types.append(consent_fi_type)
+                except KeyError:
+                    # Skip invalid FI types
+                    continue
+            
+            self.commit()
+            return created_fi_types
+        
+        return self.execute_safely(_create)

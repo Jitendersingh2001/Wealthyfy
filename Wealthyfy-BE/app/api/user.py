@@ -223,15 +223,16 @@ def verify_otp(payload: VerifyOtpRequest):
 )
 def link_bank(
     payload: LinkBankRequest,
+    db: Session = Depends(get_db),
     current_user=Depends(authenticate_user)
 ):
     pancard = current_user.pancard.pancard
-    # user_Id = current_user.id
+    pancard_id = current_user.pancard.id
     data_start_date = to_utc_z_format(payload.start_date)
     data_end_date = to_utc_z_format(payload.end_date)
 
     setu_service = SetuService()
-    data = setu_service.create_consent(
+    consent_data = setu_service.create_consent(
             phone_number=current_user.phone_number,
             pancard=pancard,
             start_date=data_start_date,
@@ -241,7 +242,42 @@ def link_bank(
             fetch_type=payload.fetch_type,
             frequency=payload.frequency
         )
+    
+    # Only create consent request if URL is present in response
+    consent_request_id = None
+    if consent_data.get("url"):
+        # Create user service instance
+        user_service = UserService(db)
+        
+        # Check and expire existing pending consents for the user
+        user_service.expire_pending_consents(user_id=current_user.id)
+        
+        # Create consent request
+        consent_request = user_service.create_consent_request(
+            user_id=current_user.id,
+            pan_id=pancard_id,
+            consent_data=consent_data
+        )
+        
+        # Store consent request primary key ID for response
+        consent_request_id = consent_request.id
+        
+        # Create consent FI types
+        detail = consent_data.get("detail", {})
+        fi_types = detail.get("fiTypes", [])
+        if fi_types:
+            user_service.create_consent_fi_types(
+                consent_request_id=consent_request.id,
+                fi_types=fi_types
+            )
+        else:
+            # Commit the consent request even if there are no FI types
+            db.commit()
+    
     return success_response(
-            data=data.get("url"),
+            data={
+                "url": consent_data.get("url"),
+                "consent_request_id": consent_request_id
+            },
             message=Messages.CREATED_SUCCESSFULLY.replace(":name", "Consent"),
         )

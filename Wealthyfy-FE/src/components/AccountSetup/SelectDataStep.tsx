@@ -20,7 +20,7 @@ import type {
   FrequencyUnit,
 } from "@/types/selectDataStep";
 
-function SelectDataStep({ onNext: _onNext, onBack }: StepWithBackProps) {
+function SelectDataStep({ onBack }: StepWithBackProps) {
   const [isLinking, setIsLinking] = useState(false);
   const [currentSubStep, setCurrentSubStep] = useState(1);
   const [selectedFiTypes, setSelectedFiTypes] = useState<FiType[]>([]);
@@ -136,10 +136,10 @@ function SelectDataStep({ onNext: _onNext, onBack }: StepWithBackProps) {
         fetch_type: fetchType,
         frequency,
       });
-
-      if (response?.data) {
+      console.log("Link Bank Response:", response);
+      if (response?.data?.url) {
         // Redirect to consent URL in the same window
-        window.location.href = response.data;
+        window.location.href = response.data.url;
       } else {
         toast.error("Failed to get consent URL");
       }
