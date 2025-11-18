@@ -9,4 +9,8 @@ export const config = {
     name: import.meta.env.VITE_APP_NAME,
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
   },
+  pusher: {
+    key: import.meta.env.VITE_PUSHER_KEY,
+    cluster: import.meta.env.VITE_PUSHER_CLUSTER,
+  }
 };

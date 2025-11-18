@@ -9,3 +9,6 @@ export const ENDPOINTS = {
     LINK_BANK: `/users/link-bank`,
   },
 };
+
+
+export const PUSHER_AUTH_ENDPOINT = '/pusher/auth';

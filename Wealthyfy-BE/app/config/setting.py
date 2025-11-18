@@ -69,6 +69,15 @@ class TwilloSettings(BaseSettings):
     TWILIO_AUTH_TOKEN: str
     TWILIO_VERIFICATION_SERVICE_SID: str
 
+# ---------------------------------------------------------
+# Pusher Configuration
+# ---------------------------------------------------------
+class PusherSettings(BaseSettings):
+    PUSHER_APP_ID: str
+    PUSHER_KEY: str
+    PUSHER_SECRET: str
+    PUSHER_CLUSTER: str
+    PUSHER_SSL: bool = True
 
 # ---------------------------------------------------------
 # Root Configuration
@@ -79,6 +88,8 @@ class Settings(BaseSettings):
     keycloak: KeycloakSettings
     setu: SetuSettings
     twillo: TwilloSettings
+    pusher: PusherSettings
+
 
     class Config:
         env_file = ".env"

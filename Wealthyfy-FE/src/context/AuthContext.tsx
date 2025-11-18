@@ -13,6 +13,7 @@ import { SESSION_KEYS } from "@/constants/sessionKeys";
 import { userService } from "@/services/userService";
 import { getErrorMessage } from "@/utils/errorHelper";
 import type { UserResponse } from "@/types/user";
+import { pusherService } from "@/services/pusher";
 
 /* -------------------------------- Types ----------------------------------- */
 
@@ -93,6 +94,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
               Boolean(mappedUser.phoneNumber && mappedUser.isSetupComplete)
             );
 
+            // Subscribe to Pusher channel for user events
+            try {
+              await pusherService.subscribe(mappedUser.id);
+            } catch (error) {
+              console.error("Failed to subscribe to Pusher channel:", error);
+              // Don't block login if Pusher subscription fails
+            }
+
             // Login toast
             if (
               isRedirectFromLogin &&
@@ -112,6 +121,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         } else {
           updateUserState();
           sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN);
+          // Unsubscribe from Pusher when not authenticated
+          await pusherService.unsubscribe();
+          pusherService.disconnect();
         }
 
         // Logout message handling
@@ -128,13 +140,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     };
 
     initialize();
+
+    // Cleanup function to unsubscribe and disconnect on unmount
+    return () => {
+      pusherService.unsubscribe().catch(console.error);
+      pusherService.disconnect();
+    };
   }, [updateUserState]);
 
   /* ----------------------------- Auth Actions ----------------------------- */
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
-  const logout = () =>
+  const logout = async () => {
+    // Unsubscribe from Pusher and disconnect before logout
+    await pusherService.unsubscribe();
+    pusherService.disconnect();
     keycloakService.logout({ redirectUri: window.location.origin });
+  };
 
   if (isLoading) return <Loader fullscreen />;
 
