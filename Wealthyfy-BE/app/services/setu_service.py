@@ -1,7 +1,9 @@
 import requests
+from requests.exceptions import JSONDecodeError
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from fastapi import status
+from datetime import datetime
 from app.config.setting import settings
 from app.constants.setu_api import SetuAPI
 from app.constants import constant
@@ -9,10 +11,13 @@ from app.constants.setu_events import SetuEventTypes
 from app.models.consent_request import ConsentRequest, ConsentStatus
 from app.models.consent_cancellation_log import ConsentCancellationLog, CancelledBy
 from app.models.consent_fI_type import ConsentFITypeStatus
+from app.services.user_services import UserService
 from app.utils.logger_util import (
     logger_info, logger_debug, logger_error, logger_exception, logger_success, logger_warning
 )
 from app.constants.message import Messages
+from app.utils.helper import to_utc_z_format
+
 
 
 class SetuService:
@@ -326,3 +331,143 @@ class SetuService:
             return SetuEventTypes.SETU_CONSENT_CANCELLATION_LOG_MESSAGE[error_message]
 
         return Messages.UNKNOWN_ERROR
+
+    # -----------------------------------------------------------------------
+    # Update Consent Status
+    # -----------------------------------------------------------------------
+    def update_consent_status(self, consent_id: str, consent_status: str):
+        """
+        Update the consent status in the database based on Setu event.
+
+        Args:
+            consent_id: The consent ID from Setu
+            consent_status: The new consent status to update
+        """
+
+        if not consent_id:
+            logger_warning("Consent ID is missing, cannot update status")
+            return
+
+        try:
+            logger_info(
+                f"Updating consent status",
+                consent_id=consent_id,
+                consent_status=consent_status
+            )
+
+            # Find the consent request by consent_id
+            consent_request = (
+                self.db.query(ConsentRequest)
+                .filter(ConsentRequest.consent_id == consent_id)
+                .first()
+            )
+
+            if not consent_request:
+                logger_warning(
+                    f"Consent request not found for consent_id: {consent_id}")
+                return
+
+            # Update the consent status
+            consent_request.status = ConsentStatus(consent_status)
+            self.db.commit()
+            self.db.refresh(consent_request)
+
+            logger_success(
+                f"Consent status updated successfully",
+                consent_id=consent_id,
+                new_status=consent_status
+            )
+            if consent_status == constant.CAP_ACTIVE:
+                self._create_data_session(consent_request)
+        except Exception as e:
+            logger_exception(
+                f"Failed to update consent status for consent_id: {consent_id}")
+            if self.db:
+                self.db.rollback()
+            raise
+
+    # -----------------------------------------------------------------------
+    # Create Data Session
+    # -----------------------------------------------------------------------
+    def _create_data_session(self, consent_request: ConsentRequest):
+        """
+        Create a data session when consent becomes ACTIVE.
+
+        Args:
+            consent_request: The ConsentRequest object
+        """
+
+        try:
+            # Logic to create data session goes here
+            # For demonstration, we just log the action
+            logger_info(
+                f"Creating data session for ACTIVE consent",
+                consent_request=consent_request
+            )
+            consent_id = consent_request.consent_id
+            data_start_date = to_utc_z_format(consent_request.data_range_from)
+            data_end_date = to_utc_z_format(consent_request.data_range_to)
+            token = self.get_aa_token()
+            payload = {
+                "consentId": consent_id,
+                "dataRange": {
+                    "to": data_end_date,
+                    "from": data_start_date
+                },
+                "format": "json"
+            }
+
+            headers = {
+                "x-product-instance-id": self._aa_product_instance_id,
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}",
+            }
+            
+            response = requests.post(
+                SetuAPI.CREATE_DATA_SESSION_API, json=payload, headers=headers, timeout=10
+            )
+            
+            if response.status_code != status.HTTP_201_CREATED:
+                logger_error(
+                    f"Invalid data session response: {response.status_code} | {response.text}",
+                    status_code=response.status_code,
+                    consent_id=consent_id
+                )
+                raise RuntimeError(
+                    f"Data session API error: {response.status_code} | {response.text}"
+                )
+            
+            try:
+                data = response.json()
+                logger_info(f"Data session API response: {data}")
+            except (ValueError, JSONDecodeError) as json_err:
+                logger_error(
+                    f"Non-JSON response received from data session API: {response.text}",
+                    consent_id=consent_id
+                )
+                raise RuntimeError(
+                    f"Failed to parse data session API response as JSON: {json_err}"
+                ) from json_err
+
+            try:
+                user_service = UserService(self.db)
+                user_service.create_user_data_session(
+                        consent_request=consent_request,
+                        session_data=data
+                    )
+            except Exception as db_err:
+                logger_error(
+                        f"Failed to save data session to database: {db_err}",
+                        consent_id=consent_id,
+                        session_id=data.get("id")
+                    )
+
+
+            logger_success(
+                f"Consent is now ACTIVE",
+                consent_request=consent_request
+            )
+
+        except Exception as e:
+            logger_exception(
+                f"Failed to create data session for consent_id: {consent_request.consent_id}")

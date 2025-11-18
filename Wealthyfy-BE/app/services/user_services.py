@@ -8,9 +8,15 @@ from app.models.pancard import Pancard
 from app.models.consent_request import ConsentRequest, ConsentStatus, FetchType, UnitEnum
 from app.models.consent_fI_type import ConsentFIType, FITypeEnum, ConsentFITypeStatus
 from app.models.consent_cancellation_log import ConsentCancellationLog, CancelledBy
+from app.models.consent_data_session import DataSession, DataSessionStatusEnum
+from app.utils.logger_util import (
+    logger_info, logger_error, logger_success, logger_warning
+)
+from app.services.pusher_service import PusherService
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
 from datetime import datetime
+import threading
 
 
 class UserService(BaseService):
@@ -347,3 +353,174 @@ class UserService(BaseService):
             return created_fi_types
         
         return self.execute_safely(_create)
+
+    # ======================================================================
+    # Create User Data Session
+    # ======================================================================
+    def create_user_data_session(
+        self,
+        consent_request: ConsentRequest,
+        session_data: Dict[str, Any]
+    ) -> DataSession:
+        """
+        Creates and stores a data session record from Setu API response.
+        
+        Args:
+            consent_request: The ConsentRequest object
+            session_data: Response data from Setu create data session API
+        
+        Returns:
+            DataSession: Created data session record
+        """
+        def _create():
+            # Extract session data from response
+            session_id = session_data.get("id")
+            
+            # Parse status using DataSessionStatusEnum
+            status_str = session_data.get("status", "PENDING")
+            try:
+                session_status = DataSessionStatusEnum[status_str]
+            except KeyError:
+                logger_warning(
+                    f"Unknown status '{status_str}', defaulting to PENDING",
+                    status=status_str,
+                    consent_id=consent_request.consent_id
+                )
+                session_status = DataSessionStatusEnum.PENDING
+            
+            # Parse date range
+            data_range = session_data.get("dataRange", {})
+            data_range_from = None
+            data_range_to = None
+            
+            if data_range:
+                from_str = data_range.get("from")
+                to_str = data_range.get("to")
+                
+                if from_str:
+                    # Parse ISO format date string (handles 'Z' suffix)
+                    from_str = from_str.replace('Z', '+00:00')
+                    data_range_from = datetime.fromisoformat(from_str)
+                
+                if to_str:
+                    # Parse ISO format date string (handles 'Z' suffix)
+                    to_str = to_str.replace('Z', '+00:00')
+                    data_range_to = datetime.fromisoformat(to_str)
+            
+            # Create DataSession record
+            data_session = DataSession(
+                session_id=session_id,
+                consent_request_id=consent_request.id,
+                status=session_status,
+                data_range_from=data_range_from,
+                data_range_to=data_range_to
+            )
+            
+            self.db.add(data_session)
+            self.commit()
+            self.db.refresh(data_session)
+            
+            logger_success(
+                f"Data session saved to database",
+                session_id=session_id,
+                consent_id=consent_request.consent_id
+            )
+            
+            return data_session
+        
+        return self.execute_safely(_create)
+    
+
+    # ======================================================================
+    # Update Session Status
+    # ======================================================================
+    def update_session_status(self, consent_id: str,session_id: str,session_status: str) -> None:
+        """
+        Updates the status of a data session.
+        """
+        def _update():
+            # Find the consent request by consent_id
+            consent_request = (
+                self.db.query(ConsentRequest)
+                .filter(ConsentRequest.consent_id == consent_id)
+                .first()
+            )
+            if not consent_request:
+                logger_error(
+                    f"Consent request not found for consent_id: {consent_id}"
+                )
+                return
+            
+            # Find the latest data session for the consent request
+            data_session = (
+                self.db.query(DataSession)
+                .filter(
+                    DataSession.consent_request_id == consent_request.id,
+                    DataSession.session_id == session_id
+                )
+                .order_by(DataSession.id.desc())
+                .first()
+            )
+            if not data_session:
+                logger_error(
+                    f"Data session not found for consent_id: {consent_id}"
+                )
+                return
+            
+            # Update the session status
+            try:
+                new_status = DataSessionStatusEnum[session_status]
+                data_session.status = new_status
+                self.commit()
+                
+                logger_success(
+                    f"Data session status updated",
+                    session_id=data_session.session_id,
+                    new_status=session_status
+                )
+                
+                # If session status is COMPLETED, send pusher event to trigger Link Accounts step
+                if new_status == DataSessionStatusEnum.COMPLETED:
+                    # Schedule pusher event to be sent after 30 seconds
+                    def send_delayed_pusher_event():
+                        try:
+                            pusher_service = PusherService()
+                            user_id = consent_request.user_id
+                            pusher_service.trigger(
+                                user_id=user_id,
+                                event="session-completed",
+                                data={
+                                    "session_id": session_id,
+                                    "consent_id": consent_id,
+                                    "status": session_status
+                                }
+                            )
+                            logger_info(
+                                f"Pusher event 'session-completed' sent to user {user_id}",
+                                session_id=session_id,
+                                consent_id=consent_id
+                            )
+                        except Exception as e:
+                            logger_error(
+                                f"Failed to send pusher event for completed session",
+                                error=str(e),
+                                session_id=session_id,
+                                consent_id=consent_id
+                            )
+                    
+                    # Schedule the event to be sent after 30 seconds
+                    timer = threading.Timer(30.0, send_delayed_pusher_event)
+                    timer.start()
+                    logger_info(
+                        f"Pusher event 'session-completed' scheduled for user {consent_request.user_id} after 30 seconds",
+                        session_id=session_id,
+                        consent_id=consent_id
+                    )
+                
+            except KeyError:
+                logger_warning(
+                    f"Unknown session status '{session_status}' received",
+                    session_id=data_session.session_id
+                )
+        
+        self.execute_safely(_update)

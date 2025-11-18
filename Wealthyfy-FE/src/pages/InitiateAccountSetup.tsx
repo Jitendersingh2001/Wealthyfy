@@ -15,6 +15,7 @@ import OtpStep from "@/components/AccountSetup/OtpStep";
 import StepNavigation from "@/components/custom/StepNavigation";
 import SelectDataStep from "@/components/AccountSetup/SelectDataStep";
 import LinkAccountsStep from "@/components/AccountSetup/LinkAccountsStep";
+import FetchDataStep from "@/components/AccountSetup/FetchDataStep";
 
 /* ------------------------------ Component --------------------------------- */
 function InitiateAccountSetupPage() {
@@ -49,6 +50,10 @@ function InitiateAccountSetupPage() {
       setuError={setuError}
       onNext={() => setCurrentStep(5)}
       onBack={() => setCurrentStep(3)}
+    />,
+    <FetchDataStep
+      onNext={() => setCurrentStep(6)}
+      onBack={() => setCurrentStep(4)}
     />,
   ];
 

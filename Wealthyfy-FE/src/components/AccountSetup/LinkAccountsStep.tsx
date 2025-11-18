@@ -1,14 +1,51 @@
+import { useEffect, useRef } from "react";
 import { type StepWithBackProps } from "@/types/step";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
+import { pusherService } from "@/services/pusher";
 
 interface LinkAccountsStepProps extends StepWithBackProps {
   isSetuCallback?: boolean;
   setuError?: { code?: string; message?: string } | null;
 }
 
+interface SessionCompletedEvent {
+  session_id: string;
+  consent_id: string;
+  status: string;
+}
+
 function LinkAccountsStep({ onNext, onBack, isSetuCallback = false, setuError = null }: LinkAccountsStepProps) {
+  const hasTriggeredNext = useRef(false);
+
+  // Listen for session-completed Pusher event
+  useEffect(() => {
+    const channel = pusherService.getChannel();
+    
+    if (!channel) {
+      console.warn("Pusher channel not available");
+      return;
+    }
+
+    const handleSessionCompleted = (data: SessionCompletedEvent) => {
+      console.log("Received session-completed event:", data);
+      
+      // Only trigger onNext once and when status is COMPLETED
+      if (data.status === "COMPLETED" && !hasTriggeredNext.current) {
+        hasTriggeredNext.current = true;
+        onNext();
+      }
+    };
+
+    // Bind to the session-completed event
+    channel.bind("session-completed", handleSessionCompleted);
+
+    // Cleanup: unbind the event listener
+    return () => {
+      channel.unbind("session-completed", handleSessionCompleted);
+    };
+  }, [onNext]);
   // If user is returning from Setu with an error
   if (isSetuCallback && setuError) {
     return (

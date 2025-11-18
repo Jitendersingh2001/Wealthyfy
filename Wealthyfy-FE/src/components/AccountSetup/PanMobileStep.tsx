@@ -90,17 +90,23 @@ function PanMobileStep({ onNext }: PanMobileStepProps) {
 
         const { id, pancard, consent } = response.data;
 
-        // 🚨 Only hydrate if user has NOT entered anything previously
+        // Always update pancardId, consent, and panVerify from API response
+        // These are metadata that should always be synced with the database
+        dispatch(
+          updateFormData({
+            pancardId: id,
+            consent,
+            panVerify: true,
+          })
+        );
+
+        // Only hydrate form fields if user has NOT entered anything previously
         if (!saved.pan && !saved.mobile) {
           reset({ pan: pancard, mobile: phone });
-
           dispatch(
             updateFormData({
               pan: pancard,
               mobile: phone,
-              pancardId: id,
-              consent,
-              panVerify: true,
             })
           );
         }

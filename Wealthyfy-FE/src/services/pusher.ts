@@ -21,7 +21,7 @@ class PusherService {
     this.pusherClient = new Pusher(config.pusher.key, {
       cluster: config.pusher.cluster,
       forceTLS: true,
-      authEndpoint: `${config.app.apiBaseUrl}/${PUSHER_AUTH_ENDPOINT}`,
+      authEndpoint: `${config.app.apiBaseUrl}${PUSHER_AUTH_ENDPOINT}`,
       auth: {
         headers: {
           Authorization: `Bearer ${token}`,

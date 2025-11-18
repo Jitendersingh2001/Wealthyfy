@@ -66,6 +66,7 @@ async def handle_keycloak_event(request: Request, db: Session = Depends(get_db))
 async def setu_events(request: Request, db: Session = Depends(get_db)):
     try:
         setu_service = SetuService(db)
+        user_service = UserService(db)
 
         payload: Dict[str, Any] = await request.json()
         logger_info(f"Received setu event payload: {payload}")
@@ -76,6 +77,15 @@ async def setu_events(request: Request, db: Session = Depends(get_db)):
             if payload.get("error"):
                 error = payload.get("error")
                 setu_service.handle_consent_cancellation(error, consent_id)
+            else:
+                consent_status = payload.get("data", {}).get("status").upper()
+                setu_service.update_consent_status(consent_id, consent_status)
+        elif event_type == SetuEventTypes.SETU_SESSION_STATUS_EVENT_TYPE:
+            session_status = payload.get("data", {}).get("status").upper()
+            session_id = payload.get("dataSessionId")
+            user_service.update_session_status(consent_id, session_id,  session_status)
+        else:
+            logger_warning(f"Unhandled Setu event type: {event_type}", event_type=event_type)
         return {"status": "received", "payload": payload}
 
     except Exception as e:
