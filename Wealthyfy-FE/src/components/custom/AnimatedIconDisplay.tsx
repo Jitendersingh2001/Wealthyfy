@@ -36,31 +36,39 @@ function AnimatedIconDisplay({
   };
 
   const colors = colorClasses[variant];
-  const finalIconColor = iconColor || colors.text;
+  
+  // Determine icon color: use provided iconColor, or white when inside circular background, or variant color
+  const getIconColor = () => {
+    if (iconColor) return iconColor;
+    if (showCircularBackground) return "text-white";
+    return colors.text;
+  };
+
+  const finalIconColor = getIconColor();
 
   return (
     <div className="flex justify-center">
-      <div className={`relative ${containerSize} flex items-center justify-center`}>
+      <div className={`relative ${containerSize} flex items-center justify-center min-h-40`}>
         {/* Animated Background Circles */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div
-            className={`absolute w-24 h-24 rounded-full ${colors.bg}/15 animate-pulse`}
+            className={`absolute w-24 h-24 rounded-full ${colors.bg} opacity-[0.15] animate-pulse`}
             style={{ animationDelay: "0s" }}
           />
           <div
-            className={`absolute w-20 h-20 rounded-full ${colors.bg}/30 animate-pulse`}
+            className={`absolute w-20 h-20 rounded-full ${colors.bg} opacity-[0.30] animate-pulse`}
             style={{ animationDelay: "0.5s" }}
           />
         </div>
 
         {/* Icon with optional Circular Background */}
-        <div className="relative z-10">
+        <div className="relative z-10 flex items-center justify-center">
           {showCircularBackground ? (
-            <div className={`w-20 h-20 rounded-full ${colors.bg}/10 border-2 ${colors.border}/30 flex items-center justify-center backdrop-blur-sm`}>
-              <Icon className={`${iconSize} ${finalIconColor}`} />
+            <div className={`w-20 h-20 rounded-full ${colors.bg} opacity-90 border-2 ${colors.border} flex items-center justify-center shadow-lg`}>
+              <Icon className={`${iconSize} ${finalIconColor} stroke-2`} />
             </div>
           ) : (
-            <Icon className={`${iconSize} ${finalIconColor}`} />
+            <Icon className={`${iconSize} ${finalIconColor} stroke-2`} />
           )}
         </div>
       </div>

@@ -1,11 +1,18 @@
 import requests
+from typing import Dict, Any, Optional
+from sqlalchemy.orm import Session
 from fastapi import status
 from app.config.setting import settings
 from app.constants.setu_api import SetuAPI
 from app.constants import constant
+from app.constants.setu_events import SetuEventTypes
+from app.models.consent_request import ConsentRequest, ConsentStatus
+from app.models.consent_cancellation_log import ConsentCancellationLog, CancelledBy
+from app.models.consent_fI_type import ConsentFITypeStatus
 from app.utils.logger_util import (
-    logger_info, logger_debug, logger_error, logger_exception, logger_success
+    logger_info, logger_debug, logger_error, logger_exception, logger_success, logger_warning
 )
+from app.constants.message import Messages
 
 
 class SetuService:
@@ -14,9 +21,8 @@ class SetuService:
     # -----------------------------------------------------------------------
     # Initialization
     # -----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, db: Optional[Session] = None):
         """Load Setu configuration from environment and initialize credentials."""
-
         setu_settings = settings.setu
 
         # PAN Verification credentials
@@ -28,6 +34,9 @@ class SetuService:
         self._aa_client_id = setu_settings.SETU_AA_CLIENT_ID
         self._aa_client_secret = setu_settings.SETU_AA_CLIENT_SECRET
         self._aa_product_instance_id = setu_settings.SETU_AA_PRODUCT_INSTANCE_ID
+
+        # Database session (optional for backward compatibility)
+        self.db = db
 
     # -----------------------------------------------------------------------
     # PAN Verification
@@ -84,7 +93,8 @@ class SetuService:
             result = response.json()
             logger_debug(f"PAN verification API response: {result}")
         except ValueError:
-            logger_error("Non-JSON response received from PAN API", pan=pancard)
+            logger_error(
+                "Non-JSON response received from PAN API", pan=pancard)
             raise RuntimeError(
                 "Invalid JSON response from PAN verification API")
 
@@ -98,7 +108,8 @@ class SetuService:
             logger_info(f"PAN verification failed", pan=pancard)
             return False
 
-        logger_error(f"Unexpected verification status: {verification_status}", status=verification_status)
+        logger_error(
+            f"Unexpected verification status: {verification_status}", status=verification_status)
         raise RuntimeError(
             f"Unexpected verification status received: {verification_status}"
         )
@@ -220,3 +231,98 @@ class SetuService:
             logger_exception("Connection to Setu Create Consent API failed")
             raise RuntimeError(
                 f"Failed connecting to create consent API: {exc}") from exc
+
+    # -----------------------------------------------------------------------
+    # Handle Setu Consent Cancellation Events
+    # -----------------------------------------------------------------------
+    def handle_consent_cancellation(self, error: Dict[str, Any], consent_id: str):
+        """
+        Handle consent cancellation when an error occurs in Setu events.
+        
+        Args:
+            error: Error dictionary containing code and message
+            consent_id: The consent ID from Setu
+        """
+
+        if not consent_id:
+            logger_warning(
+                "Consent ID is missing, cannot process cancellation")
+            return
+
+        try:
+            # Extract error code and message
+            error_code = error.get("code", "")
+            error_message = error.get("message", "")
+
+            logger_info(
+                f"Processing consent cancellation",
+                consent_id=consent_id,
+                error_code=error_code,
+                error_message=error_message
+            )
+
+            # Find the consent request by consent_id
+            consent_request = (
+                self.db.query(ConsentRequest)
+                .filter(ConsentRequest.consent_id == consent_id)
+                .first()
+            )
+
+            if not consent_request:
+                logger_warning(
+                    f"Consent request not found for consent_id: {consent_id}")
+                return
+
+            # Check if error code matches any cancellation event
+            is_cancellation_event = error_code in SetuEventTypes.SETU_CONSNET_CANCELATION_EVENTS
+
+            if is_cancellation_event:
+                # Map error code to cancellation message
+                cancellation_message = self._get_cancellation_message(
+                    error_code, error_message)
+
+                # Update consent status to REJECTED
+                consent_request.status = ConsentStatus.REJECTED
+
+                # Expire all associated FI types
+                for fi_type in consent_request.fi_types:
+                    fi_type.status = ConsentFITypeStatus.EXPIRE
+
+                # Create cancellation log entry
+                cancellation_log = ConsentCancellationLog(
+                    consent_request_id=consent_request.id,
+                    reason=cancellation_message,
+                    cancelled_by=CancelledBy.USER
+                )
+                self.db.add(cancellation_log)
+                self.db.commit()
+
+                logger_success(
+                    f"Consent cancelled and status updated to REJECTED",
+                    consent_id=consent_id,
+                    error_code=error_code
+                )
+            else:
+                # For non-cancellation errors, log but don't change status
+                logger_info(
+                    f"Error received but not a cancellation event",
+                    consent_id=consent_id,
+                    error_code=error_code
+                )
+
+        except Exception as e:
+            logger_exception(
+                f"Failed to handle consent cancellation for consent_id: {consent_id}")
+            if self.db:
+                self.db.rollback()
+            raise
+
+    # -----------------------------------------------------------------------
+    # Get Cancellation Message
+    # -----------------------------------------------------------------------
+    def _get_cancellation_message(self, error_code: str, error_message: str) -> str:
+        # First, check if error_message is a valid key in the constants
+        if error_message and error_message in SetuEventTypes.SETU_CONSENT_CANCELLATION_LOG_MESSAGE:
+            return SetuEventTypes.SETU_CONSENT_CANCELLATION_LOG_MESSAGE[error_message]
+
+        return Messages.UNKNOWN_ERROR
