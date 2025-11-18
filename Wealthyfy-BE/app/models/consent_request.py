@@ -75,3 +75,4 @@ class ConsentRequest(Base):
     # Relationships
     fi_types = relationship("ConsentFIType", back_populates="consent_request", cascade="all, delete-orphan")
     sessions = relationship("DataSession", back_populates="consent_request", cascade="all, delete-orphan")
+    cancellation_logs = relationship("ConsentCancellationLog", back_populates="consent_request", cascade="all, delete-orphan")

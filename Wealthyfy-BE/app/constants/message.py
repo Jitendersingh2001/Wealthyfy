@@ -22,3 +22,4 @@ class Messages:
     INVALID_OR_EXPIRED_OTP="Invalid or expired OTP"
     FAILED_TO_SEND_OTP = "Failed to send OTP. Please try again later."
     SAVED_SUCCESSFULLY = ":name saved successfully."
+    CONSENT_CANCELLED_NEW_CONSENT_CREATED = "New consent created, previous pending consent expired"

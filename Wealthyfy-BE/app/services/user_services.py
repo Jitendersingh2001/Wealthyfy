@@ -7,6 +7,7 @@ from app.constants.constant import CAP_ACTIVE
 from app.models.pancard import Pancard
 from app.models.consent_request import ConsentRequest, ConsentStatus, FetchType, UnitEnum
 from app.models.consent_fI_type import ConsentFIType, FITypeEnum, ConsentFITypeStatus
+from app.models.consent_cancellation_log import ConsentCancellationLog, CancelledBy
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -169,7 +170,7 @@ class UserService(BaseService):
     def expire_pending_consents(self, user_id: int) -> int:
         """
         Marks all pending and non-expired consent requests for a user as EXPIRED.
-        Also expires all associated FI types.
+        Also expires all associated FI types and logs the cancellation reason.
         
         Args:
             user_id: User ID
@@ -194,6 +195,14 @@ class UserService(BaseService):
                 # Expire all associated FI types
                 for fi_type in consent.fi_types:
                     fi_type.status = ConsentFITypeStatus.EXPIRE
+                
+                # Create cancellation log entry
+                cancellation_log = ConsentCancellationLog(
+                    consent_request_id=consent.id,
+                    reason=Messages.CONSENT_CANCELLED_NEW_CONSENT_CREATED,
+                    cancelled_by=CancelledBy.SYSTEM
+                )
+                self.db.add(cancellation_log)
                 expired_count += 1
             
             if expired_count > 0:
