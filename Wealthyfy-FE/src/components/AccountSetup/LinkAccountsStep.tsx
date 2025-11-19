@@ -6,6 +6,7 @@ import { usePusherEvent } from "@/hooks/use-pusher-event";
 import { useEffect, useState, useRef } from "react";
 import { useSetuCallback } from "@/hooks/use-setu-callback";
 import { userService } from "@/services/userService";
+import { CONSTANTS } from "@/constants/constants";
 
 interface LinkAccountsStepProps extends StepWithBackProps {
   isSetuCallback?: boolean;
@@ -19,7 +20,6 @@ interface SessionCompletedEvent {
 }
 
 function LinkAccountsStep({ onNext, onBack, isSetuCallback = false, setuError = null }: LinkAccountsStepProps) {
-  // Use useSetuCallback hook to get consent_id (it already uses useSearchParams internally)
   const { consentId } = useSetuCallback();
   const [hasCheckedStatus, setHasCheckedStatus] = useState(false);
   const [shouldListenToPusher, setShouldListenToPusher] = useState(false);
@@ -41,7 +41,7 @@ function LinkAccountsStep({ onNext, onBack, isSetuCallback = false, setuError = 
           console.log("Session status check:", sessionInfo);
           
           // If session is already completed, trigger onNext immediately
-          if (sessionInfo.completed && sessionInfo.status === "COMPLETED") {
+          if (sessionInfo.completed && sessionInfo.status === CONSTANTS.COMPLETED_STATUS) {
             console.log("Session already completed, proceeding immediately");
             onNextRef.current();
           } else {
