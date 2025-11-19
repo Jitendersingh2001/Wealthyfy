@@ -6,7 +6,7 @@ interface FetchDataStepProps extends StepWithBackProps {}
 
 function FetchDataStep({ onNext: _onNext, onBack: _onBack }: FetchDataStepProps) {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center px-4 py-12" style={{ minHeight: 0, maxWidth: '100%', width: '100%' }}>
+    <div className="w-full h-full flex flex-col items-center justify-center px-4" style={{ minHeight: 0, maxWidth: '100%', width: '100%' }}>
       <div className="flex flex-col items-center justify-center space-y-6 text-center max-w-lg">
         <AnimatedIconDisplay
           icon={Database}
