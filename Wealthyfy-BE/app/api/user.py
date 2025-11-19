@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, Response
+from fastapi import APIRouter, status, Depends, Response, Query
 from sqlalchemy.orm import Session
 from app.config.database import get_db
 from app.schemas.user import UserResponse, CreateUserPanAndPhoneRequest
@@ -281,3 +281,28 @@ def link_bank(
             },
             message=Messages.CREATED_SUCCESSFULLY.replace(":name", "Consent"),
         )
+
+# ===========================================================================
+# CHECK SESSION STATUS
+# ===========================================================================
+@router.get(
+    "/session-status",
+    response_model=ApiResponse,
+    dependencies=[Depends(authenticate_user)]
+)
+def check_session_status(
+    consent_id: str = Query(..., description="Consent ID to check session status"),
+    db: Session = Depends(get_db)
+):
+    """
+    Checks if a session exists and is completed for a given consent_id.
+    This endpoint allows the frontend to poll for session completion status
+    after redirecting from Setu, avoiding race conditions with Pusher events.
+    """
+    user_service = UserService(db)
+    session_info = user_service.check_session_status(consent_id)
+    
+    return success_response(
+        data=session_info,
+        message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Session status")
+    )

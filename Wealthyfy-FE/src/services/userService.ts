@@ -88,6 +88,27 @@ class UserService {
     const url = ENDPOINTS.USER.LINK_BANK;
     return apiRequest.post<ApiResponse<{ url: string; consent_request_id: number | null }>>(url, payload);
   }
+
+  /**
+   * Check session status for a given consent ID
+   * @param consentId - Consent ID to check
+   */
+  async checkSessionStatus(consentId: string): Promise<ApiResponse<{
+    session_id: string | null;
+    consent_id: string;
+    status: string | null;
+    exists: boolean;
+    completed: boolean;
+  }>> {
+    const url = ENDPOINTS.USER.SESSION_STATUS(consentId);
+    return apiRequest.get<ApiResponse<{
+      session_id: string | null;
+      consent_id: string;
+      status: string | null;
+      exists: boolean;
+      completed: boolean;
+    }>>(url);
+  }
 }
 
 export const userService = new UserService();

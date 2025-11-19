@@ -20,6 +20,7 @@ interface UseSetuCallbackReturn {
   setuError: SetuError | null;
   shouldRedirect: boolean;
   redirectPath: string | null;
+  consentId: string | null;
 }
 
 /* ---------------------------- Hook Definition ----------------------------- */
@@ -100,5 +101,11 @@ export function useSetuCallback(
   }, [hasSetuParams, setuParams]);
 
   /* ------------------------------- Return -------------------------------- */
-  return { isSetuCallback, setuError, shouldRedirect, redirectPath };
+  return { 
+    isSetuCallback, 
+    setuError, 
+    shouldRedirect, 
+    redirectPath,
+    consentId: setuParams.id || null
+  };
 }

@@ -1,9 +1,11 @@
-import { useEffect, useRef } from "react";
 import { type StepWithBackProps } from "@/types/step";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
-import { pusherService } from "@/services/pusher";
+import { usePusherEvent } from "@/hooks/use-pusher-event";
+import { useEffect, useState, useRef } from "react";
+import { useSetuCallback } from "@/hooks/use-setu-callback";
+import { userService } from "@/services/userService";
 
 interface LinkAccountsStepProps extends StepWithBackProps {
   isSetuCallback?: boolean;
@@ -17,35 +19,66 @@ interface SessionCompletedEvent {
 }
 
 function LinkAccountsStep({ onNext, onBack, isSetuCallback = false, setuError = null }: LinkAccountsStepProps) {
-  const hasTriggeredNext = useRef(false);
+  // Use useSetuCallback hook to get consent_id (it already uses useSearchParams internally)
+  const { consentId } = useSetuCallback();
+  const [hasCheckedStatus, setHasCheckedStatus] = useState(false);
+  const [shouldListenToPusher, setShouldListenToPusher] = useState(false);
+  const onNextRef = useRef(onNext);
 
-  // Listen for session-completed Pusher event
+  // Keep onNext ref up to date
   useEffect(() => {
-    const channel = pusherService.getChannel();
-    
-    if (!channel) {
-      console.warn("Pusher channel not available");
-      return;
-    }
+    onNextRef.current = onNext;
+  }, [onNext]);
 
-    const handleSessionCompleted = (data: SessionCompletedEvent) => {
+  // Check session status immediately when component mounts (if returning from Setu)
+  useEffect(() => {
+    if (isSetuCallback && consentId && !hasCheckedStatus) {
+      const checkStatus = async () => {
+        try {
+          const response = await userService.checkSessionStatus(consentId);
+          const sessionInfo = response.data;
+          
+          console.log("Session status check:", sessionInfo);
+          
+          // If session is already completed, trigger onNext immediately
+          if (sessionInfo.completed && sessionInfo.status === "COMPLETED") {
+            console.log("Session already completed, proceeding immediately");
+            onNextRef.current();
+          } else {
+            // Session not completed yet, listen to Pusher event
+            console.log("Session not completed yet, listening to Pusher");
+            setShouldListenToPusher(true);
+          }
+        } catch (error) {
+          console.error("Failed to check session status:", error);
+          // On error, fall back to listening to Pusher
+          setShouldListenToPusher(true);
+        } finally {
+          setHasCheckedStatus(true);
+        }
+      };
+      
+      checkStatus();
+    } else if (!isSetuCallback) {
+      // If not a Setu callback, we can listen to Pusher immediately
+      setShouldListenToPusher(true);
+      setHasCheckedStatus(true);
+    }
+  }, [isSetuCallback, consentId, hasCheckedStatus]);
+
+  // Listen for session-completed Pusher event (only if we should listen)
+  usePusherEvent<SessionCompletedEvent>(
+    "session-completed",
+    (data) => {
       console.log("Received session-completed event:", data);
       
-      // Only trigger onNext once and when status is COMPLETED
-      if (data.status === "COMPLETED" && !hasTriggeredNext.current) {
-        hasTriggeredNext.current = true;
+      // Only trigger onNext when status is COMPLETED
+      if (data.status === "COMPLETED") {
         onNext();
       }
-    };
-
-    // Bind to the session-completed event
-    channel.bind("session-completed", handleSessionCompleted);
-
-    // Cleanup: unbind the event listener
-    return () => {
-      channel.unbind("session-completed", handleSessionCompleted);
-    };
-  }, [onNext]);
+    },
+    { once: true, enabled: shouldListenToPusher }
+  );
   // If user is returning from Setu with an error
   if (isSetuCallback && setuError) {
     return (

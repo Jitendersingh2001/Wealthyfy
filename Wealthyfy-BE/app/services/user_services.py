@@ -16,7 +16,6 @@ from app.services.pusher_service import PusherService
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
 from datetime import datetime
-import threading
 
 
 class UserService(BaseService):
@@ -479,43 +478,32 @@ class UserService(BaseService):
                     new_status=session_status
                 )
                 
-                # If session status is COMPLETED, send pusher event to trigger Link Accounts step
+                # If session status is COMPLETED, send pusher event immediately
                 if new_status == DataSessionStatusEnum.COMPLETED:
-                    # Schedule pusher event to be sent after 30 seconds
-                    def send_delayed_pusher_event():
-                        try:
-                            pusher_service = PusherService()
-                            user_id = consent_request.user_id
-                            pusher_service.trigger(
-                                user_id=user_id,
-                                event="session-completed",
-                                data={
-                                    "session_id": session_id,
-                                    "consent_id": consent_id,
-                                    "status": session_status
-                                }
-                            )
-                            logger_info(
-                                f"Pusher event 'session-completed' sent to user {user_id}",
-                                session_id=session_id,
-                                consent_id=consent_id
-                            )
-                        except Exception as e:
-                            logger_error(
-                                f"Failed to send pusher event for completed session",
-                                error=str(e),
-                                session_id=session_id,
-                                consent_id=consent_id
-                            )
-                    
-                    # Schedule the event to be sent after 30 seconds
-                    timer = threading.Timer(30.0, send_delayed_pusher_event)
-                    timer.start()
-                    logger_info(
-                        f"Pusher event 'session-completed' scheduled for user {consent_request.user_id} after 30 seconds",
-                        session_id=session_id,
-                        consent_id=consent_id
-                    )
+                    try:
+                        pusher_service = PusherService()
+                        user_id = consent_request.user_id
+                        pusher_service.trigger(
+                            user_id=user_id,
+                            event="session-completed",
+                            data={
+                                "session_id": session_id,
+                                "consent_id": consent_id,
+                                "status": session_status
+                            }
+                        )
+                        logger_info(
+                            f"Pusher event 'session-completed' sent to user {user_id}",
+                            session_id=session_id,
+                            consent_id=consent_id
+                        )
+                    except Exception as e:
+                        logger_error(
+                            f"Failed to send pusher event for completed session",
+                            error=str(e),
+                            session_id=session_id,
+                            consent_id=consent_id
+                        )
                 
             except KeyError:
                 logger_warning(
@@ -524,3 +512,74 @@ class UserService(BaseService):
                 )
         
         self.execute_safely(_update)
+
+    # ======================================================================
+    # Check Session Status
+    # ======================================================================
+    def check_session_status(self, consent_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Checks if a session exists and is completed for a given consent_id.
+        
+        Args:
+            consent_id: The consent ID to check
+            
+        Returns:
+            Dict with session info if found and completed, None otherwise
+            Format: {
+                "session_id": str,
+                "consent_id": str,
+                "status": str,
+                "exists": bool,
+                "completed": bool
+            }
+        """
+        def _check():
+            # Default response structure for not found cases
+            default_response = {
+                "session_id": None,
+                "consent_id": consent_id,
+                "status": None,
+                "exists": False,
+                "completed": False
+            }
+            
+            # Find the consent request by consent_id
+            consent_request = (
+                self.db.query(ConsentRequest)
+                .filter(ConsentRequest.consent_id == consent_id)
+                .first()
+            )
+            
+            if not consent_request:
+                logger_warning(
+                    f"Consent request not found for consent_id: {consent_id}"
+                )
+                return default_response
+            
+            # Find the latest data session for the consent request
+            data_session = (
+                self.db.query(DataSession)
+                .filter(
+                    DataSession.consent_request_id == consent_request.id
+                )
+                .order_by(DataSession.id.desc())
+                .first()
+            )
+            
+            if not data_session:
+                logger_info(
+                    f"No data session found for consent_id: {consent_id}"
+                )
+                return default_response
+            
+            # Session found - return with actual data
+            is_completed = data_session.status == DataSessionStatusEnum.COMPLETED
+            return {
+                "session_id": data_session.session_id,
+                "consent_id": consent_id,
+                "status": data_session.status.value,
+                "exists": True,
+                "completed": is_completed
+            }
+        
+        return self.execute_safely(_check)
