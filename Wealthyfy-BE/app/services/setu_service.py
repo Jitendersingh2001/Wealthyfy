@@ -1,9 +1,8 @@
 import requests
 from requests.exceptions import JSONDecodeError
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
 from fastapi import status
-from datetime import datetime
 from app.config.setting import settings
 from app.constants.setu_api import SetuAPI
 from app.constants import constant
@@ -471,3 +470,54 @@ class SetuService:
         except Exception as e:
             logger_exception(
                 f"Failed to create data session for consent_id: {consent_request.consent_id}")
+            
+    # -----------------------------------------------------------------------
+    # Fetch the FIP IDS 
+    # -----------------------------------------------------------------------
+    def fetch_fip_ids(self, token: str) -> List[Dict[str, Any]]:
+        """
+        Fetch the list of Financial Information Providers (FIPs).
+
+        Args:
+            token: Valid AA bearer token.
+
+        Returns:
+            A list of FIP records (each containing fipId, name, fiTypes, status, etc.).
+        """
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+
+        try:
+            response = requests.get(
+                SetuAPI.FETCH_FIP_ID_API,
+                headers=headers,
+                timeout=10,
+            )
+
+            response.raise_for_status()
+
+            json_data = response.json()
+            logger_debug(f"FIP IDs API response: {json_data}")
+
+            fip_list = json_data.get("data")
+
+            if not isinstance(fip_list, list):
+                logger_error("'data' key missing or not a list in FIP API response")
+                raise RuntimeError("Invalid FIP API response format")
+
+            return fip_list
+
+        except requests.exceptions.Timeout:
+            logger_exception("Timeout while calling FIP API")
+            raise RuntimeError("FIP IDs API timeout")
+
+        except requests.exceptions.RequestException as exc:
+            logger_exception("Failed calling FIP API")
+            raise RuntimeError(f"Failed connecting to FIP API: {exc}") from exc
+
+        except ValueError:
+            logger_error("Invalid JSON received from FIP API")
+            raise RuntimeError("Non-JSON response received from FIP API")
+

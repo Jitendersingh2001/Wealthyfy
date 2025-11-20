@@ -24,6 +24,7 @@ cryptography = "^46.0.3"
 twilio = "^9.8.6"
 pusher = "^3.3.3"
 python-multipart = "^0.0.20"
+apscheduler = "^3.11.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
