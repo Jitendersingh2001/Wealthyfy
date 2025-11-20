@@ -474,7 +474,7 @@ class SetuService:
     # -----------------------------------------------------------------------
     # Fetch the FIP IDS 
     # -----------------------------------------------------------------------
-    def fetch_fip_ids(self, token: str) -> List[Dict[str, Any]]:
+    def fetch_fip_ids(self) -> List[Dict[str, Any]]:
         """
         Fetch the list of Financial Information Providers (FIPs).
 
@@ -484,6 +484,8 @@ class SetuService:
         Returns:
             A list of FIP records (each containing fipId, name, fiTypes, status, etc.).
         """
+        token = self.get_aa_token()
+        
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}",

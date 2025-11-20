@@ -16,11 +16,8 @@ def sync_fip_master_data():
     try:
         service = SetuService(db)
 
-        # Get auth token
-        token = service.get_aa_token()
-
         # Fetch FIP list
-        fip_list = service.fetch_fip_ids(token)
+        fip_list = service.fetch_fip_ids()
 
         # Extract only FIP IDs from external source
         incoming_fip_ids = set(item["fipId"] for item in fip_list)
