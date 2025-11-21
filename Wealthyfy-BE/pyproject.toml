@@ -25,6 +25,7 @@ twilio = "^9.8.6"
 pusher = "^3.3.3"
 python-multipart = "^0.0.20"
 flower = "^2.0.1"
+polars = "^1.35.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
