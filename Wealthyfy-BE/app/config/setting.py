@@ -78,6 +78,12 @@ class PusherSettings(BaseSettings):
     PUSHER_SECRET: str
     PUSHER_CLUSTER: str
     PUSHER_SSL: bool = True
+# ---------------------------------------------------------
+# Celery Configuration
+# ---------------------------------------------------------
+class CelerySettings(BaseSettings):
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
 
 # ---------------------------------------------------------
 # Root Configuration
@@ -89,7 +95,7 @@ class Settings(BaseSettings):
     setu: SetuSettings
     twillo: TwilloSettings
     pusher: PusherSettings
-
+    celery: CelerySettings
 
     class Config:
         env_file = ".env"

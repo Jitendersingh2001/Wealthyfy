@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 from app.services.setu_service import SetuService
 from app.models.financial_institutions import FinancialInstitutions, FinancialInstitutionsStatusEnum
 from app.config.database import SessionLocal
+from app.config.celery_app import celery_app
 from app.utils.logger_util import logger_info, logger_error
 
 
+@celery_app.task(name="sync_fip_master_data")
 def sync_fip_master_data():
     """
     Pull FIP list from Setu and upsert into the database.

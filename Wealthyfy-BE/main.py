@@ -10,29 +10,13 @@ setup_logging()
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
 
 # Routers & Utilities
 from app.api import router as api_router
 from app.utils.response import error_response
 
-# Scheduler
-from app.jobs.scheduler.scheduler import start_scheduler, stop_scheduler
-
-
-# ------------------------------------------------------------
-# Lifespan Handler (Startup + Shutdown)
-# ------------------------------------------------------------
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # ---- STARTUP ----
-    start_scheduler()  # initialize APScheduler jobs
-
-    yield   # FastAPI runs
-
-    # ---- SHUTDOWN ----
-    stop_scheduler()   # graceful scheduler shutdown
+# Celery Beat schedule (import to register periodic tasks)
+from app.config.celery_app import celery_app # noqa: F401
 
 
 # ------------------------------------------------------------
@@ -40,7 +24,6 @@ async def lifespan(app: FastAPI):
 # ------------------------------------------------------------
 app = FastAPI(
     title="Todo App",
-    lifespan=lifespan
 )
 
 
