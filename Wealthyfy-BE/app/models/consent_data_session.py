@@ -59,6 +59,11 @@ class DataSession(Base):
     # Metadata tracking
     last_fetched_at = Column(DateTime(timezone=True), nullable=True)
     usage_count = Column(Integer, default=0)
+    consent_file_path = Column(
+        String(255),
+        nullable=True,
+        comment="Path to the stored consent file, if applicable"
+    )
 
     # Audit fields
     created_at = Column(

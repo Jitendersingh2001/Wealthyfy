@@ -12,10 +12,11 @@ from app.models.consent_data_session import DataSession, DataSessionStatusEnum
 from app.utils.logger_util import (
     logger_info, logger_error, logger_success, logger_warning
 )
-from app.services.pusher_service import PusherService
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
 from datetime import datetime
+import json
+from pathlib import Path
 
 
 class UserService(BaseService):
@@ -419,12 +420,6 @@ class UserService(BaseService):
             self.commit()
             self.db.refresh(data_session)
             
-            logger_success(
-                f"Data session saved to database",
-                session_id=session_id,
-                consent_id=consent_request.consent_id
-            )
-            
             return data_session
         
         return self.execute_safely(_create)
@@ -433,24 +428,40 @@ class UserService(BaseService):
     # ======================================================================
     # Update Session Status
     # ======================================================================
-    def update_session_status(self, consent_id: str,session_id: str,session_status: str) -> None:
+    def update_session_status(self, consent_id: str, session_id: str, session_status: str, setu_service=None) -> None:
         """
         Updates the status of a data session.
+        If status becomes COMPLETED:
+        - Fetch session data from Setu
+        - Store JSON to disk
+        - Save file path inside DataSession.consent_file_path
+        
+        Args:
+            consent_id: The consent ID
+            session_id: The session ID
+            session_status: The new session status
+            setu_service: Optional SetuService instance for fetching session data
         """
+
+        STORAGE_DIR = Path("storage/session_data")
+        STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
         def _update():
-            # Find the consent request by consent_id
+            # ------------------------------------------------
+            # 1. Fetch Consent Request
+            # ------------------------------------------------
             consent_request = (
                 self.db.query(ConsentRequest)
                 .filter(ConsentRequest.consent_id == consent_id)
                 .first()
             )
             if not consent_request:
-                logger_error(
-                    f"Consent request not found for consent_id: {consent_id}"
-                )
+                logger_error(f"Consent request not found for consent_id: {consent_id}")
                 return
-            
-            # Find the latest data session for the consent request
+
+            # ------------------------------------------------
+            # 2. Fetch Data Session
+            # ------------------------------------------------
             data_session = (
                 self.db.query(DataSession)
                 .filter(
@@ -461,56 +472,71 @@ class UserService(BaseService):
                 .first()
             )
             if not data_session:
-                logger_error(
-                    f"Data session not found for consent_id: {consent_id}"
-                )
+                logger_error(f"Data session not found for consent_id: {consent_id}")
                 return
-            
-            # Update the session status
+
+            # ------------------------------------------------
+            # 3. Update Status
+            # ------------------------------------------------
             try:
                 new_status = DataSessionStatusEnum[session_status]
                 data_session.status = new_status
                 self.commit()
-                
-                logger_success(
-                    f"Data session status updated",
-                    session_id=data_session.session_id,
-                    new_status=session_status
-                )
-                
-                # If session status is COMPLETED, send pusher event immediately
+
+                # ------------------------------------------------
+                # 4. Handle COMPLETED Status
+                # ------------------------------------------------
                 if new_status == DataSessionStatusEnum.COMPLETED:
-                    try:
-                        pusher_service = PusherService()
-                        user_id = consent_request.user_id
-                        pusher_service.trigger(
-                            user_id=user_id,
-                            event="session-completed",
-                            data={
-                                "session_id": session_id,
-                                "consent_id": consent_id,
-                                "status": session_status
-                            }
-                        )
-                        logger_info(
-                            f"Pusher event 'session-completed' sent to user {user_id}",
+                    if not setu_service:
+                        logger_warning(
+                            "SetuService not provided, cannot fetch session data",
                             session_id=session_id,
                             consent_id=consent_id
                         )
+                        return
+                    
+                    try:
+                        # ---- Fetch full session data from Setu ----
+                        session_json = setu_service.fetch_session_data(session_id)
+
+                        user_id = consent_request.user_id
+
+                        # ---- Build file name ----
+                        file_name = f"session_{session_id}_{consent_id}_{user_id}.json"
+                        file_path = STORAGE_DIR / file_name
+
+                        # ---- Save JSON response to file ----
+                        with open(file_path, "w") as f:
+                            json.dump(session_json, f, indent=2)
+
+                        # ---- Update DB with file path ----
+                        data_session.consent_file_path = str(file_path)
+                        self.commit()
+
+                        logger_info(
+                            "Completed session data stored to file",
+                            file_path=str(file_path),
+                            session_id=session_id,
+                            consent_id=consent_id
+                        )
+
                     except Exception as e:
                         logger_error(
-                            f"Failed to send pusher event for completed session",
+                            "Failed to fetch or store completed session data",
                             error=str(e),
                             session_id=session_id,
                             consent_id=consent_id
                         )
-                
+
             except KeyError:
                 logger_warning(
                     f"Unknown session status '{session_status}' received",
                     session_id=data_session.session_id
                 )
-        
+
+        # ------------------------------------------------
+        # Execute inside safety wrapper
+        # ------------------------------------------------
         self.execute_safely(_update)
 
     # ======================================================================

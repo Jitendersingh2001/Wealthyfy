@@ -27,6 +27,9 @@ venv/
 Wealthyfy-BE/migrations/__pycache__/
 Wealthyfy-BE/app/**/__pycache__/
 
+# Storage folder (session data, etc.)
+Wealthyfy-BE/storage/
+
 # =========================
 # Environment Files
 # =========================

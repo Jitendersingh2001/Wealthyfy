@@ -9,3 +9,4 @@ class SetuAPI:
     AA_AUTH_TOKEN = "https://uat.setu.co/api/v2/auth/token"
     CREATE_DATA_SESSION_API = f"{_settings.SETU_AA_BASE_URL}/sessions"
     FETCH_FIP_ID_API = f"{_settings.SETU_AA_BASE_URL}/fips"
+    FETCH_SESSION_DATA_API = f"{_settings.SETU_AA_BASE_URL}/sessions/{'{session_id}'}"

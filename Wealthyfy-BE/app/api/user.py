@@ -233,7 +233,7 @@ def link_bank(
 
     setu_service = SetuService()
     consent_data = setu_service.create_consent(
-            phone_number=current_user.phone_number,
+            phone=current_user.phone_number,
             pancard=pancard,
             start_date=data_start_date,
             end_date=data_end_date,
