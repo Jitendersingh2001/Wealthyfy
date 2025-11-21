@@ -14,7 +14,7 @@ from app.utils.logger_util import (
 )
 from typing import Optional, Dict, Any, List
 from sqlalchemy.orm import joinedload
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 
@@ -511,6 +511,7 @@ class UserService(BaseService):
 
                         # ---- Update DB with file path ----
                         data_session.consent_file_path = str(file_path)
+                        data_session.last_fetched_at = datetime.now(timezone.utc)
                         self.commit()
 
                         logger_info(
