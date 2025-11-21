@@ -1,7 +1,8 @@
-from celery import Celery
-from app.config.setting import settings
 import pkgutil
 import importlib
+from celery import Celery
+from app.config.setting import settings
+from app.jobs import tasks as tasks_pkg
 from app.jobs import scheduler as scheduler_pkg
 
 
@@ -27,24 +28,24 @@ celery_app.conf.update(
 )
 
 
-# ---------------------------------------------------------
-# Auto-discover all tasks in app/jobs/tasks/*
-# ---------------------------------------------------------
-celery_app.autodiscover_tasks(["app.jobs.tasks"])
-
-
-
-# ---------------------------------------------------------
-# Auto-discover all Celery Beat schedules from app/jobs/scheduler/*
-# Each file must contain a dict variable named `beat_schedule`
-# ---------------------------------------------------------
-beat_schedule = {}
-
-for module in pkgutil.iter_modules(scheduler_pkg.__path__):
-    module_name = f"app.jobs.scheduler.{module.name}"
+# ----------------------------
+# Task Autoloading
+# Each task file must contain a `register(celery_app)` function
+# ----------------------------
+for module in pkgutil.iter_modules(tasks_pkg.__path__):
+    module_name = f"app.jobs.tasks.{module.name}"
     mod = importlib.import_module(module_name)
 
-    if hasattr(mod, "beat_schedule"):
-        beat_schedule.update(mod.beat_schedule)
+    if hasattr(mod, "register"):
+        mod.register(celery_app)
 
-celery_app.conf.beat_schedule = beat_schedule
+
+# ---------------------------------------------------------
+# Schedule Autodiscovery
+# Each scheduler file must contain a `register(celery_app)` function
+# ---------------------------------------------------------
+for module in pkgutil.iter_modules(scheduler_pkg.__path__):
+    mod = importlib.import_module(f"app.jobs.scheduler.{module.name}")
+
+    if hasattr(mod, "register"):
+        mod.register(celery_app)
