@@ -10,6 +10,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import validates
 from app.config.database import Base
 from app.models.consent_fI_type import FITypeEnum
+from sqlalchemy.orm import relationship
 
 
 class FinancialAccount(Base):
@@ -59,3 +60,21 @@ class FinancialAccount(Base):
         except ValueError:
             raise ValueError(f"Invalid FITypeEnum value: {value}")
 # ---------------------------------------------------------------
+
+    holders = relationship(
+        "AccountHolder",
+        back_populates="account",
+        cascade="all, delete-orphan"
+    )
+    
+    summary = relationship(
+        "AccountSummary",
+        back_populates="account",
+        uselist=False
+    )
+    
+    transactions = relationship(
+        "BankTransaction",
+        back_populates="account",
+        cascade="all, delete-orphan"
+    )
