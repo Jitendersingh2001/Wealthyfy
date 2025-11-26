@@ -22,10 +22,10 @@ class AccountHolder(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    # Matches FinancialAccount.account_id (String(64))
+    # References FinancialAccount.id (Integer)
     account_id = Column(
-        String(64),
-        ForeignKey("financial_accounts.account_id"),
+        Integer,
+        ForeignKey("financial_accounts.id"),
         nullable=False,
         index=True
     )

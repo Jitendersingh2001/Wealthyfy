@@ -1,10 +1,38 @@
 import { type StepWithBackProps } from "@/types/step";
 import { Database, Loader2 } from "lucide-react";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
+import { usePusherEvent } from "@/hooks/use-pusher-event";
+import { useEffect, useRef } from "react";
 
 interface FetchDataStepProps extends StepWithBackProps {}
 
-function FetchDataStep({ onNext: _onNext, onBack: _onBack }: FetchDataStepProps) {
+interface DataFetchingCompletedEvent {
+  status: string;
+  message: string;
+}
+
+function FetchDataStep({ onNext, onBack: _onBack }: FetchDataStepProps) {
+  const onNextRef = useRef(onNext);
+
+  // Keep onNext ref up to date
+  useEffect(() => {
+    onNextRef.current = onNext;
+  }, [onNext]);
+
+  // Listen for data-fetching-completed Pusher event
+  usePusherEvent<DataFetchingCompletedEvent>(
+    "data-fetching-completed",
+    (data) => {
+      console.log("Received data-fetching-completed event:", data);
+      
+      // Move to finish step when data fetching is completed
+      if (data.status === "completed") {
+        onNextRef.current();
+      }
+    },
+    { once: true }
+  );
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-4" style={{ minHeight: 0, maxWidth: '100%', width: '100%' }}>
       <div className="flex flex-col items-center justify-center space-y-6 text-center max-w-lg">

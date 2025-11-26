@@ -14,7 +14,7 @@ class AccountSummary(Base):
     __tablename__ = 'account_summaries'
     
     id = Column(Integer, primary_key=True)
-    account_id = Column(String(64), ForeignKey('financial_accounts.account_id'))
+    account_id = Column(Integer, ForeignKey('financial_accounts.id'))
     branch = Column(String(255))
     ifsc_code = Column(String(20))
     opening_date = Column(DateTime(timezone=True))

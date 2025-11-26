@@ -16,6 +16,7 @@ import StepNavigation from "@/components/custom/StepNavigation";
 import SelectDataStep from "@/components/AccountSetup/SelectDataStep";
 import LinkAccountsStep from "@/components/AccountSetup/LinkAccountsStep";
 import FetchDataStep from "@/components/AccountSetup/FetchDataStep";
+import FinishStep from "@/components/AccountSetup/FinishStep";
 
 /* ------------------------------ Component --------------------------------- */
 function InitiateAccountSetupPage() {
@@ -35,7 +36,7 @@ function InitiateAccountSetupPage() {
 
   /* ------------------------------- Steps ----------------------------------- */
   const steps = [
-    <WelcomeStep onNext={() => setCurrentStep(3)} />,
+    <WelcomeStep onNext={() => setCurrentStep(1)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
     <OtpStep
       onNext={() => setCurrentStep(3)}
@@ -54,6 +55,10 @@ function InitiateAccountSetupPage() {
     <FetchDataStep
       onNext={() => setCurrentStep(6)}
       onBack={() => setCurrentStep(4)}
+    />,
+    <FinishStep
+      onNext={() => {}}
+      onBack={() => setCurrentStep(5)}
     />,
   ];
 
@@ -108,15 +113,7 @@ function InitiateAccountSetupPage() {
               <div className="border-l border-border flex-1 bg-card rounded-r-xl overflow-y-auto">
                 <div className="w-full h-full flex justify-center p-8">
                   <div className={`w-full ${currentStep === 4 ? 'max-w-5xl' : 'max-w-lg'} h-full flex flex-col`}>
-                    {steps[currentStep] || (
-                      <div className="text-center space-y-4">
-                        <h1 className="text-3xl font-bold">Setup Complete!</h1>
-                        <p className="text-base text-muted-foreground">
-                          Your account setup has been completed successfully. You
-                          will be redirected to the dashboard shortly.
-                        </p>
-                      </div>
-                    )}
+                    {steps[currentStep]}
                   </div>
                 </div>
               </div>

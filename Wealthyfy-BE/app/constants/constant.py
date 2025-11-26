@@ -10,3 +10,6 @@ SUCCESS="success"
 FAILED="failed"
 APPROVED="approved"
 PENDING="pending"
+
+# Date format constants
+DATE_FORMAT_YYYY_MM_DD = "%Y-%m-%d"

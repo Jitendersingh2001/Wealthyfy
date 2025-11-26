@@ -18,6 +18,21 @@ class FITypeEnum(str, Enum):
     ETF = "ETF"
     EQUITY_SHARES = "EQUITY_SHARES"
 
+    @classmethod
+    def from_string(cls, account_type_str: str) -> "FITypeEnum":
+        """Map account type string to FITypeEnum. Returns DEPOSIT if unknown."""
+        if not account_type_str:
+            return cls.DEPOSIT
+        
+        # Normalize: uppercase, replace hyphens with underscores, strip whitespace
+        normalized = account_type_str.strip().upper().replace("-", "_")
+        
+        # Try direct enum access
+        try:
+            return cls[normalized]
+        except (KeyError, ValueError):
+            return cls.DEPOSIT
+
 
 class ConsentFITypeStatus(str, Enum):
     """Enum to represent the status of consent FI type."""

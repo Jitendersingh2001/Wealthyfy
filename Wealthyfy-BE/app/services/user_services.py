@@ -17,6 +17,7 @@ from sqlalchemy.orm import joinedload
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from app.config.celery_app import celery_app
 
 
 class UserService(BaseService):
@@ -520,6 +521,25 @@ class UserService(BaseService):
                             session_id=session_id,
                             consent_id=consent_id
                         )
+
+                        # ---- Trigger background job to process session data ----
+                        try:
+                            celery_app.send_task(
+                                "process_session_data",
+                                args=[data_session.id]
+                            )
+                            logger_info(
+                                "Background job triggered for session data processing",
+                                data_session_id=data_session.id,
+                                session_id=session_id
+                            )
+                        except Exception as e:
+                            logger_error(
+                                "Failed to trigger background job for session data processing",
+                                error=str(e),
+                                data_session_id=data_session.id,
+                                session_id=session_id
+                            )
 
                     except Exception as e:
                         logger_error(

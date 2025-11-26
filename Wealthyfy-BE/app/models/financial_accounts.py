@@ -16,7 +16,7 @@ from sqlalchemy.orm import relationship
 class FinancialAccount(Base):
     __tablename__ = "financial_accounts"
 
-    account_id = Column(String(64), primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
 
     consent_id = Column(
         Integer,

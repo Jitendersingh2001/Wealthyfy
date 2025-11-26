@@ -16,7 +16,7 @@ class BankTransaction(Base):
     __tablename__ = 'bank_transactions'
     
     id = Column(Integer, primary_key=True)
-    account_id = Column(String(64), ForeignKey('financial_accounts.account_id'))
+    account_id = Column(Integer, ForeignKey('financial_accounts.id'))
     amount = Column(Numeric(15, 2), nullable=False)
     balance = Column(Numeric(15, 2))
     mode = Column(String(20), nullable=False)
