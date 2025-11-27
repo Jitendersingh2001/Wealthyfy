@@ -39,12 +39,15 @@ interface AuthContextType {
   login: () => void;
   register: () => void;
   logout: () => void;
+  updateSetupComplete: (value: boolean) => void;
 }
 
-/* ----------------------------- Context Setup ------------------------------ */
+/* -------------------------------- Context --------------------------------- */
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /* --------------------------- Helper Functions ----------------------------- */
+
 const mapUserResponse = (data: UserResponse): UserProfile => ({
   id: data.id,
   keycloakUserId: data.keycloak_user_id,
@@ -59,7 +62,8 @@ const mapUserResponse = (data: UserResponse): UserProfile => ({
   phoneNumber: data.phone_number ?? null,
 });
 
-/* ----------------------------- Provider ----------------------------------- */
+/* -------------------------------- Provider -------------------------------- */
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -72,6 +76,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     setIsAuthenticated(Boolean(profile));
     setUser(profile);
   }, []);
+
+  /* ------------------------ NEW: Update Setup Status ----------------------- */
+  const updateSetupComplete = useCallback((value: boolean) => {
+    setIsSetupComplete(value);
+    setUser((prev) => (prev ? { ...prev, isSetupComplete: value } : prev));
+  }, []);
+
+  /* ------------------------ Initialization -------------------------------- */
 
   useEffect(() => {
     const initialize = async () => {
@@ -89,25 +101,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
             updateUserState(mappedUser);
 
-            // Setup completion state
             setIsSetupComplete(
               Boolean(mappedUser.phoneNumber && mappedUser.isSetupComplete)
             );
 
-            // Subscribe to Pusher channel for user events
             try {
               await pusherService.subscribe(mappedUser.id);
             } catch (error) {
               console.error("Failed to subscribe to Pusher channel:", error);
-              // Don't block login if Pusher subscription fails
             }
 
-            // Login toast
             if (
               isRedirectFromLogin &&
               !sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN)
             ) {
-              toast.success(GENERAL_MESSAGES.LOGIN_SUCCESSFULLY(mappedUser.fullName));
+              toast.success(
+                GENERAL_MESSAGES.LOGIN_SUCCESSFULLY(mappedUser.fullName)
+              );
               sessionStorage.setItem(
                 SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN,
                 "true"
@@ -115,18 +125,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
             }
           } catch (error) {
             console.error("User fetch failed:", error);
-            toast.error(getErrorMessage(error, ERROR_MESSAGES.INTERNAL_SERVER_ERROR));
+            toast.error(
+              getErrorMessage(error, ERROR_MESSAGES.INTERNAL_SERVER_ERROR)
+            );
             updateUserState();
           }
         } else {
           updateUserState();
           sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGIN_TOAST_SHOWN);
-          // Unsubscribe from Pusher when not authenticated
           await pusherService.unsubscribe();
           pusherService.disconnect();
         }
 
-        // Logout message handling
         if (sessionStorage.getItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY)) {
           toast.success(GENERAL_MESSAGES.LOGOUT_SUCCESSFULLY);
           sessionStorage.removeItem(SESSION_KEYS.KEYCLOAK_LOGOUT_SESSION_KEY);
@@ -141,18 +151,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     initialize();
 
-    // Cleanup function to unsubscribe and disconnect on unmount
     return () => {
       pusherService.unsubscribe().catch(console.error);
       pusherService.disconnect();
     };
   }, [updateUserState]);
 
-  /* ----------------------------- Auth Actions ----------------------------- */
+  /* ----------------------------- Actions ---------------------------------- */
+
   const login = () => keycloakService.login();
   const register = () => keycloakService.register();
   const logout = async () => {
-    // Unsubscribe from Pusher and disconnect before logout
     await pusherService.unsubscribe();
     pusherService.disconnect();
     keycloakService.logout({ redirectUri: window.location.origin });
@@ -162,7 +171,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, isLoading, user, isSetupComplete, login, register, logout }}
+      value={{
+        isAuthenticated,
+        isLoading,
+        user,
+        isSetupComplete,
+        login,
+        register,
+        logout,
+        updateSetupComplete,
+      }}
     >
       {children}
     </AuthContext.Provider>

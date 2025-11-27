@@ -1,28 +1,39 @@
-import { type StepWithBackProps } from "@/types/step";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowRight } from "lucide-react";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/routes/routes";
+import { userService } from "@/services/userService";
+import { Button } from "@/components/ui/button";
+import {useAuth} from "@/hooks/use-auth";
 
-interface FinishStepProps extends StepWithBackProps {}
-
-function FinishStep({ onNext: _onNext, onBack: _onBack }: FinishStepProps) {
-  const [countdown, setCountdown] = useState(15);
+function FinishStep() {
+  const { updateSetupComplete } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const hasMarkedComplete = useRef(false);
 
-  useEffect(() => {
-    if (countdown === 0) {
-      navigate(ROUTES.DASHBOARD);
+  const handleContinue = () => {
+    if (hasMarkedComplete.current || isLoading) {
       return;
     }
 
-    const timer = setTimeout(() => {
-      setCountdown(countdown - 1);
-    }, 1000);
+    setIsLoading(true);
+    hasMarkedComplete.current = true;
 
-    return () => clearTimeout(timer);
-  }, [countdown, navigate]);
+    userService
+      .markSetupComplete()
+      .then(() => {
+        updateSetupComplete(true);
+        navigate(ROUTES.DASHBOARD);
+      })
+      .catch((error) => {
+        console.error("Failed to mark setup as complete:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center px-4" style={{ minHeight: 0, maxWidth: '100%', width: '100%' }}>
@@ -34,17 +45,30 @@ function FinishStep({ onNext: _onNext, onBack: _onBack }: FinishStepProps) {
           showCircularBackground={true}
           variant="primary"
         />
-        <div className="space-y-4">
+        <div>
           <h1 className="text-3xl font-bold tracking-tight">Everything is Set Up!</h1>
-          <div className="space-y-3">
+          <div className="space-y-4 mt-4">
             <p className="text-base text-muted-foreground leading-relaxed">
-              Your account setup has been completed successfully.
-            </p>
-            <p className="text-lg font-semibold text-foreground">
-              You will be redirected to the dashboard in {countdown} {countdown === 1 ? 'second' : 'seconds'}...
+              Your account setup has been completed successfully. We've securely connected your financial accounts and are now ready to help you manage your wealth.
             </p>
           </div>
         </div>
+        <Button
+          onClick={handleContinue}
+          disabled={isLoading}
+          className="w-full group relative overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          size="lg"
+        >
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {isLoading ? "Processing..." : "Continue"}
+            {!isLoading && (
+              <ArrowRight 
+                className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" 
+              />
+            )}
+          </span>
+          <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+        </Button>
       </div>
     </div>
   );

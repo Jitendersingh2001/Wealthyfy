@@ -48,7 +48,7 @@ function AnimatedIconDisplay({
 
   return (
     <div className="flex justify-center">
-      <div className={`relative ${containerSize} flex items-center justify-center min-h-40`}>
+      <div className={`relative ${containerSize} flex items-center justify-center`}>
         {/* Animated Background Circles */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div

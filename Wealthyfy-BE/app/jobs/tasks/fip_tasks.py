@@ -11,7 +11,7 @@ def register(celery_app):
     Tasks are registered at runtime to prevent circular imports.
     """
     @celery_app.task(name="sync_fip_master_data",bind=True)
-    def sync_fip_master_data():
+    def sync_fip_master_data(self):
         """
         Pull FIP list from Setu and upsert into the database.
         """

@@ -160,6 +160,39 @@ class UserService(BaseService):
         return self.execute_safely(_update)
 
     # ======================================================================
+    # Mark Setup as Complete
+    # ======================================================================
+    def mark_setup_complete(self, user_id: int) -> User:
+        """
+        Marks the user's setup as complete.
+        
+        Args:
+            user_id: User database ID
+            
+        Returns:
+            Updated User object
+        """
+        def _update():
+            user = (
+                self.db.query(User)
+                .filter(User.id == user_id)
+                .first()
+            )
+
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=Messages.USER_NOT_FOUND
+                )
+
+            user.is_setup_complete = True
+            self.commit()
+            self.db.refresh(user)
+            return user
+
+        return self.execute_safely(_update)
+
+    # ======================================================================
     # Get User Pan Card
     # ======================================================================
     def get_pancard(self,id:str) -> Pancard:
@@ -566,6 +599,7 @@ class UserService(BaseService):
     def check_session_status(self, consent_id: str) -> Optional[Dict[str, Any]]:
         """
         Checks if a session exists and is completed for a given consent_id.
+        Also checks if data processing is complete (usage_count === 1).
         
         Args:
             consent_id: The consent ID to check
@@ -577,7 +611,9 @@ class UserService(BaseService):
                 "consent_id": str,
                 "status": str,
                 "exists": bool,
-                "completed": bool
+                "completed": bool,
+                "usage_count": int,
+                "is_ready": bool  # True if completed AND usage_count is 1
             }
         """
         def _check():
@@ -621,12 +657,18 @@ class UserService(BaseService):
             
             # Session found - return with actual data
             is_completed = data_session.status == DataSessionStatusEnum.COMPLETED
+            usage_count = data_session.usage_count or 0
+            # Session is ready if it's completed AND usage_count is 1 (data processing is done)
+            is_ready = is_completed and usage_count == 1
+            
             return {
                 "session_id": data_session.session_id,
                 "consent_id": consent_id,
                 "status": data_session.status.value,
                 "exists": True,
-                "completed": is_completed
+                "completed": is_completed,
+                "usage_count": usage_count,
+                "is_ready": is_ready  # Green flag: completed and usage_count is 1
             }
         
         return self.execute_safely(_check)

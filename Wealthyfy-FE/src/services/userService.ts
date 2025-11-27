@@ -99,6 +99,8 @@ class UserService {
     status: string | null;
     exists: boolean;
     completed: boolean;
+    usage_count: number;
+    is_ready: boolean; // True if completed AND usage_count is 1
   }>> {
     const url = ENDPOINTS.USER.SESSION_STATUS(consentId);
     return apiRequest.get<ApiResponse<{
@@ -107,7 +109,18 @@ class UserService {
       status: string | null;
       exists: boolean;
       completed: boolean;
+      usage_count: number;
+      is_ready: boolean;
     }>>(url);
+  }
+
+  /**
+   * Mark user's account setup as complete
+   * This should be called when the user completes the FinishStep
+   */
+  async markSetupComplete(): Promise<ApiResponse<{ is_setup_complete: boolean }>> {
+    const url = ENDPOINTS.USER.MARK_SETUP_COMPLETE;
+    return apiRequest.post<ApiResponse<{ is_setup_complete: boolean }>>(url);
   }
 }
 

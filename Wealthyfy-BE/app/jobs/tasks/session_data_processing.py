@@ -133,13 +133,20 @@ def register(celery_app):
 
             # Commit all changes
             db.commit()
-
+            # Increment usage_count after successful processing
+            data_session.usage_count = (data_session.usage_count or 0) + 1
+            db.commit()
+            logger_info(
+                "Usage count incremented",
+                data_session_id=data_session_id,
+                usage_count=data_session.usage_count
+            )
             # Delete the file after successful processing
             try:
                 file_path.unlink()
                 logger_info(
                     "Session data file deleted after successful processing",
-                    file_path=str(file_path),
+                    file_path=str(file_path), 
                     data_session_id=data_session_id
                 )
             except Exception as e:
@@ -150,23 +157,9 @@ def register(celery_app):
                 )
 
             # Send data fetching completed event when processing is done
+            # This event is used to complete the FinishStep to ensure they see the completion screen
             if user_id:
                 try:
-                    user = db.query(User).filter(User.id == user_id).first()
-                    if user:
-                        user.is_setup_complete = True
-                        db.commit()
-                        logger_info(
-                            "User setup marked as complete",
-                            user_id=user_id,
-                            data_session_id=data_session_id
-                        )
-                    else:
-                        logger_warning(
-                            "User not found when trying to mark setup as complete",
-                            user_id=user_id,
-                            data_session_id=data_session_id
-                        )
                     pusher_service = PusherService()
                     pusher_service.trigger(
                         user_id=user_id,

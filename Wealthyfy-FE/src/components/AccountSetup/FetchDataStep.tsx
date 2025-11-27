@@ -2,16 +2,20 @@ import { type StepWithBackProps } from "@/types/step";
 import { Database, Loader2 } from "lucide-react";
 import AnimatedIconDisplay from "@/components/custom/AnimatedIconDisplay";
 import { usePusherEvent } from "@/hooks/use-pusher-event";
-import { useEffect, useRef } from "react";
-
-interface FetchDataStepProps extends StepWithBackProps {}
+import { useEffect, useRef, useState } from "react";
+import { useSetuCallback } from "@/hooks/use-setu-callback";
+import { userService } from "@/services/userService";
 
 interface DataFetchingCompletedEvent {
   status: string;
   message: string;
 }
 
-function FetchDataStep({ onNext, onBack: _onBack }: FetchDataStepProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function FetchDataStep({ onNext, onBack: _onBack }: StepWithBackProps) {
+  const { consentId } = useSetuCallback();
+  const [hasCheckedStatus, setHasCheckedStatus] = useState(false);
+  const [shouldListenToPusher, setShouldListenToPusher] = useState(false);
   const onNextRef = useRef(onNext);
 
   // Keep onNext ref up to date
@@ -19,7 +23,43 @@ function FetchDataStep({ onNext, onBack: _onBack }: FetchDataStepProps) {
     onNextRef.current = onNext;
   }, [onNext]);
 
-  // Listen for data-fetching-completed Pusher event
+  // Check session status immediately when component mounts
+  useEffect(() => {
+    if (consentId && !hasCheckedStatus) {
+      const checkStatus = async () => {
+        try {
+          const response = await userService.checkSessionStatus(consentId);
+          const sessionInfo = response.data;
+          
+          console.log("Session status check:", sessionInfo);
+          
+          // If session is ready (completed AND usage_count is 1), proceed immediately
+          if (sessionInfo.is_ready) {
+            console.log("Data processing already completed, proceeding immediately");
+            onNextRef.current();
+          } else {
+            // Session not ready yet, listen to Pusher event
+            console.log("Data processing not complete yet, listening to Pusher");
+            setShouldListenToPusher(true);
+          }
+        } catch (error) {
+          console.error("Failed to check session status:", error);
+          // On error, fall back to listening to Pusher
+          setShouldListenToPusher(true);
+        } finally {
+          setHasCheckedStatus(true);
+        }
+      };
+      
+      checkStatus();
+    } else if (!consentId) {
+      // If no consent ID, listen to Pusher immediately
+      setShouldListenToPusher(true);
+      setHasCheckedStatus(true);
+    }
+  }, [consentId, hasCheckedStatus]);
+
+  // Listen for data-fetching-completed Pusher event (only if we should listen)
   usePusherEvent<DataFetchingCompletedEvent>(
     "data-fetching-completed",
     (data) => {
@@ -30,7 +70,7 @@ function FetchDataStep({ onNext, onBack: _onBack }: FetchDataStepProps) {
         onNextRef.current();
       }
     },
-    { once: true }
+    { once: true, enabled: shouldListenToPusher }
   );
 
   return (

@@ -306,3 +306,27 @@ def check_session_status(
         data=session_info,
         message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Session status")
     )
+
+# ===========================================================================
+# MARK SETUP AS COMPLETE
+# ===========================================================================
+@router.post(
+    "/mark-setup-complete",
+    response_model=ApiResponse,
+    dependencies=[Depends(authenticate_user)]
+)
+def mark_setup_complete(
+    db: Session = Depends(get_db),
+    current_user=Depends(authenticate_user)
+):
+    """
+    Marks the user's account setup as complete.
+    This should be called when the user completes the FinishStep in the setup flow.
+    """
+    user_service = UserService(db)
+    user = user_service.mark_setup_complete(user_id=current_user.id)
+    
+    return success_response(
+        data={"is_setup_complete": user.is_setup_complete},
+        message=Messages.UPDATE_SUCCESSFULLY.replace(":name", "Setup status")
+    )

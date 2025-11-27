@@ -8,6 +8,7 @@ export const ENDPOINTS = {
     VERIFY_OTP: `/users/verify-otp`,
     LINK_BANK: `/users/link-bank`,
     SESSION_STATUS: (consentId: string) => `/users/session-status?consent_id=${consentId}`,
+    MARK_SETUP_COMPLETE: `/users/mark-setup-complete`,
   },
 };
 

@@ -36,7 +36,7 @@ function InitiateAccountSetupPage() {
 
   /* ------------------------------- Steps ----------------------------------- */
   const steps = [
-    <WelcomeStep onNext={() => setCurrentStep(1)} />,
+    <WelcomeStep onNext={() => setCurrentStep(3)} />,
     <PanMobileStep onNext={() => setCurrentStep(2)} />,
     <OtpStep
       onNext={() => setCurrentStep(3)}
@@ -56,10 +56,7 @@ function InitiateAccountSetupPage() {
       onNext={() => setCurrentStep(6)}
       onBack={() => setCurrentStep(4)}
     />,
-    <FinishStep
-      onNext={() => {}}
-      onBack={() => setCurrentStep(5)}
-    />,
+    <FinishStep/>,
   ];
 
   /* ------------------------- Side Panel Step Info -------------------------- */
