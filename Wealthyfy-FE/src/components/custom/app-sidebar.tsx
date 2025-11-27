@@ -72,7 +72,7 @@ export function AppSidebar() {
           >
             <Link
               to={item.url}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 hover:bg-accent/40 hover:scale-[1.01] focus:outline-none focus:ring-1 focus:ring-accent/30"
+              className="w-full flex items-center gap-3 px-3 py-5 rounded-md transition-all duration-200 hover:bg-accent/40 hover:scale-[1.01] focus:outline-none focus:ring-1 focus:ring-accent/30"
               aria-label={`Navigate to ${item.title}`}
               role="menuitem"
             >
@@ -90,7 +90,7 @@ export function AppSidebar() {
               </span>
 
               {isActive && (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-primary rounded-full" />
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-9 bg-primary rounded-full" />
               )}
             </Link>
           </SidebarMenuButton>
