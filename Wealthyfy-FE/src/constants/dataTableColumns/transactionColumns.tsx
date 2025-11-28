@@ -22,7 +22,7 @@ export const columns: ColumnDef<Transactions>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       return (
-        <div className="font-mono text-sm font-medium">
+        <div className="text-sm font-medium">
           {row.getValue("transactionId")}
         </div>
       );
