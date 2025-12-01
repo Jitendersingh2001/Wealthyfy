@@ -1,4 +1,3 @@
-import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -8,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import Tilt from "react-parallax-tilt";
 import type { DepositAccount } from "@/services/accountService";
 import { REGEX } from "@/constants/regexConstant";
 
@@ -22,16 +22,13 @@ export function BankAccountCard({
   accounts,
   onAccountChange,
 }: BankAccountCardProps) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
-
   const accountNumber = account.masked_account_number || "**** **** **** ****";
   const accountHolder = account.holders?.[0]?.name || "Account Holder";
 
   // Format account number: show masked with last 4 digits (e.g., "**** **** **** 1837")
   const formatAccountNumber = (accNum: string) => {
     // Remove all spaces and non-digits
-    const cleaned = accNum.replace(/\s/g, "").replace(REGEX.NON_DIGITS_REGEX, "");
+    const cleaned = accNum.replace(REGEX.WHITESPACE_REGEX, "").replace(REGEX.NON_DIGITS_REGEX, "");
     // Extract last 4 digits
     if (cleaned.length >= 4) {
       const lastFour = cleaned.slice(-4);
@@ -44,42 +41,22 @@ export function BankAccountCard({
   const hasMultipleAccounts = accounts.length > 1;
   
   // Extract last 4 digits for display in dropdown trigger
-  const cleaned = accountNumber.replace(/\s/g, "").replace(REGEX.NON_DIGITS_REGEX, "");
+  const cleaned = accountNumber.replace(REGEX.WHITESPACE_REGEX, "").replace(REGEX.NON_DIGITS_REGEX, "");
   const lastFourDigits = cleaned.length >= 4 ? cleaned.slice(-4) : "****";
 
-  // Handle mouse move for tilt effect
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateX = ((y - centerY) / centerY) * -10; // Max 10 degrees
-    const rotateY = ((x - centerX) / centerX) * 10; // Max 10 degrees
-
-    setTilt({ x: rotateX, y: rotateY });
-  };
-
-  // Reset tilt when mouse leaves
-  const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
-  };
-
   return (
-    <Card 
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="relative w-fit gap-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
-      style={{
-        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-        transformStyle: 'preserve-3d',
-      }}
+    <Tilt
+      tiltMaxAngleX={10}
+      tiltMaxAngleY={10}
+      perspective={1000}
+      transitionSpeed={1500}
+      scale={1.02}
+      glareEnable={true}
+      glareMaxOpacity={0.1}
+      glarePosition="all"
+      className="relative w-fit"
     >
+      <Card className="relative w-fit gap-2 transition-all duration-300 hover:shadow-lg cursor-pointer">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Account</CardTitle>
         {hasMultipleAccounts && (
@@ -99,7 +76,7 @@ export function BankAccountCard({
             <DropdownMenuContent align="end" className="w-56">
               {accounts.map((acc) => {
                 const accNumber = acc.masked_account_number || "**** **** **** ****";
-                const cleaned = accNumber.replace(/\s/g, "").replace(REGEX.NON_DIGITS_REGEX, "");
+                const cleaned = accNumber.replace(REGEX.WHITESPACE_REGEX, "").replace(REGEX.NON_DIGITS_REGEX, "");
                 const lastFour = cleaned.length >= 4 ? cleaned.slice(-4) : "****";
                 const accHolder = acc.holders?.[0]?.name || "Account Holder";
                 
@@ -160,5 +137,6 @@ export function BankAccountCard({
         </div>
       </CardContent>
     </Card>
+    </Tilt>
   );
 }

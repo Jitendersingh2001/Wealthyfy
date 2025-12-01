@@ -5,4 +5,5 @@ export const REGEX = Object.freeze({
   NON_ALPHANUMERIC_UPPERCASE_REGEX: /[^A-Z0-9]/g,
   ONLY_DIGITS_REGEX: /^\d+$/,
   NON_DIGITS_REGEX: /\D/g,
+  WHITESPACE_REGEX: /\s/g,
 });
