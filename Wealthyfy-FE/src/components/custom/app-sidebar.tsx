@@ -48,6 +48,7 @@ function SidebarHeaderContent() {
 export function AppSidebar() {
   const location = useLocation();
   const [activeItem, setActiveItem] = useState("");
+  const { state } = useSidebar();
 
   // Determine the active menu item when route changes
   useEffect(() => {
@@ -103,7 +104,7 @@ export function AppSidebar() {
   // Generic Renderer for each category block
   const renderCategory = (label: string, items: MenuItem[]) => (
     <SidebarGroup key={label}>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      {state === "expanded" && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu className="space-y-1">{items.map(renderMenuItem)}</SidebarMenu>
       </SidebarGroupContent>
