@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
 from typing import List
 from enum import Enum
 from app.config.database import get_db
-from app.schemas.account import DepositAccountResponse
+from app.schemas.account import DepositAccountResponse, AccountDetailsResponse
 from app.schemas.response import ApiResponse
 from app.services.account_service import AccountService
 from app.dependencies.auth import authenticate_user
@@ -82,6 +82,59 @@ def get_deposit_accounts(
         raise
     except Exception:
         logger_exception(f"Failed to fetch deposit accounts for user_id={current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=Messages.SOMETHING_WENT_WRONG
+        )
+
+
+# ===========================================================================
+# Get Account Details by Account ID
+# ===========================================================================
+@router.get(
+    "/{account_id}/details",
+    response_model=ApiResponse[AccountDetailsResponse],
+    dependencies=[Depends(authenticate_user)]
+)
+def get_account_details(
+    account_id: int = Path(..., description="Account ID to fetch details for"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user)
+):
+    """
+    Fetches detailed account information for a specific account.
+    
+    Path Parameters:
+        - account_id: The account ID to fetch details for
+    
+    Returns:
+        Account details including holder type, CKYC, DOB, email, phone, 
+        nominee status, PAN, branch, and IFSC code
+    """
+    try:
+        account_service = AccountService(db)
+        
+        # Fetch account details
+        details = account_service.get_account_details(
+            account_id=account_id,
+            user_id=current_user.id
+        )
+        
+        if details is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Account not found or access denied"
+            )
+        
+        return success_response(
+            data=details,
+            message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Account details")
+        )
+    
+    except HTTPException:
+        raise
+    except Exception:
+        logger_exception(f"Failed to fetch account details for account_id={account_id}, user_id={current_user.id}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=Messages.SOMETHING_WENT_WRONG

@@ -16,6 +16,8 @@ export const ENDPOINTS = {
   ACCOUNTS: {
     GET_DEPOSIT_ACCOUNTS: (type: "deposit" | "term_deposit") => 
       `/accounts/deposit?type=${type}`,
+    GET_ACCOUNT_DETAILS: (accountId: number) => 
+      `/accounts/${accountId}/details`,
   },
 };
 

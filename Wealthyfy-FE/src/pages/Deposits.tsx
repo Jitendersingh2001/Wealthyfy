@@ -2,15 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 import { DataTable } from "@/components/custom/data-table";
 import { DataTableSkeleton } from "@/components/custom/data-table-skeleton";
 import { BankAccountCard } from "@/components/custom/bank-account-card";
+import { AccountDetailsCard } from "@/components/custom/account-details-card";
 import { columns, type Transactions } from "@/constants/dataTableColumns/transactionColumns";
 import { transactionService } from "@/services/transactionService";
-import { accountService, type DepositAccount } from "@/services/accountService";
+import { accountService, type DepositAccount, type AccountDetails } from "@/services/accountService";
 import { useServerPagination } from "@/hooks/use-server-pagination";
 
 function DepositsPage() {
   const [accounts, setAccounts] = useState<DepositAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
+  const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(null);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
   // Fetch deposit accounts on page load
   useEffect(() => {
@@ -37,7 +40,32 @@ function DepositsPage() {
 
   const handleAccountChange = useCallback((accountId: number) => {
     setSelectedAccountId(accountId);
+    // Reset account details when account changes
+    setAccountDetails(null);
   }, []);
+
+  // Fetch account details when "Show Details" is clicked
+  const handleShowDetails = useCallback(async () => {
+    if (!selectedAccountId) {
+      return;
+    }
+
+    // Only fetch if details haven't been loaded yet
+    if (accountDetails) {
+      return;
+    }
+
+    try {
+      setIsLoadingDetails(true);
+      const details = await accountService.getAccountDetails(selectedAccountId);
+      setAccountDetails(details);
+    } catch (error) {
+      console.error("Failed to fetch account details:", error);
+      setAccountDetails(null);
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  }, [selectedAccountId, accountDetails]);
 
   const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
 
@@ -121,12 +149,18 @@ function DepositsPage() {
             )}
           </div>
 
-          {/* Bank Account Card */}
-          <div className="flex-shrink-0">
+          {/* Bank Account Card and Account Details Card */}
+          <div className="shrink-0 flex flex-col gap-6">
             <BankAccountCard
               account={selectedAccount}
               accounts={accounts}
               onAccountChange={handleAccountChange}
+            />
+            <AccountDetailsCard
+              details={accountDetails}
+              isLoading={isLoadingDetails}
+              onShowDetails={handleShowDetails}
+              accountId={selectedAccountId}
             />
           </div>
         </div>

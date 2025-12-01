@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from datetime import datetime
 
 
 class AccountHolderResponse(BaseModel):
@@ -17,6 +18,23 @@ class DepositAccountResponse(BaseModel):
     id: int = Field(..., description="Account ID")
     masked_account_number: Optional[str] = Field(None, description="Masked account number")
     holders: List[AccountHolderResponse] = Field(default_factory=list, description="Account holders (name only)")
+
+    class Config:
+        from_attributes = True
+
+
+class AccountDetailsResponse(BaseModel):
+    """Schema for account details response with comprehensive information."""
+    
+    holder_type: Optional[str] = Field(None, description="Account holder type")
+    ckyc_compliance: Optional[bool] = Field(None, description="CKYC compliance status")
+    date_of_birth: Optional[datetime] = Field(None, description="Date of birth")
+    email: Optional[str] = Field(None, description="Email address")
+    mobile: Optional[str] = Field(None, description="Mobile number")
+    nominee_status: Optional[str] = Field(None, description="Nominee status")
+    pan: Optional[str] = Field(None, description="PAN number")
+    branch: Optional[str] = Field(None, description="Branch name")
+    ifsc_code: Optional[str] = Field(None, description="IFSC code")
 
     class Config:
         from_attributes = True
