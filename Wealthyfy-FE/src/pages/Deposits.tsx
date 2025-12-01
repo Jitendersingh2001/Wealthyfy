@@ -3,9 +3,11 @@ import { DataTable } from "@/components/custom/data-table";
 import { DataTableSkeleton } from "@/components/custom/data-table-skeleton";
 import { BankAccountCard } from "@/components/custom/bank-account-card";
 import { AccountDetailsCard } from "@/components/custom/account-details-card";
+import { MonitoringCards, type MonitoringCardItem } from "@/components/custom/monitoring-cards";
+import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { columns, type Transactions } from "@/constants/dataTableColumns/transactionColumns";
 import { transactionService } from "@/services/transactionService";
-import { accountService, type DepositAccount, type AccountDetails } from "@/services/accountService";
+import { accountService, type DepositAccount, type AccountDetails, type AccountMetrics } from "@/services/accountService";
 import { useServerPagination } from "@/hooks/use-server-pagination";
 
 function DepositsPage() {
@@ -14,6 +16,8 @@ function DepositsPage() {
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
   const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(null);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [accountMetrics, setAccountMetrics] = useState<AccountMetrics | null>(null);
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
 
   // Fetch deposit accounts on page load
   useEffect(() => {
@@ -40,8 +44,9 @@ function DepositsPage() {
 
   const handleAccountChange = useCallback((accountId: number) => {
     setSelectedAccountId(accountId);
-    // Reset account details when account changes
+    // Reset account details and metrics when account changes
     setAccountDetails(null);
+    setAccountMetrics(null);
   }, []);
 
   // Fetch account details when "Show Details" is clicked
@@ -67,7 +72,73 @@ function DepositsPage() {
     }
   }, [selectedAccountId, accountDetails]);
 
+  // Fetch account metrics when account is selected
+  useEffect(() => {
+    const fetchAccountMetrics = async () => {
+      if (!selectedAccountId) {
+        setAccountMetrics(null);
+        return;
+      }
+
+      try {
+        setIsLoadingMetrics(true);
+        const metrics = await accountService.getAccountMetrics(selectedAccountId);
+        setAccountMetrics(metrics);
+      } catch (error) {
+        console.error("Failed to fetch account metrics:", error);
+        setAccountMetrics(null);
+      } finally {
+        setIsLoadingMetrics(false);
+      }
+    };
+
+    fetchAccountMetrics();
+  }, [selectedAccountId]);
+
   const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
+
+  // Format currency helper
+  const formatCurrency = (value: string | number | null) => {
+    if (value === null || value === undefined) return "N/A";
+    if (typeof value === "string") {
+      const numValue = parseFloat(value);
+      if (isNaN(numValue)) return "N/A";
+      value = numValue;
+    }
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  // Prepare monitoring cards data
+  const monitoringCards: MonitoringCardItem[] = [
+    {
+      title: "Current Balance",
+      value: accountMetrics?.current_balance ?? null,
+      icon: Wallet,
+      iconColor: "text-muted-foreground",
+      formatValue: formatCurrency,
+    },
+    {
+      title: "Last Month Credit",
+      value: accountMetrics?.last_month_total_credit ?? 0,
+      icon: TrendingUp,
+      iconColor: "text-green-600",
+      valueColor: "text-green-600",
+      formatValue: formatCurrency,
+    },
+    {
+      title: "Last Month Debit",
+      value: accountMetrics?.last_month_total_debit ?? 0,
+      icon: TrendingDown,
+      iconColor: "text-red-600",
+      valueColor: "text-red-600",
+      formatValue: formatCurrency,
+    },
+  ];
 
   const fetchTransactions = useCallback(
     (page: number, size: number, sortBy?: string, sortOrder?: "asc" | "desc") => {
@@ -101,7 +172,7 @@ function DepositsPage() {
             <div className="flex-1">
               <DataTableSkeleton columnCount={columns.length} rowCount={10} />
             </div>
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <div className="h-64 w-[320px] bg-muted animate-pulse rounded-xl" />
             </div>
           </div>
@@ -126,6 +197,13 @@ function DepositsPage() {
         <div className="flex gap-6 items-start">
           {/* Transactions Table */}
           <div className="flex-1">
+            {/* Monitoring Cards */}
+            <MonitoringCards
+              cards={monitoringCards}
+              isLoading={isLoadingMetrics}
+              columns={3}
+            />
+            
             {isLoading ? (
               <DataTableSkeleton columnCount={columns.length} rowCount={pagination.pageSize} />
             ) : (

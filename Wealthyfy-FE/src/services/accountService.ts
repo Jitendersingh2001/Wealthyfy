@@ -24,6 +24,12 @@ export interface AccountDetails {
   ifsc_code: string | null;
 }
 
+export interface AccountMetrics {
+  current_balance: number | null;
+  last_month_total_credit: number;
+  last_month_total_debit: number;
+}
+
 class AccountService {
   /**
    * Fetch deposit accounts for the authenticated user
@@ -45,6 +51,20 @@ class AccountService {
     const url = ENDPOINTS.ACCOUNTS.GET_ACCOUNT_DETAILS(accountId);
     const response = await apiRequest.get<ApiResponse<AccountDetails>>(url);
     return response.data || {} as AccountDetails;
+  }
+
+  /**
+   * Fetch account metrics for a specific account
+   * @param accountId - The account ID to fetch metrics for
+   */
+  async getAccountMetrics(accountId: number): Promise<AccountMetrics> {
+    const url = ENDPOINTS.ACCOUNTS.GET_ACCOUNT_METRICS(accountId);
+    const response = await apiRequest.get<ApiResponse<AccountMetrics>>(url);
+    return response.data || {
+      current_balance: null,
+      last_month_total_credit: 0,
+      last_month_total_debit: 0,
+    };
   }
 }
 

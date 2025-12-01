@@ -1,8 +1,11 @@
-from typing import Optional
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Query
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func, and_
 from app.services.base_service import BaseService
 from app.models.bank_transaction import BankTransaction
+from app.models.banking_account_details import BankingAccountDetails
+from app.models.account_summary import AccountSummary
 
 
 class TransactionService(BaseService):
@@ -51,4 +54,61 @@ class TransactionService(BaseService):
             query = query.order_by(desc(BankTransaction.transaction_timestamp))
 
         return query
+
+    def get_account_metrics(
+        self,
+        account_id: int
+    ) -> Dict[str, Any]:
+        """
+        Returns account metrics including current balance and last month transaction totals.
+        
+        Args:
+            account_id: The account ID to fetch metrics for
+            
+        Returns:
+            Dictionary containing current_balance, last_month_total_credit, last_month_total_debit
+        """
+        # Calculate last month date range
+        today = datetime.now()
+        first_day_last_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+        first_day_this_month = today.replace(day=1)
+        
+        # Get current balance from BankingAccountDetails via AccountSummary
+        current_balance = None
+        summary = self.db.query(AccountSummary).filter(
+            AccountSummary.account_id == account_id
+        ).first()
+        
+        if summary and summary.banking_details:
+            current_balance = float(summary.banking_details.current_balance) if summary.banking_details.current_balance else None
+        
+        # Calculate last month total credit
+        last_month_credit = self.db.query(
+            func.coalesce(func.sum(BankTransaction.amount), 0)
+        ).filter(
+            and_(
+                BankTransaction.account_id == account_id,
+                BankTransaction.transaction_type == "CREDIT",
+                BankTransaction.transaction_timestamp >= first_day_last_month,
+                BankTransaction.transaction_timestamp < first_day_this_month
+            )
+        ).scalar() or 0
+        
+        # Calculate last month total debit
+        last_month_debit = self.db.query(
+            func.coalesce(func.sum(BankTransaction.amount), 0)
+        ).filter(
+            and_(
+                BankTransaction.account_id == account_id,
+                BankTransaction.transaction_type == "DEBIT",
+                BankTransaction.transaction_timestamp >= first_day_last_month,
+                BankTransaction.transaction_timestamp < first_day_this_month
+            )
+        ).scalar() or 0
+        
+        return {
+            "current_balance": float(current_balance) if current_balance is not None else None,
+            "last_month_total_credit": float(last_month_credit),
+            "last_month_total_debit": float(last_month_debit),
+        }
 

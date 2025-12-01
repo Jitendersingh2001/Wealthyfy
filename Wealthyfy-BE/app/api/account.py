@@ -3,12 +3,15 @@ from sqlalchemy.orm import Session
 from typing import List
 from enum import Enum
 from app.config.database import get_db
-from app.schemas.account import DepositAccountResponse, AccountDetailsResponse
+from app.schemas.account import DepositAccountResponse, AccountDetailsResponse, AccountMetricsResponse
 from app.schemas.response import ApiResponse
 from app.services.account_service import AccountService
+from app.services.transaction_service import TransactionService
 from app.dependencies.auth import authenticate_user
 from app.models.user import User
 from app.models.consent_fI_type import FITypeEnum
+from app.models.financial_accounts import FinancialAccount
+from app.models.consent_request import ConsentRequest
 from app.utils.logger_util import logger_exception
 from app.constants.message import Messages
 from app.utils.response import success_response
@@ -135,6 +138,47 @@ def get_account_details(
         raise
     except Exception:
         logger_exception(f"Failed to fetch account details for account_id={account_id}, user_id={current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=Messages.SOMETHING_WENT_WRONG
+        )
+
+
+# ===========================================================================
+# Get Account Metrics (Current Balance, Last Month Credit/Debit)
+# ===========================================================================
+@router.get(
+    "/{account_id}/metrics",
+    response_model=ApiResponse[AccountMetricsResponse],
+    dependencies=[Depends(authenticate_user)]
+)
+def get_account_metrics(
+    account_id: int = Path(..., description="Account ID to fetch metrics for"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user)
+):
+    """
+    Fetches account metrics including current balance and last month transaction totals.
+    
+    Path Parameters:
+        - account_id: The account ID to fetch metrics for
+    
+    Returns:
+        Account metrics including current balance, last month total credit, and last month total debit
+    """
+    try:
+        transaction_service = TransactionService(db)
+        metrics = transaction_service.get_account_metrics(account_id)
+        
+        return success_response(
+            data=metrics,
+            message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Account metrics")
+        )
+    
+    except HTTPException:
+        raise
+    except Exception:
+        logger_exception(f"Failed to fetch account metrics for account_id={account_id}, user_id={current_user.id}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=Messages.SOMETHING_WENT_WRONG

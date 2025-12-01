@@ -39,3 +39,14 @@ class AccountDetailsResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class AccountMetricsResponse(BaseModel):
+    """Schema for account metrics response."""
+    
+    current_balance: Optional[float] = Field(None, description="Current account balance")
+    last_month_total_credit: float = Field(0.0, description="Total credit transactions in last month")
+    last_month_total_debit: float = Field(0.0, description="Total debit transactions in last month")
+
+    class Config:
+        from_attributes = True
+
