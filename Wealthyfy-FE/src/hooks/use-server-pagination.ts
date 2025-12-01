@@ -136,8 +136,12 @@ export function useServerPagination<T>({
         setIsLoading(true);
         const response = await fetchData(page, size, sortBy, sortOrder);
         setData(response.items || []);
-        setPageCount(response.pages || 0);
-        setTotal(response.total || 0);
+        const total = response.total || 0;
+        setTotal(total);
+        // Calculate pages from total and size if pages is not provided
+        const responseSize = response.size || size;
+        const pages = response.pages ?? (total > 0 ? Math.ceil(total / responseSize) : 0);
+        setPageCount(pages);
       } catch (error) {
         const errorMsg =
           errorMessage ||

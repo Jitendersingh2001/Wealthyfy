@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
+from enum import Enum
 from app.config.database import get_db
 from app.schemas.account import DepositAccountResponse
 from app.schemas.response import ApiResponse
@@ -11,6 +12,12 @@ from app.models.consent_fI_type import FITypeEnum
 from app.utils.logger_util import logger_exception
 from app.constants.message import Messages
 from app.utils.response import success_response
+
+
+class DepositAccountType(str, Enum):
+    """Enum for deposit account types in API requests."""
+    DEPOSIT = "deposit"
+    TERM_DEPOSIT = "term_deposit"
 
 
 # ---------------------------------------------------------------------------
@@ -31,10 +38,9 @@ router = APIRouter(
     dependencies=[Depends(authenticate_user)]
 )
 def get_deposit_accounts(
-    type: str = Query(
+    type: DepositAccountType = Query(
         ...,
-        description="Account type filter: 'deposit' or 'term_deposit'",
-        regex="^(deposit|term_deposit)$"
+        description="Account type filter: 'deposit' or 'term_deposit'"
     ),
     db: Session = Depends(get_db),
     current_user: User = Depends(authenticate_user)
@@ -51,8 +57,8 @@ def get_deposit_accounts(
     try:
         account_service = AccountService(db)
         
-        # Convert string type to FITypeEnum
-        type_upper = type.upper().replace("-", "_")
+        # Convert DepositAccountType enum to FITypeEnum
+        type_upper = type.value.upper().replace("-", "_")
         try:
             account_type = FITypeEnum[type_upper]
         except KeyError:
@@ -78,6 +84,6 @@ def get_deposit_accounts(
         logger_exception(f"Failed to fetch deposit accounts for user_id={current_user.id}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=Messages.FETCH_FAILED.replace(":name", "Deposit accounts")
+            detail=Messages.SOMETHING_WENT_WRONG
         )
 

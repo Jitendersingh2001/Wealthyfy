@@ -1,18 +1,22 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
-from app.models.consent_fI_type import FITypeEnum
+from typing import Optional, List
+
+
+class AccountHolderResponse(BaseModel):
+    """Schema for account holder - only name field needed."""
+    
+    name: str = Field(..., description="Holder name")
+
+    class Config:
+        from_attributes = True
 
 
 class DepositAccountResponse(BaseModel):
-    """Schema for deposit account response."""
+    """Schema for deposit account response - only essential fields."""
     
     id: int = Field(..., description="Account ID")
-    consent_id: int = Field(..., description="Consent request ID")
-    fip_id: str = Field(..., description="Financial Institution Provider ID")
-    link_ref_number: str = Field(..., description="Link reference number")
-    masked_account_number: str | None = Field(None, description="Masked account number")
-    account_type: FITypeEnum = Field(..., description="Account type (DEPOSIT or TERM_DEPOSIT)")
-    created_at: datetime = Field(..., description="Account creation timestamp")
+    masked_account_number: Optional[str] = Field(None, description="Masked account number")
+    holders: List[AccountHolderResponse] = Field(default_factory=list, description="Account holders (name only)")
 
     class Config:
         from_attributes = True

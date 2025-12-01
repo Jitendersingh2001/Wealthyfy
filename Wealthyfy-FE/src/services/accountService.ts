@@ -2,14 +2,14 @@ import { ENDPOINTS } from "@/services/api/endpoints";
 import { apiRequest } from "@/services/api/request";
 import type { ApiResponse } from "@/types/api";
 
+export interface AccountHolder {
+  name: string;
+}
+
 export interface DepositAccount {
   id: number;
-  consent_id: number;
-  fip_id: string;
-  link_ref_number: string;
   masked_account_number: string | null;
-  account_type: "DEPOSIT" | "TERM_DEPOSIT";
-  created_at: string;
+  holders: AccountHolder[];
 }
 
 class AccountService {

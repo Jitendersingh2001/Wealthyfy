@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DataTable } from "@/components/custom/data-table";
 import { DataTableSkeleton } from "@/components/custom/data-table-skeleton";
+import { BankAccountCard } from "@/components/custom/bank-account-card";
 import { columns, type Transactions } from "@/constants/dataTableColumns/transactionColumns";
 import { transactionService } from "@/services/transactionService";
 import { accountService, type DepositAccount } from "@/services/accountService";
@@ -20,11 +21,9 @@ function DepositsPage() {
         const fetchedAccounts = await accountService.getDepositAccounts("deposit");
         setAccounts(fetchedAccounts);
         
-        // Set default account: first account, or account with id=1 if exists, or first account
+        // Set default account: first account in the array (index 0)
         if (fetchedAccounts.length > 0) {
-          const accountWithId1 = fetchedAccounts.find(acc => acc.id === 1);
-          const defaultAccount = accountWithId1 || fetchedAccounts[0];
-          setSelectedAccountId(defaultAccount.id);
+          setSelectedAccountId(fetchedAccounts[0].id);
         }
       } catch (error) {
         console.error("Failed to fetch deposit accounts:", error);
@@ -35,6 +34,12 @@ function DepositsPage() {
 
     fetchAccounts();
   }, []);
+
+  const handleAccountChange = useCallback((accountId: number) => {
+    setSelectedAccountId(accountId);
+  }, []);
+
+  const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
 
   const fetchTransactions = useCallback(
     (page: number, size: number, sortBy?: string, sortOrder?: "asc" | "desc") => {
@@ -60,11 +65,28 @@ function DepositsPage() {
     initialSorting: [{ id: "transaction_timestamp", desc: true }],
   });
 
-  if (isLoadingAccounts || isLoading) {
+  if (isLoadingAccounts) {
     return (
       <div className="relative w-full">
         <div className="p-6">
-          <DataTableSkeleton columnCount={columns.length} rowCount={pagination.pageSize} />
+          <div className="flex gap-6 items-start">
+            <div className="flex-1">
+              <DataTableSkeleton columnCount={columns.length} rowCount={10} />
+            </div>
+            <div className="flex-shrink-0">
+              <div className="h-64 w-[320px] bg-muted animate-pulse rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedAccount) {
+    return (
+      <div className="relative w-full">
+        <div className="p-6">
+          <p className="text-muted-foreground">No account selected</p>
         </div>
       </div>
     );
@@ -73,23 +95,41 @@ function DepositsPage() {
   return (
     <div className="relative w-full">
       <div className="p-6">
-        <DataTable
-          columns={columns}
-          data={transactions}
-          initialSorting={[{ id: "transaction_timestamp", desc: true }]}
-          initialPageSize={pagination.pageSize}
-          pageCount={pageCount}
-          total={total}
-          pagination={pagination}
-          onPaginationChange={handlePaginationChange}
-          manualPagination={true}
-          sorting={sorting}
-          onSortingChange={(updater) => {
-            const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
-            handleSortingChange(newSorting);
-          }}
-          manualSorting={true}
-        />
+        <div className="flex gap-6 items-start">
+          {/* Transactions Table */}
+          <div className="flex-1">
+            {isLoading ? (
+              <DataTableSkeleton columnCount={columns.length} rowCount={pagination.pageSize} />
+            ) : (
+              <DataTable
+                columns={columns}
+                data={transactions}
+                initialSorting={[{ id: "transaction_timestamp", desc: true }]}
+                initialPageSize={pagination.pageSize}
+                pageCount={pageCount}
+                total={total}
+                pagination={pagination}
+                onPaginationChange={handlePaginationChange}
+                manualPagination={true}
+                sorting={sorting}
+                onSortingChange={(updater) => {
+                  const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
+                  handleSortingChange(newSorting);
+                }}
+                manualSorting={true}
+              />
+            )}
+          </div>
+
+          {/* Bank Account Card */}
+          <div className="flex-shrink-0">
+            <BankAccountCard
+              account={selectedAccount}
+              accounts={accounts}
+              onAccountChange={handleAccountChange}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

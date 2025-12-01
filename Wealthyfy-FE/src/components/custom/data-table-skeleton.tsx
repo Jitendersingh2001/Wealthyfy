@@ -25,54 +25,59 @@ export function DataTableSkeleton({
 }: DataTableSkeletonProps) {
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow className="hover:bg-muted/50 border-b">
-              {Array.from({ length: columnCount }).map((_, index) => (
-                <TableHead key={index}>
-                  <Skeleton className="h-4 w-24" />
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Array.from({ length: rowCount }).map((_, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {Array.from({ length: columnCount }).map((_, colIndex) => (
-                  <TableCell key={colIndex}>
-                    <Skeleton
-                      className={
-                        colIndex === 0
-                          ? "h-4 w-32"
-                          : colIndex === 1
-                          ? "h-6 w-20"
-                          : colIndex === 2
-                          ? "h-4 w-24"
-                          : colIndex === 3
-                          ? "h-4 w-16"
-                          : "h-4 w-28"
-                      }
-                    />
-                  </TableCell>
+      <div className="rounded-md border flex flex-col h-[630px] overflow-hidden">
+        <div className="flex-1 overflow-auto">
+          <Table>
+            <TableHeader className="bg-muted/50 sticky top-0 z-10">
+              <TableRow className="hover:bg-muted/50 border-b">
+                {Array.from({ length: columnCount }).map((_, index) => (
+                  <TableHead key={index}>
+                    <Skeleton className="h-4 w-24" />
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      {/* Pagination skeleton */}
-      <div className="flex items-center justify-between px-2">
-        <Skeleton className="h-4 w-48" />
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-9 w-[70px]" />
-          </div>
-          <Skeleton className="h-4 w-24" />
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-9 w-9" />
-            <Skeleton className="h-9 w-9" />
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: rowCount }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {Array.from({ length: columnCount }).map((_, colIndex) => (
+                    <TableCell key={colIndex}>
+                      <Skeleton
+                        className={
+                          colIndex === 0
+                            ? "h-4 w-32"
+                            : colIndex === 1
+                            ? "h-6 w-20"
+                            : colIndex === 2
+                            ? "h-4 w-24"
+                            : colIndex === 3
+                            ? "h-4 w-16"
+                            : "h-4 w-28"
+                        }
+                      />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Footer - Pagination skeleton */}
+        <div className="shrink-0 border-t bg-secondary/30">
+          <div className="flex items-center justify-between px-2 py-2">
+            <Skeleton className="h-4 w-48" />
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-9 w-[70px]" />
+              </div>
+              <Skeleton className="h-4 w-24" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-9 w-9" />
+                <Skeleton className="h-9 w-9" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

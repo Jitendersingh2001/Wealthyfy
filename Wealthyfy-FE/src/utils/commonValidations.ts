@@ -66,3 +66,21 @@ export const otpValidation = z
   )
   .transform((v) => v.trim());
 
+/**
+ * Format a number as currency
+ * @param amount - The amount to format
+ * @param currency - Currency code (default: 'INR')
+ * @returns Formatted currency string
+ */
+export function formatCurrency(
+  amount: number,
+  currency: string = "INR"
+): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
