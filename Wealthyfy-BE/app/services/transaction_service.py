@@ -6,6 +6,7 @@ from app.services.base_service import BaseService
 from app.models.bank_transaction import BankTransaction
 from app.models.banking_account_details import BankingAccountDetails
 from app.models.account_summary import AccountSummary
+from app.constants.constant import TRANSACTION_TYPE_CREDIT, TRANSACTION_TYPE_DEBIT
 
 
 class TransactionService(BaseService):
@@ -88,7 +89,7 @@ class TransactionService(BaseService):
         ).filter(
             and_(
                 BankTransaction.account_id == account_id,
-                BankTransaction.transaction_type == "CREDIT",
+                BankTransaction.transaction_type == TRANSACTION_TYPE_CREDIT,
                 BankTransaction.transaction_timestamp >= first_day_last_month,
                 BankTransaction.transaction_timestamp < first_day_this_month
             )
@@ -100,7 +101,7 @@ class TransactionService(BaseService):
         ).filter(
             and_(
                 BankTransaction.account_id == account_id,
-                BankTransaction.transaction_type == "DEBIT",
+                BankTransaction.transaction_type == TRANSACTION_TYPE_DEBIT,
                 BankTransaction.transaction_timestamp >= first_day_last_month,
                 BankTransaction.transaction_timestamp < first_day_this_month
             )

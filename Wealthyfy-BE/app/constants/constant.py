@@ -11,5 +11,9 @@ FAILED="failed"
 APPROVED="approved"
 PENDING="pending"
 
+# Transaction type constants
+TRANSACTION_TYPE_CREDIT = "CREDIT"
+TRANSACTION_TYPE_DEBIT = "DEBIT"
+
 # Date format constants
 DATE_FORMAT_YYYY_MM_DD = "%Y-%m-%d"

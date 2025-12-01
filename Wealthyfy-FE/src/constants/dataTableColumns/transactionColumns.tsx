@@ -4,6 +4,7 @@ import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { DATE_FORMATS } from "@/constants/dateFormatConstants";
+import { TRANSACTION_TYPES, type TransactionType } from "@/constants/constants";
 
 export type Transactions = {
   id: number;
@@ -12,7 +13,7 @@ export type Transactions = {
   mode: string;
   transaction_timestamp: string;
   transaction_id: string;
-  transaction_type: "CREDIT" | "DEBIT";
+  transaction_type: TransactionType;
 };
 
 export const columns: ColumnDef<Transactions>[] = [
@@ -33,8 +34,8 @@ export const columns: ColumnDef<Transactions>[] = [
     header: "Type",
     enableSorting: false,
     cell: ({ row }) => {
-      const type = row.getValue("transaction_type") as "CREDIT" | "DEBIT";
-      const isCredit = type === "CREDIT";
+      const type = row.getValue("transaction_type") as TransactionType;
+      const isCredit = type === TRANSACTION_TYPES.CREDIT;
       return (
         <div className="flex items-center gap-2">
           {isCredit ? (
@@ -72,12 +73,12 @@ export const columns: ColumnDef<Transactions>[] = [
       return (
         <div
           className={`font-semibold ${
-            type === "CREDIT"
+            type === TRANSACTION_TYPES.CREDIT
               ? "text-green-600 dark:text-green-400"
               : "text-red-600 dark:text-red-400"
           }`}
         >
-          {type === "CREDIT" ? "+" : "-"}
+          {type === TRANSACTION_TYPES.CREDIT ? "+" : "-"}
           {formatted}
         </div>
       );
