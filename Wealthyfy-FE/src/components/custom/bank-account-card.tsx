@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -21,6 +22,9 @@ export function BankAccountCard({
   accounts,
   onAccountChange,
 }: BankAccountCardProps) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const accountNumber = account.masked_account_number || "**** **** **** ****";
   const accountHolder = account.holders?.[0]?.name || "Account Holder";
 
@@ -43,8 +47,39 @@ export function BankAccountCard({
   const cleaned = accountNumber.replace(/\s/g, "").replace(REGEX.NON_DIGITS_REGEX, "");
   const lastFourDigits = cleaned.length >= 4 ? cleaned.slice(-4) : "****";
 
+  // Handle mouse move for tilt effect
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -10; // Max 10 degrees
+    const rotateY = ((x - centerX) / centerX) * 10; // Max 10 degrees
+
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  // Reset tilt when mouse leaves
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
   return (
-    <Card className="relative w-fit gap-2">
+    <Card 
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative w-fit gap-2 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        transformStyle: 'preserve-3d',
+      }}
+    >
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Account</CardTitle>
         {hasMultipleAccounts && (
@@ -91,9 +126,9 @@ export function BankAccountCard({
       </CardHeader>
       <CardContent className="relative">
         {/* Green Credit Card */}
-        <div className="relative overflow-hidden bg-linear-to-br from-green-700 to-green-800 text-white shadow-xl rounded-xl aspect-[85.6/53.98] w-[320px]">
+        <div className="relative overflow-hidden bg-linear-to-br from-green-700 to-green-800 text-white shadow-xl rounded-xl aspect-[85.6/53.98] w-[320px] transition-all duration-300 hover:from-green-600 hover:to-green-700 hover:shadow-2xl hover:brightness-110">
           {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 opacity-10 transition-opacity duration-300 hover:opacity-15">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
           </div>
@@ -104,13 +139,13 @@ export function BankAccountCard({
               <img 
                 src="/chip.png" 
                 alt="Chip" 
-                className="h-8 w-auto"
+                className="h-8 w-auto transition-transform duration-300 hover:scale-110"
               />
             </div>
 
             {/* Middle Section: Account Number */}
             <div className="flex-1 flex items-center">
-              <p className="text-lg font-mono font-semibold tracking-wider">
+              <p className="text-lg font-mono font-semibold tracking-wider transition-all duration-300 hover:tracking-widest">
                 {formattedAccountNumber}
               </p>
             </div>
@@ -118,7 +153,7 @@ export function BankAccountCard({
             {/* Bottom Section: Name and Logo */}
             <div className="text-left">
               <div>
-                <p className="text-sm font-medium">{accountHolder}</p>
+                <p className="text-sm font-medium transition-all duration-300 hover:font-semibold">{accountHolder}</p>
               </div>
             </div>
           </div>
