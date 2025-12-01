@@ -13,6 +13,10 @@ export const ENDPOINTS = {
   TRANSACTIONS: {
     GET_TRANSACTIONS: () => `/transactions`,
   },
+  ACCOUNTS: {
+    GET_DEPOSIT_ACCOUNTS: (type: "deposit" | "term_deposit") => 
+      `/accounts/deposit?type=${type}`,
+  },
 };
 
 
