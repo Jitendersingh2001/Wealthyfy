@@ -14,6 +14,7 @@ from fastapi.exceptions import RequestValidationError
 # Routers & Utilities
 from app.api import router as api_router
 from app.utils.response import error_response
+from fastapi_pagination import add_pagination
 
 # Celery Beat schedule (import to register periodic tasks)
 from app.config.celery_app import celery_app # noqa: F401
@@ -47,6 +48,11 @@ app.add_middleware(
 # Register Routers
 # ------------------------------------------------------------
 app.include_router(api_router)
+
+# ------------------------------------------------------------
+# Add Pagination Support
+# ------------------------------------------------------------
+add_pagination(app)
 
 
 # ------------------------------------------------------------

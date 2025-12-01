@@ -7,33 +7,33 @@ import { DATE_FORMATS } from "@/constants/dateFormatConstants";
 
 export type Transactions = {
   id: number;
-  accountId: number;
+  account_id: number;
   amount: number;
   mode: string;
-  transactionDate: string;
-  transactionId: string;
-  transactionType: "CREDIT" | "DEBIT";
+  transaction_timestamp: string;
+  transaction_id: string;
+  transaction_type: "CREDIT" | "DEBIT";
 };
 
 export const columns: ColumnDef<Transactions>[] = [
   {
-    accessorKey: "transactionId",
+    accessorKey: "transaction_id",
     header: "Transaction ID",
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => {
       return (
         <div className="text-sm font-medium">
-          {row.getValue("transactionId")}
+          {row.getValue("transaction_id")}
         </div>
       );
     },
   },
   {
-    accessorKey: "transactionType",
+    accessorKey: "transaction_type",
     header: "Type",
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => {
-      const type = row.getValue("transactionType") as "CREDIT" | "DEBIT";
+      const type = row.getValue("transaction_type") as "CREDIT" | "DEBIT";
       const isCredit = type === "CREDIT";
       return (
         <div className="flex items-center gap-2">
@@ -61,7 +61,7 @@ export const columns: ColumnDef<Transactions>[] = [
     enableSorting: true,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("amount"));
-      const type = row.original.transactionType;
+      const type = row.original.transaction_type;
       const formatted = new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
@@ -86,7 +86,7 @@ export const columns: ColumnDef<Transactions>[] = [
   {
     accessorKey: "mode",
     header: "Mode",
-    enableSorting: true,
+    enableSorting: false,
     cell: ({ row }) => {
       return (
         <span className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 text-xs font-medium">
@@ -96,11 +96,12 @@ export const columns: ColumnDef<Transactions>[] = [
     },
   },
   {
-    accessorKey: "transactionDate",
+    accessorKey: "transaction_timestamp",
     header: "Date/Time",
     enableSorting: true,
     cell: ({ row }) => {
-      const date = new Date(row.getValue("transactionDate"));
+      const timestamp = row.getValue("transaction_timestamp") as string;
+      const date = new Date(timestamp);
       return (
         <div className="flex flex-col">
           <span className="text-sm font-medium">

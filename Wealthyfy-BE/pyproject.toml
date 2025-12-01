@@ -25,6 +25,7 @@ twilio = "^9.8.6"
 pusher = "^3.3.3"
 python-multipart = "^0.0.20"
 flower = "^2.0.1"
+fastapi-pagination = "^0.15.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

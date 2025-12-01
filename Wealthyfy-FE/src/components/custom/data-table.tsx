@@ -29,6 +29,16 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   initialSorting?: SortingState
   initialPageSize?: number
+  // Server-side pagination props
+  pageCount?: number
+  total?: number
+  pagination?: PaginationState
+  onPaginationChange?: (pagination: PaginationState) => void
+  manualPagination?: boolean
+  // Server-side sorting props
+  sorting?: SortingState
+  onSortingChange?: (updater: SortingState | ((old: SortingState) => SortingState)) => void
+  manualSorting?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -36,21 +46,62 @@ export function DataTable<TData, TValue>({
   data,
   initialSorting = [],
   initialPageSize = 10,
+  pageCount,
+  total,
+  pagination: controlledPagination,
+  onPaginationChange,
+  manualPagination = false,
+  sorting: controlledSorting,
+  onSortingChange,
+  manualSorting = false,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>(initialSorting)
-  const [pagination, setPagination] = useState<PaginationState>({
+  const [internalSorting, setInternalSorting] = useState<SortingState>(initialSorting)
+  const [internalPagination, setInternalPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: initialPageSize,
   })
+
+  // Use controlled sorting if provided, otherwise use internal state
+  // If controlled sorting is provided, use it; otherwise fall back to internal state
+  const sorting = controlledSorting !== undefined ? controlledSorting : internalSorting
+  
+  // Use controlled pagination if provided, otherwise use internal state
+  const pagination = controlledPagination ?? internalPagination
+
+  const handlePaginationChange = (updater: PaginationState | ((old: PaginationState) => PaginationState)) => {
+    const newPagination = typeof updater === 'function' ? updater(pagination) : updater
+    if (controlledPagination) {
+      // Controlled: notify parent
+      onPaginationChange?.(newPagination)
+    } else {
+      // Uncontrolled: update internal state
+      setInternalPagination(newPagination)
+    }
+  }
+
+  const handleSortingChange = (updater: SortingState | ((old: SortingState) => SortingState)) => {
+    const newSorting = typeof updater === 'function' ? updater(sorting) : updater
+    // For controlled sorting, notify parent with the new sorting state
+    if (controlledSorting !== undefined && onSortingChange) {
+      // Pass the updater function directly to parent
+      onSortingChange(updater)
+    } else {
+      // Uncontrolled: update internal state
+      setInternalSorting(newSorting)
+    }
+  }
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    getSortedRowModel: manualSorting ? undefined : getSortedRowModel(),
+    getPaginationRowModel: manualPagination ? undefined : getPaginationRowModel(),
+    manualPagination,
+    manualSorting,
+    pageCount: pageCount ?? -1,
+    onSortingChange: handleSortingChange,
+    onPaginationChange: handlePaginationChange,
     state: { sorting, pagination },
   })
 
@@ -137,12 +188,25 @@ export function DataTable<TData, TValue>({
                 <div className="flex items-center justify-between px-2">
                   <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">
-                      Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
-                      {Math.min(
-                        (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                        table.getFilteredRowModel().rows.length
-                      )}{" "}
-                      of {table.getFilteredRowModel().rows.length} results
+                      {manualPagination && total !== undefined ? (
+                        <>
+                          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+                          {Math.min(
+                            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                            total
+                          )}{" "}
+                          of {total} results
+                        </>
+                      ) : (
+                        <>
+                          Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{" "}
+                          {Math.min(
+                            (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                            table.getFilteredRowModel().rows.length
+                          )}{" "}
+                          of {table.getFilteredRowModel().rows.length} results
+                        </>
+                      )}
                     </p>
                   </div>
 

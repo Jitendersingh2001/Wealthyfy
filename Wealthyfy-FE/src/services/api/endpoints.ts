@@ -10,6 +10,9 @@ export const ENDPOINTS = {
     SESSION_STATUS: (consentId: string) => `/users/session-status?consent_id=${consentId}`,
     MARK_SETUP_COMPLETE: `/users/mark-setup-complete`,
   },
+  TRANSACTIONS: {
+    GET_TRANSACTIONS: () => `/transactions`,
+  },
 };
 
 
