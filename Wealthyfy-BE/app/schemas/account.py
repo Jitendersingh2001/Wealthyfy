@@ -50,3 +50,22 @@ class AccountMetricsResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class PaymentTypeStatistic(BaseModel):
+    """Schema for individual payment type statistic."""
+    
+    mode: str = Field(..., description="Payment mode (UPI, NEFT, IMPS, RTGS, etc.)")
+    amount: float = Field(..., description="Total amount for this payment type")
+    count: int = Field(..., description="Number of transactions for this payment type")
+    percentage: float = Field(..., description="Percentage of total amount")
+
+
+class PaymentTypeStatisticsResponse(BaseModel):
+    """Schema for payment type statistics response."""
+    
+    payment_types: List[PaymentTypeStatistic] = Field(..., description="List of payment types with statistics")
+    total_amount: float = Field(..., description="Total amount across all payment types")
+
+    class Config:
+        from_attributes = True
+

@@ -30,6 +30,18 @@ export interface AccountMetrics {
   last_month_total_debit: number;
 }
 
+export interface PaymentTypeStatistic {
+  mode: string;
+  amount: number;
+  count: number;
+  percentage: number;
+}
+
+export interface PaymentTypeStatistics {
+  payment_types: PaymentTypeStatistic[];
+  total_amount: number;
+}
+
 class AccountService {
   /**
    * Fetch deposit accounts for the authenticated user
@@ -64,6 +76,19 @@ class AccountService {
       current_balance: null,
       last_month_total_credit: 0,
       last_month_total_debit: 0,
+    };
+  }
+
+  /**
+   * Fetch payment type statistics for a specific account
+   * @param accountId - The account ID to fetch payment statistics for
+   */
+  async getPaymentStatistics(accountId: number): Promise<PaymentTypeStatistics> {
+    const url = ENDPOINTS.ACCOUNTS.GET_PAYMENT_STATISTICS(accountId);
+    const response = await apiRequest.get<ApiResponse<PaymentTypeStatistics>>(url);
+    return response.data || {
+      payment_types: [],
+      total_amount: 0,
     };
   }
 }

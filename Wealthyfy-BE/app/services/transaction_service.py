@@ -113,3 +113,52 @@ class TransactionService(BaseService):
             "last_month_total_debit": float(last_month_debit),
         }
 
+    def get_payment_type_statistics(
+        self,
+        account_id: int
+    ) -> Dict[str, Any]:
+        """
+        Returns payment type statistics grouped by transaction mode.
+        Calculates total amount and percentage for each payment type.
+        
+        Args:
+            account_id: The account ID to fetch statistics for
+            
+        Returns:
+            Dictionary containing list of payment types with amounts and percentages
+        """
+        # Query to get total amount grouped by mode
+        results = self.db.query(
+            BankTransaction.mode,
+            func.sum(BankTransaction.amount).label('total_amount'),
+            func.count(BankTransaction.id).label('count')
+        ).filter(
+            BankTransaction.account_id == account_id
+        ).group_by(
+            BankTransaction.mode
+        ).all()
+        
+        # Calculate total amount across all payment types
+        total_amount = sum(float(result.total_amount) for result in results)
+        
+        # Build response with percentages
+        payment_types = []
+        for result in results:
+            amount = float(result.total_amount)
+            percentage = (amount / total_amount * 100) if total_amount > 0 else 0
+            
+            payment_types.append({
+                "mode": result.mode,
+                "amount": amount,
+                "count": result.count,
+                "percentage": round(percentage, 2)
+            })
+        
+        # Sort by amount descending
+        payment_types.sort(key=lambda x: x["amount"], reverse=True)
+        
+        return {
+            "payment_types": payment_types,
+            "total_amount": total_amount
+        }
+

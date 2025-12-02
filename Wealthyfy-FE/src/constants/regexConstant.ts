@@ -6,4 +6,5 @@ export const REGEX = Object.freeze({
   ONLY_DIGITS_REGEX: /^\d+$/,
   NON_DIGITS_REGEX: /\D/g,
   WHITESPACE_REGEX: /\s/g,
+  ONE_OR_MORE_WHITESPACE_REGEX: /\s+/g,
 });

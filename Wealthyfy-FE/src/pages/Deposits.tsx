@@ -4,10 +4,11 @@ import { DataTableSkeleton } from "@/components/custom/data-table-skeleton";
 import { BankAccountCard } from "@/components/custom/bank-account-card";
 import { AccountDetailsCard } from "@/components/custom/account-details-card";
 import { MonitoringCards, type MonitoringCardItem } from "@/components/custom/monitoring-cards";
+import { PaymentTypeChart } from "@/components/custom/payment-type-chart";
 import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { columns, type Transactions } from "@/constants/dataTableColumns/transactionColumns";
 import { transactionService } from "@/services/transactionService";
-import { accountService, type DepositAccount, type AccountDetails, type AccountMetrics } from "@/services/accountService";
+import { accountService, type DepositAccount, type AccountDetails, type AccountMetrics, type PaymentTypeStatistics } from "@/services/accountService";
 import { useServerPagination } from "@/hooks/use-server-pagination";
 
 function DepositsPage() {
@@ -18,6 +19,8 @@ function DepositsPage() {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [accountMetrics, setAccountMetrics] = useState<AccountMetrics | null>(null);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(false);
+  const [paymentStatistics, setPaymentStatistics] = useState<PaymentTypeStatistics | null>(null);
+  const [isLoadingPaymentStats, setIsLoadingPaymentStats] = useState(false);
 
   // Fetch deposit accounts on page load
   useEffect(() => {
@@ -93,6 +96,29 @@ function DepositsPage() {
     };
 
     fetchAccountMetrics();
+  }, [selectedAccountId]);
+
+  // Fetch payment statistics when account is selected
+  useEffect(() => {
+    const fetchPaymentStatistics = async () => {
+      if (!selectedAccountId) {
+        setPaymentStatistics(null);
+        return;
+      }
+
+      try {
+        setIsLoadingPaymentStats(true);
+        const stats = await accountService.getPaymentStatistics(selectedAccountId);
+        setPaymentStatistics(stats);
+      } catch (error) {
+        console.error("Failed to fetch payment statistics:", error);
+        setPaymentStatistics(null);
+      } finally {
+        setIsLoadingPaymentStats(false);
+      }
+    };
+
+    fetchPaymentStatistics();
   }, [selectedAccountId]);
 
   const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
@@ -239,6 +265,11 @@ function DepositsPage() {
               isLoading={isLoadingDetails}
               onShowDetails={handleShowDetails}
               accountId={selectedAccountId}
+            />
+            {/* Payment Type Chart */}
+            <PaymentTypeChart
+              data={paymentStatistics}
+              isLoading={isLoadingPaymentStats}
             />
           </div>
         </div>

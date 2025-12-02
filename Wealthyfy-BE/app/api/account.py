@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from enum import Enum
 from app.config.database import get_db
-from app.schemas.account import DepositAccountResponse, AccountDetailsResponse, AccountMetricsResponse
+from app.schemas.account import DepositAccountResponse, AccountDetailsResponse, AccountMetricsResponse, PaymentTypeStatisticsResponse
 from app.schemas.response import ApiResponse
 from app.services.account_service import AccountService
 from app.services.transaction_service import TransactionService
@@ -179,6 +179,47 @@ def get_account_metrics(
         raise
     except Exception:
         logger_exception(f"Failed to fetch account metrics for account_id={account_id}, user_id={current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=Messages.SOMETHING_WENT_WRONG
+        )
+
+
+# ===========================================================================
+# Get Payment Type Statistics
+# ===========================================================================
+@router.get(
+    "/{account_id}/payment-statistics",
+    response_model=ApiResponse[PaymentTypeStatisticsResponse],
+    dependencies=[Depends(authenticate_user)]
+)
+def get_payment_type_statistics(
+    account_id: int = Path(..., description="Account ID to fetch payment statistics for"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user)
+):
+    """
+    Fetches payment type statistics grouped by transaction mode.
+    
+    Path Parameters:
+        - account_id: The account ID to fetch payment statistics for
+    
+    Returns:
+        Payment type statistics including mode, amount, count, and percentage for each payment type
+    """
+    try:
+        transaction_service = TransactionService(db)
+        statistics = transaction_service.get_payment_type_statistics(account_id)
+        
+        return success_response(
+            data=statistics,
+            message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Payment statistics")
+        )
+    
+    except HTTPException:
+        raise
+    except Exception:
+        logger_exception(f"Failed to fetch payment statistics for account_id={account_id}, user_id={current_user.id}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=Messages.SOMETHING_WENT_WRONG

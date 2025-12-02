@@ -20,6 +20,8 @@ export const ENDPOINTS = {
       `/accounts/${accountId}/details`,
     GET_ACCOUNT_METRICS: (accountId: number) => 
       `/accounts/${accountId}/metrics`,
+    GET_PAYMENT_STATISTICS: (accountId: number) => 
+      `/accounts/${accountId}/payment-statistics`,
   },
 };
 
