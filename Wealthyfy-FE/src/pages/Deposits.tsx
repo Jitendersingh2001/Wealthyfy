@@ -5,6 +5,7 @@ import { BankAccountCard } from "@/components/custom/bank-account-card";
 import { AccountDetailsCard } from "@/components/custom/account-details-card";
 import { MonitoringCards, type MonitoringCardItem } from "@/components/custom/monitoring-cards";
 import { PaymentTypeChart } from "@/components/custom/payment-type-chart";
+import { CreditDebitChart } from "@/components/custom/credit-debit-chart";
 import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { columns, type Transactions } from "@/constants/dataTableColumns/transactionColumns";
 import { transactionService } from "@/services/transactionService";
@@ -229,6 +230,13 @@ function DepositsPage() {
               isLoading={isLoadingMetrics}
               columns={3}
             />
+            
+            {/* Credit/Debit Monthly Chart */}
+            {selectedAccountId && (
+              <div className="mt-6 mb-6">
+                <CreditDebitChart accountId={selectedAccountId} />
+              </div>
+            )}
             
             {isLoading ? (
               <DataTableSkeleton columnCount={columns.length} rowCount={pagination.pageSize} />

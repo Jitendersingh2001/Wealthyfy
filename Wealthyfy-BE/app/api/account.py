@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from enum import Enum
 from app.config.database import get_db
-from app.schemas.account import DepositAccountResponse, AccountDetailsResponse, AccountMetricsResponse, PaymentTypeStatisticsResponse
+from app.schemas.account import (
+    DepositAccountResponse, 
+    AccountDetailsResponse, 
+    AccountMetricsResponse, 
+    PaymentTypeStatisticsResponse,
+    MonthlyCreditDebitStatisticsResponse
+)
 from app.schemas.response import ApiResponse
 from app.services.account_service import AccountService
 from app.services.transaction_service import TransactionService
@@ -220,6 +226,54 @@ def get_payment_type_statistics(
         raise
     except Exception:
         logger_exception(f"Failed to fetch payment statistics for account_id={account_id}, user_id={current_user.id}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=Messages.SOMETHING_WENT_WRONG
+        )
+
+
+# ===========================================================================
+# Get Monthly Credit/Debit Statistics
+# ===========================================================================
+@router.get(
+    "/{account_id}/monthly-statistics",
+    response_model=ApiResponse[MonthlyCreditDebitStatisticsResponse],
+    dependencies=[Depends(authenticate_user)]
+)
+def get_monthly_credit_debit_statistics(
+    account_id: int = Path(..., description="Account ID to fetch monthly statistics for"),
+    year: Optional[int] = Query(None, description="Year to filter by. If not provided, returns available years only."),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(authenticate_user)
+):
+    """
+    Fetches monthly credit and debit statistics for a given account and year.
+    
+    Path Parameters:
+        - account_id: The account ID to fetch statistics for
+    
+    Query Parameters:
+        - year: Optional year to filter by. If not provided, returns available years only.
+    
+    Returns:
+        Monthly credit/debit statistics including available years and monthly data
+    """
+    try:
+        transaction_service = TransactionService(db)
+        statistics = transaction_service.get_monthly_credit_debit_statistics(
+            account_id=account_id,
+            year=year
+        )
+        
+        return success_response(
+            data=statistics,
+            message=Messages.FETCH_SUCCESSFULLY.replace(":name", "Monthly statistics")
+        )
+    
+    except HTTPException:
+        raise
+    except Exception:
+        logger_exception(f"Failed to fetch monthly statistics for account_id={account_id}, user_id={current_user.id}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=Messages.SOMETHING_WENT_WRONG

@@ -22,6 +22,8 @@ export const ENDPOINTS = {
       `/accounts/${accountId}/metrics`,
     GET_PAYMENT_STATISTICS: (accountId: number) => 
       `/accounts/${accountId}/payment-statistics`,
+    GET_MONTHLY_STATISTICS: (accountId: number, year?: number) => 
+      `/accounts/${accountId}/monthly-statistics${year ? `?year=${year}` : ''}`,
   },
 };
 

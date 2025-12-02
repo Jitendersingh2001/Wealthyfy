@@ -42,6 +42,17 @@ export interface PaymentTypeStatistics {
   total_amount: number;
 }
 
+export interface MonthlyCreditDebitData {
+  month: string;
+  credit: number;
+  debit: number;
+}
+
+export interface MonthlyCreditDebitStatistics {
+  available_years: number[];
+  monthly_data: MonthlyCreditDebitData[];
+}
+
 class AccountService {
   /**
    * Fetch deposit accounts for the authenticated user
@@ -89,6 +100,23 @@ class AccountService {
     return response.data || {
       payment_types: [],
       total_amount: 0,
+    };
+  }
+
+  /**
+   * Fetch monthly credit/debit statistics for a specific account
+   * @param accountId - The account ID to fetch monthly statistics for
+   * @param year - Optional year to filter by. If not provided, returns available years only.
+   */
+  async getMonthlyStatistics(
+    accountId: number,
+    year?: number
+  ): Promise<MonthlyCreditDebitStatistics> {
+    const url = ENDPOINTS.ACCOUNTS.GET_MONTHLY_STATISTICS(accountId, year);
+    const response = await apiRequest.get<ApiResponse<MonthlyCreditDebitStatistics>>(url);
+    return response.data || {
+      available_years: [],
+      monthly_data: [],
     };
   }
 }

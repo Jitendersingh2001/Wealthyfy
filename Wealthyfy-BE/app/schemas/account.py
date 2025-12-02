@@ -69,3 +69,21 @@ class PaymentTypeStatisticsResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class MonthlyCreditDebitData(BaseModel):
+    """Schema for monthly credit/debit data."""
+    
+    month: str = Field(..., description="Month abbreviation (Jan, Feb, etc.)")
+    credit: float = Field(..., description="Total credit amount for the month")
+    debit: float = Field(..., description="Total debit amount for the month")
+
+
+class MonthlyCreditDebitStatisticsResponse(BaseModel):
+    """Schema for monthly credit/debit statistics response."""
+    
+    available_years: List[int] = Field(..., description="List of years with available transaction data")
+    monthly_data: List[MonthlyCreditDebitData] = Field(..., description="Monthly credit/debit data for the selected year")
+
+    class Config:
+        from_attributes = True
+
