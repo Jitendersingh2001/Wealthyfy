@@ -144,14 +144,11 @@ export function PaymentTypeChart({ data, isLoading }: PaymentTypeChartProps) {
       <text
         x={x}
         y={y}
-        fill="white"
+        fill="var(--foreground)"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         fontSize={13}
-        fontWeight={600}
-        style={{
-          textShadow: "0 0 3px rgba(0, 0, 0, 1), 0 0 1px rgba(0, 0, 0, 1), 0 1px 2px rgba(0, 0, 0, 1)",
-        }}
+        fontWeight={500}
       >
         {`${percentage}%`}
       </text>
@@ -170,7 +167,7 @@ export function PaymentTypeChart({ data, isLoading }: PaymentTypeChartProps) {
         <div className="w-[320px] h-[300px] overflow-visible relative">
           <ChartContainer
             config={chartConfig}
-            className="mx-auto w-full h-full overflow-visible [&_.recharts-sector]:cursor-pointer"
+            className="mx-auto w-full h-full overflow-visible [&_.recharts-sector]:cursor-pointer [.dark_&_text]:[text-shadow:0_0_3px_rgba(0,0,0,1),0_0_1px_rgba(0,0,0,1),0_1px_2px_rgba(0,0,0,1)]"
           >
             <PieChart>
               <ChartTooltip
@@ -198,7 +195,7 @@ export function PaymentTypeChart({ data, isLoading }: PaymentTypeChartProps) {
                 data={chartData}
                 dataKey="amount"
                 label={renderCustomLabel}
-                labelLine={{ stroke: "white", strokeWidth: 1 }}
+                labelLine={{ stroke: "var(--foreground)", strokeWidth: 1 }}
                 nameKey="mode"
                 cx="50%"
                 cy="50%"
